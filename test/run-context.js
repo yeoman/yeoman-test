@@ -1,4 +1,3 @@
-/*global it, describe, before, beforeEach, afterEach */
 'use strict';
 var os = require('os');
 var fs = require('fs');
@@ -37,7 +36,9 @@ describe('RunContext', function () {
 
   describe('constructor', function () {
     it('accept path parameter', function (done) {
-      var ctx = new RunContext(path.join(__dirname, './fixtures/custom-generator-simple'));
+      var ctx = new RunContext(
+        require.resolve('./fixtures/generator-simple/app')
+      );
 
       ctx
         .on('ready', function () {
@@ -211,16 +212,17 @@ describe('RunContext', function () {
     it('optional `cb` can use `this.async()` to delay execution', function (done) {
       var ctx = new RunContext(this.Dummy);
       var delayed = false;
-      var cb = sinon.spy(function () {
-        var release = this.async();
 
-        setTimeout(function () {
-          delayed = true;
-          release();
-        }, 1);
-      });
+      ctx
+        .inDir(this.tmp, function () {
+          console.log('inDir callback');
+          var release = this.async();
 
-      ctx.inDir(this.tmp, cb)
+          setTimeout(function () {
+            delayed = true;
+            release();
+          }, 1);
+        })
         .on('ready', function () {
           assert(delayed);
         })
@@ -394,7 +396,7 @@ describe('RunContext', function () {
   describe('#withGenerators()', function () {
     it('register paths', function (done) {
       this.ctx.withGenerators([
-        path.join(__dirname, './fixtures/custom-generator-simple')
+        require.resolve('./fixtures/generator-simple/app')
       ]).on('ready', function () {
         assert(this.ctx.env.get('simple:app'));
         done();
@@ -412,7 +414,7 @@ describe('RunContext', function () {
 
     it('allow multiple calls', function (done) {
       this.ctx.withGenerators([
-        path.join(__dirname, './fixtures/custom-generator-simple')
+        require.resolve('./fixtures/generator-simple/app')
       ]).withGenerators([
         [helpers.createDummyGenerator(), 'dummy:gen']
       ]).on('ready', function () {

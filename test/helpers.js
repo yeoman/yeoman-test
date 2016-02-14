@@ -1,13 +1,13 @@
-/*global it, describe, before, beforeEach, afterEach */
 'use strict';
 var util = require('util');
 var path = require('path');
 var assert = require('assert');
 var sinon = require('sinon');
 var RunContext = require('../lib/run-context');
-var yeoman = require('yeoman-generator');
+var yeoman = require('yeoman-environment');
+var generators = require('yeoman-generator');
 var helpers = require('../lib');
-var env = yeoman();
+var env = yeoman.createEnv();
 
 describe('yeoman-test', function () {
   beforeEach(function () {
@@ -19,12 +19,14 @@ describe('yeoman-test', function () {
       self.options = options;
     };
 
-    util.inherits(this.StubGenerator, yeoman.Base);
+    util.inherits(this.StubGenerator, generators.Base);
   });
 
   describe('.registerDependencies()', function () {
     it('accepts dependency as a path', function () {
-      helpers.registerDependencies(env, ['./custom-generator-simple']);
+      helpers.registerDependencies(env, [
+        require.resolve('./fixtures/generator-simple/app')
+      ]);
       assert(env.get('simple:app'));
     });
 
