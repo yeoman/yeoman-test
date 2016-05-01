@@ -51,12 +51,15 @@ describe('RunContext', function () {
       var error = new Error();
       var Dummy = helpers.createDummyGenerator();
       var execSpy = sinon.stub().throws(error);
+      var endSpy = sinon.spy();
       Dummy.prototype.exec = execSpy;
+      Dummy.prototype.end = execSpy;
       var ctx = new RunContext(Dummy);
 
       ctx.on('error', function (err) {
         sinon.assert.calledOnce(execSpy);
         assert.equal(err, error);
+        sinon.assert.notCalled(endSpy);
         done();
       });
     });
@@ -195,6 +198,24 @@ describe('RunContext', function () {
     });
   });
 
+  describe('#toPromise()', function () {
+    it('return a resolved promise on success', function () {
+      return this.ctx.toPromise();
+    });
+
+    it('returns a reject promise on error', function () {
+      var error = new Error();
+      var Dummy = helpers.createDummyGenerator();
+      var execSpy = sinon.stub().throws(error);
+      Dummy.prototype.exec = execSpy;
+      var ctx = new RunContext(Dummy);
+
+      return ctx.toPromise().catch(function (err) {
+        assert.equal(err, error);
+      });
+    });
+  });
+
   describe('#inDir()', function () {
     beforeEach(function () {
       process.chdir(__dirname);
@@ -229,7 +250,6 @@ describe('RunContext', function () {
 
       ctx
         .inDir(this.tmp, function () {
-          console.log('inDir callback');
           var release = this.async();
 
           setTimeout(function () {
