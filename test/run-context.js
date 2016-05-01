@@ -132,6 +132,13 @@ describe('RunContext', function () {
         done();
       }.bind(this));
     });
+
+    it('set --skip-cache by default', function (done) {
+      this.ctx.on('end', function () {
+        assert.equal(this.execSpy.firstCall.thisValue.options.skipCache, true);
+        done();
+      }.bind(this));
+    });
   });
 
   describe('error handling', function () {
