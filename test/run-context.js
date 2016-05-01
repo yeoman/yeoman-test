@@ -115,6 +115,20 @@ describe('RunContext', function () {
       this.ctx._run();
       this.ctx._run();
     });
+
+    it('set --force by default', function (done) {
+      this.ctx.on('end', function () {
+        assert.equal(this.execSpy.firstCall.thisValue.options.force, true);
+        done();
+      }.bind(this));
+    });
+
+    it('set --skip-install by default', function (done) {
+      this.ctx.on('end', function () {
+        assert.equal(this.execSpy.firstCall.thisValue.options.skipInstall, true);
+        done();
+      }.bind(this));
+    });
   });
 
   describe('error handling', function () {
@@ -292,17 +306,14 @@ describe('RunContext', function () {
       }.bind(this));
     });
 
-    it('set skip-install by default', function (done) {
-      this.ctx.on('end', function () {
-        assert.equal(this.execSpy.firstCall.thisValue.options.skipInstall, true);
-        done();
-      }.bind(this));
-    });
-
-    it('allow skip-install to be overriden', function (done) {
-      this.ctx.withOptions({ 'skip-install': false });
+    it('allow default settings to be overriden', function (done) {
+      this.ctx.withOptions({
+        'skip-install': false,
+        force: false
+      });
       this.ctx.on('end', function () {
         assert.equal(this.execSpy.firstCall.thisValue.options.skipInstall, false);
+        assert.equal(this.execSpy.firstCall.thisValue.options.force, false);
         done();
       }.bind(this));
     });
