@@ -25,6 +25,7 @@ describe('RunContext', function () {
 
   afterEach(function (done) {
     process.chdir(__dirname);
+    this.ctx.cleanTestDirectory();
 
     if (this.ctx.completed) {
       done();
