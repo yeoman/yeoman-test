@@ -207,8 +207,10 @@ describe('RunContext', function () {
   });
 
   describe('#toPromise()', function () {
-    it('return a resolved promise on success', function () {
-      return this.ctx.toPromise();
+    it('return a resolved promise with the target directory on success', function () {
+      return this.ctx.toPromise().then(function (dir) {
+        assert.equal(this.ctx.targetDirectory, dir);
+      }.bind(this));
     });
 
     it('returns a reject promise on error', function () {
