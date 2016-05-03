@@ -30,13 +30,13 @@
   },
   "license": "MIT",
   "dependencies": {
-    "inquirer": "^0.12.0",
+    "inquirer": "^1.0.2",
     "lodash": "^4.3.0",
     "mkdirp": "^0.5.1",
     "pinkie-promise": "^2.0.1",
     "rimraf": "^2.4.4",
     "sinon": "^1.17.2",
     "yeoman-environment": "^1.5.2",
-    "yeoman-generator": "^0.22.5"
+    "yeoman-generator": "^0.23.0"
   }
 }

@@ -409,10 +409,9 @@ describe('RunContext', function () {
         .on('end', done);
     });
 
-    it('is chainable', function (done) {
+    it('is chainable', function () {
       this.Dummy.prototype.askFor = function () {
-        var cb = this.async();
-        this.prompt([{
+        return this.prompt([{
           name: 'yeoman',
           type: 'input',
           message: 'Hey!'
@@ -420,17 +419,16 @@ describe('RunContext', function () {
           name: 'yo',
           type: 'input',
           message: 'Yo!'
-        }], function (answers) {
+        }]).then(function (answers) {
           assert.equal(answers.yeoman, 'yes please');
           assert.equal(answers.yo, 'yo man');
-          cb();
         });
       };
 
-      this.ctx
+      return this.ctx
         .withPrompts({ yeoman: 'yes please' })
         .withPrompts({ yo: 'yo man' })
-        .on('end', done);
+        .toPromise();
     });
   });
 

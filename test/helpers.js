@@ -68,92 +68,101 @@ describe('yeoman-test', function () {
       helpers.mockPrompt(this.generator, { answer: 'foo' });
     });
 
-    it('uses default values', function (done) {
-      this.generator.prompt([{ name: 'respuesta', type: 'input', default: 'bar' }], function (answers) {
-        assert.equal(answers.respuesta, 'bar');
-        done();
-      });
+    it('uses default values', function () {
+      return this.generator.prompt([{ name: 'respuesta', type: 'input', default: 'bar' }])
+        .then(function (answers) {
+          assert.equal(answers.respuesta, 'bar');
+        });
     });
 
-    it('uses default values when no answer is passed', function (done) {
+    it('uses default values when no answer is passed', function () {
       var generator = env.instantiate(helpers.createDummyGenerator());
       helpers.mockPrompt(generator);
-      generator.prompt([{ name: 'respuesta', message: 'foo', type: 'input', default: 'bar' }], function (answers) {
+      return generator.prompt([
+        { name: 'respuesta', message: 'foo', type: 'input', default: 'bar' }
+      ]).then(function (answers) {
         assert.equal(answers.respuesta, 'bar');
-        done();
       });
     });
 
-    it('supports `null` answer for `list` type', function (done) {
+    it('supports `null` answer for `list` type', function () {
       var generator = env.instantiate(helpers.createDummyGenerator());
 
       helpers.mockPrompt(generator, {
         respuesta: null
       });
 
-      generator.prompt([{ name: 'respuesta', message: 'foo', type: 'list', default: 'bar' }], function (answers) {
+      return generator.prompt([
+        { name: 'respuesta', message: 'foo', type: 'list', default: 'bar' }
+      ]).then(function (answers) {
         assert.equal(answers.respuesta, null);
-        done();
       });
     });
 
-    it('treats `null` as no answer for `input` type', function (done) {
+    it('treats `null` as no answer for `input` type', function () {
       var generator = env.instantiate(helpers.createDummyGenerator());
 
       helpers.mockPrompt(generator, {
         respuesta: null
       });
 
-      generator.prompt([{ name: 'respuesta', message: 'foo', type: 'input', default: 'bar' }], function (answers) {
+      return generator.prompt([
+        { name: 'respuesta', message: 'foo', type: 'input', default: 'bar' }
+      ]).then(function (answers) {
         assert.equal(answers.respuesta, 'bar');
-        done();
       });
     });
 
-    it('uses `true` as the default value for `confirm` type', function (done) {
+    it('uses `true` as the default value for `confirm` type', function () {
       var generator = env.instantiate(helpers.createDummyGenerator());
       helpers.mockPrompt(generator, {});
-      generator.prompt([{ name: 'respuesta', message: 'foo', type: 'confirm' }], function (answers) {
+
+      return generator.prompt([
+        { name: 'respuesta', message: 'foo', type: 'confirm' }
+      ]).then(function (answers) {
         assert.equal(answers.respuesta, true);
-        done();
       });
     });
 
-    it('supports `false` answer for `confirm` type', function (done) {
+    it('supports `false` answer for `confirm` type', function () {
       var generator = env.instantiate(helpers.createDummyGenerator());
       helpers.mockPrompt(generator, { respuesta: false });
-      generator.prompt([{ name: 'respuesta', message: 'foo', type: 'confirm' }], function (answers) {
+
+      return generator.prompt([
+        { name: 'respuesta', message: 'foo', type: 'confirm' }
+      ]).then(function (answers) {
         assert.equal(answers.respuesta, false);
-        done();
       });
     });
 
-    it('prefers mocked values over defaults', function (done) {
-      this.generator.prompt([{ name: 'answer', type: 'input', default: 'bar' }], function (answers) {
+    it('prefers mocked values over defaults', function () {
+      return this.generator.prompt([
+        { name: 'answer', type: 'input', default: 'bar' }
+      ]).then(function (answers) {
         assert.equal(answers.answer, 'foo');
-        done();
       });
     });
 
-    it('can be call multiple time on the same generator', function (done) {
+    it('can be call multiple time on the same generator', function () {
       var generator = env.instantiate(helpers.createDummyGenerator());
       helpers.mockPrompt(generator, { foo: 1 });
       helpers.mockPrompt(generator, { foo: 2 });
-      generator.prompt({ message: 'bar', name: 'foo' }, function (answers) {
+      return generator.prompt({ message: 'bar', name: 'foo' }).then(function (answers) {
         assert.equal(answers.foo, 2);
-        done();
       });
     });
 
-    it('keep prompt method asynchronous', function (done) {
+    it('keep prompt method asynchronous', function () {
       var spy = sinon.spy();
 
-      this.generator.prompt({ name: 'answer', type: 'input' }, function () {
+      var promise = this.generator.prompt(
+        { name: 'answer', type: 'input' }
+      ).then(function () {
         sinon.assert.called(spy);
-        done();
       });
 
       spy();
+      return promise;
     });
   });
 
