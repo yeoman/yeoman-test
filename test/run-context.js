@@ -274,6 +274,61 @@ describe('RunContext', function () {
     });
   });
 
+  describe('#inDirKeep()', function () {
+    beforeEach(function () {
+      process.chdir(__dirname);
+      this.tmp = tmpdir;
+    });
+
+    it('call helpers.testDirectoryKeep()', function () {
+      sinon.spy(helpers, 'testDirectoryKeep');
+      this.ctx.inDirKeep(this.tmp);
+      assert(helpers.testDirectoryKeep.calledOnce);
+      helpers.testDirectoryKeep.restore();
+    });
+
+    it('do not call helpers.testDirectory()', function () {
+      sinon.spy(helpers, 'testDirectory');
+      this.ctx.inDirKeep(this.tmp);
+      assert(!helpers.testDirectory.calledOnce);
+      helpers.testDirectory.restore();
+    });
+
+    it('is chainable', function () {
+      assert.equal(this.ctx.inDir(this.tmp), this.ctx);
+    });
+
+    it('accepts optional `cb` to be invoked with resolved `dir`', function (done) {
+      var ctx = new RunContext(this.Dummy);
+      var cb = sinon.spy(function () {
+        sinon.assert.calledOnce(cb);
+        sinon.assert.calledOn(cb, ctx);
+        sinon.assert.calledWith(cb, path.resolve(this.tmp));
+      }.bind(this));
+
+      ctx.inDirKeep(this.tmp, cb).on('end', done);
+    });
+
+    it('optional `cb` can use `this.async()` to delay execution', function (done) {
+      var ctx = new RunContext(this.Dummy);
+      var delayed = false;
+
+      ctx
+        .inDirKeep(this.tmp, function () {
+          var release = this.async();
+
+          setTimeout(function () {
+            delayed = true;
+            release();
+          }, 1);
+        })
+        .on('ready', function () {
+          assert(delayed);
+        })
+        .on('end', done);
+    });
+  });
+
   describe('#inTmpDir', function () {
     it('call helpers.testDirectory()', function () {
       sinon.spy(helpers, 'testDirectory');
