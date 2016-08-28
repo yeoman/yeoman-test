@@ -279,7 +279,7 @@ describe('RunContext', function () {
       process.chdir(__dirname);
       this.tmp = tmpdir;
     });
-    
+
     it('do not call helpers.testDirectory()', function () {
       sinon.spy(helpers, 'testDirectory');
       this.ctx.inDirKeep(this.tmp);
