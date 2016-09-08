@@ -274,6 +274,33 @@ describe('RunContext', function () {
     });
   });
 
+  describe('#cd()', function () {
+    beforeEach(function () {
+      process.chdir(__dirname);
+      this.tmp = tmpdir;
+    });
+
+    it('do not call helpers.testDirectory()', function () {
+      sinon.spy(helpers, 'testDirectory');
+      this.ctx.cd(this.tmp);
+      assert(!helpers.testDirectory.calledOnce);
+      helpers.testDirectory.restore();
+    });
+
+    it('is chainable', function () {
+      assert.equal(this.ctx.cd(this.tmp), this.ctx);
+    });
+
+    it('should set inDirSet & targetDirectory', function () {
+      assert(!this.ctx.inDirSet);
+      assert(!this.ctx.targetDirectory);
+      this.ctx.cd(this.tmp);
+      assert.equal(this.ctx.inDirSet, true);
+      assert.equal(this.ctx.targetDirectory, this.tmp);
+    });
+
+  });
+
   describe('#inTmpDir', function () {
     it('call helpers.testDirectory()', function () {
       sinon.spy(helpers, 'testDirectory');
