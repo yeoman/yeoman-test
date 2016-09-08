@@ -274,7 +274,7 @@ describe('RunContext', function () {
     });
   });
 
-  describe('#inDirKeep()', function () {
+  describe('#cd()', function () {
     beforeEach(function () {
       process.chdir(__dirname);
       this.tmp = tmpdir;
@@ -282,44 +282,23 @@ describe('RunContext', function () {
 
     it('do not call helpers.testDirectory()', function () {
       sinon.spy(helpers, 'testDirectory');
-      this.ctx.inDirKeep(this.tmp);
+      this.ctx.cd(this.tmp);
       assert(!helpers.testDirectory.calledOnce);
       helpers.testDirectory.restore();
     });
 
     it('is chainable', function () {
-      assert.equal(this.ctx.inDir(this.tmp), this.ctx);
+      assert.equal(this.ctx.cd(this.tmp), this.ctx);
     });
 
-    it('accepts optional `cb` to be invoked with resolved `dir`', function (done) {
-      var ctx = new RunContext(this.Dummy);
-      var cb = sinon.spy(function () {
-        sinon.assert.calledOnce(cb);
-        sinon.assert.calledOn(cb, ctx);
-        sinon.assert.calledWith(cb, path.resolve(this.tmp));
-      }.bind(this));
-
-      ctx.inDirKeep(this.tmp, cb).on('end', done);
+    it('should set inDirSet & targetDirectory', function () {
+      assert(!this.ctx.inDirSet);
+      assert(!this.ctx.targetDirectory);
+      this.ctx.cd(this.tmp);
+      assert.equal(this.ctx.inDirSet, true);
+      assert.equal(this.ctx.targetDirectory, this.tmp);
     });
 
-    it('optional `cb` can use `this.async()` to delay execution', function (done) {
-      var ctx = new RunContext(this.Dummy);
-      var delayed = false;
-
-      ctx
-        .inDirKeep(this.tmp, function () {
-          var release = this.async();
-
-          setTimeout(function () {
-            delayed = true;
-            release();
-          }, 1);
-        })
-        .on('ready', function () {
-          assert(delayed);
-        })
-        .on('end', done);
-    });
   });
 
   describe('#inTmpDir', function () {
