@@ -300,9 +300,9 @@ describe('RunContext', function () {
       assert.equal(this.ctx.targetDirectory, this.tmp);
     });
 
-    it('should mkdir and cd into created directory',function(){
-      sinon.spy(mkdirp,'sync');
-      sinon.spy(process,'chdir');
+    it('should mkdir and cd into created directory', function () {
+      sinon.spy(mkdirp, 'sync');
+      sinon.spy(process, 'chdir');
       this.ctx.inDirKeep(this.tmp);
       assert(mkdirp.sync.calledWith(this.tmp));
       assert(process.chdir.calledWith(this.tmp));
