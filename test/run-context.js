@@ -9,6 +9,7 @@ var RunContext = require('../lib/run-context');
 var generators = require('yeoman-generator');
 var tmpdir = path.join(os.tmpdir(), 'yeoman-run-context');
 var helpers = require('../lib');
+var mkdirp = require('mkdirp');
 
 describe('RunContext', function () {
   beforeEach(function () {
@@ -274,7 +275,7 @@ describe('RunContext', function () {
     });
   });
 
-  describe('#cd()', function () {
+  describe('#inDirKeep()', function () {
     beforeEach(function () {
       process.chdir(__dirname);
       this.tmp = tmpdir;
@@ -282,21 +283,31 @@ describe('RunContext', function () {
 
     it('do not call helpers.testDirectory()', function () {
       sinon.spy(helpers, 'testDirectory');
-      this.ctx.cd(this.tmp);
+      this.ctx.inDirKeep(this.tmp);
       assert(!helpers.testDirectory.calledOnce);
       helpers.testDirectory.restore();
     });
 
     it('is chainable', function () {
-      assert.equal(this.ctx.cd(this.tmp), this.ctx);
+      assert.equal(this.ctx.inDirKeep(this.tmp), this.ctx);
     });
 
     it('should set inDirSet & targetDirectory', function () {
       assert(!this.ctx.inDirSet);
       assert(!this.ctx.targetDirectory);
-      this.ctx.cd(this.tmp);
+      this.ctx.inDirKeep(this.tmp);
       assert.equal(this.ctx.inDirSet, true);
       assert.equal(this.ctx.targetDirectory, this.tmp);
+    });
+
+    it('should mkdir and cd into created directory',function(){
+      sinon.spy(mkdirp,'sync');
+      sinon.spy(process,'chdir');
+      this.ctx.inDirKeep(this.tmp);
+      assert(mkdirp.sync.calledWith(this.tmp));
+      assert(process.chdir.calledWith(this.tmp));
+      mkdirp.sync.restore();
+      process.chdir.restore();
     });
 
   });
