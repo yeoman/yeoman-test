@@ -279,6 +279,7 @@ describe('RunContext', function () {
     beforeEach(function () {
       process.chdir(__dirname);
       this.tmp = tmpdir;
+      mkdirp.sync(tmpdir);
     });
 
     it('do not call helpers.testDirectory()', function () {
@@ -300,14 +301,20 @@ describe('RunContext', function () {
       assert.equal(this.ctx.targetDirectory, this.tmp);
     });
 
-    it('should mkdir and cd into created directory', function () {
-      sinon.spy(mkdirp, 'sync');
+    it('should cd into created directory', function () {
       sinon.spy(process, 'chdir');
       this.ctx.inDirKeep(this.tmp);
-      assert(mkdirp.sync.calledWith(this.tmp));
       assert(process.chdir.calledWith(this.tmp));
-      mkdirp.sync.restore();
       process.chdir.restore();
+    });
+
+    it('should throw error if directory do not exist', function () {
+      try {
+        this.ctx.inDirKeep(path.join(this.tmp, 'NOT_EXIST'));
+        assert.fail();
+      } catch (err) {
+        assert(err.message.indexOf(this.tmp) !== -1);
+      }
     });
 
   });
