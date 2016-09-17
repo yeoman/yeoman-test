@@ -9,6 +9,7 @@ var RunContext = require('../lib/run-context');
 var generators = require('yeoman-generator');
 var tmpdir = path.join(os.tmpdir(), 'yeoman-run-context');
 var helpers = require('../lib');
+var mkdirp = require('mkdirp');
 
 describe('RunContext', function () {
   beforeEach(function () {
@@ -278,6 +279,7 @@ describe('RunContext', function () {
     beforeEach(function () {
       process.chdir(__dirname);
       this.tmp = tmpdir;
+      mkdirp.sync(tmpdir);
     });
 
     it('do not call helpers.testDirectory()', function () {
@@ -297,6 +299,22 @@ describe('RunContext', function () {
       this.ctx.cd(this.tmp);
       assert.equal(this.ctx.inDirSet, true);
       assert.equal(this.ctx.targetDirectory, this.tmp);
+    });
+
+    it('should cd into created directory', function () {
+      sinon.spy(process, 'chdir');
+      this.ctx.cd(this.tmp);
+      assert(process.chdir.calledWith(this.tmp));
+      process.chdir.restore();
+    });
+
+    it('should throw error if directory do not exist', function () {
+      try {
+        this.ctx.cd(path.join(this.tmp, 'NOT_EXIST'));
+        assert.fail();
+      } catch (err) {
+        assert(err.message.indexOf(this.tmp) !== -1);
+      }
     });
 
   });
