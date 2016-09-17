@@ -275,7 +275,7 @@ describe('RunContext', function () {
     });
   });
 
-  describe('#inDirKeep()', function () {
+  describe('#cd()', function () {
     beforeEach(function () {
       process.chdir(__dirname);
       this.tmp = tmpdir;
@@ -284,33 +284,33 @@ describe('RunContext', function () {
 
     it('do not call helpers.testDirectory()', function () {
       sinon.spy(helpers, 'testDirectory');
-      this.ctx.inDirKeep(this.tmp);
+      this.ctx.cd(this.tmp);
       assert(!helpers.testDirectory.calledOnce);
       helpers.testDirectory.restore();
     });
 
     it('is chainable', function () {
-      assert.equal(this.ctx.inDirKeep(this.tmp), this.ctx);
+      assert.equal(this.ctx.cd(this.tmp), this.ctx);
     });
 
     it('should set inDirSet & targetDirectory', function () {
       assert(!this.ctx.inDirSet);
       assert(!this.ctx.targetDirectory);
-      this.ctx.inDirKeep(this.tmp);
+      this.ctx.cd(this.tmp);
       assert.equal(this.ctx.inDirSet, true);
       assert.equal(this.ctx.targetDirectory, this.tmp);
     });
 
     it('should cd into created directory', function () {
       sinon.spy(process, 'chdir');
-      this.ctx.inDirKeep(this.tmp);
+      this.ctx.cd(this.tmp);
       assert(process.chdir.calledWith(this.tmp));
       process.chdir.restore();
     });
 
     it('should throw error if directory do not exist', function () {
       try {
-        this.ctx.inDirKeep(path.join(this.tmp, 'NOT_EXIST'));
+        this.ctx.cd(path.join(this.tmp, 'NOT_EXIST'));
         assert.fail();
       } catch (err) {
         assert(err.message.indexOf(this.tmp) !== -1);
