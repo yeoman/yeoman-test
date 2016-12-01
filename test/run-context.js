@@ -227,6 +227,40 @@ describe('RunContext', function () {
     });
   });
 
+  describe('#then()', function () {
+    it('handle success', function () {
+      return this.ctx.then(function (dir) {
+        assert.equal(this.ctx.targetDirectory, dir);
+      }.bind(this));
+    });
+
+    it('handles errors', function () {
+      var error = new Error();
+      var Dummy = helpers.createDummyGenerator();
+      var execSpy = sinon.stub().throws(error);
+      Dummy.prototype.exec = execSpy;
+      var ctx = new RunContext(Dummy);
+
+      return ctx.then(function () {}, function (err) {
+        assert.equal(err, error);
+      });
+    });
+  });
+
+  describe('#catch()', function () {
+    it('handles errors', function () {
+      var error = new Error();
+      var Dummy = helpers.createDummyGenerator();
+      var execSpy = sinon.stub().throws(error);
+      Dummy.prototype.exec = execSpy;
+      var ctx = new RunContext(Dummy);
+
+      return ctx.catch(function (err) {
+        assert.equal(err, error);
+      });
+    });
+  });
+
   describe('#inDir()', function () {
     beforeEach(function () {
       process.chdir(__dirname);
