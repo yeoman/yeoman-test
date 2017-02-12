@@ -6,7 +6,7 @@ var assert = require('assert');
 var sinon = require('sinon');
 var inquirer = require('inquirer');
 var RunContext = require('../lib/run-context');
-var generators = require('yeoman-generator');
+var Generator = require('yeoman-generator');
 var tmpdir = path.join(os.tmpdir(), 'yeoman-run-context');
 var helpers = require('../lib');
 var mkdirp = require('mkdirp');
@@ -17,7 +17,7 @@ describe('RunContext', function () {
 
     this.defaultInput = inquirer.prompts.input;
     this.execSpy = sinon.spy();
-    this.Dummy = generators.Base.extend({
+    this.Dummy = Generator.extend({
       exec: this.execSpy
     });
 

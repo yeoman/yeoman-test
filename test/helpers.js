@@ -5,7 +5,7 @@ var assert = require('assert');
 var sinon = require('sinon');
 var RunContext = require('../lib/run-context');
 var yeoman = require('yeoman-environment');
-var generators = require('yeoman-generator');
+var Generator = require('yeoman-generator');
 var helpers = require('../lib');
 var env = yeoman.createEnv();
 
@@ -19,7 +19,7 @@ describe('yeoman-test', function () {
       self.options = options;
     };
 
-    util.inherits(this.StubGenerator, generators.Base);
+    util.inherits(this.StubGenerator, Generator);
   });
 
   describe('.registerDependencies()', function () {
