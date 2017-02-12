@@ -1,5 +1,5 @@
 'use strict';
-var generators = require('yeoman-generator');
+var Generator = require('yeoman-generator');
 
 // Example of a simple generator.
 //
@@ -14,9 +14,9 @@ var generators = require('yeoman-generator');
 // stuff, extend from Generator.Base and defines your generator steps
 // in several methods.
 
-var Generator = module.exports = generators.Base.extend({
+var SimpleGenerator = module.exports = Generator.extend({
   exec: function () {}
 });
 
-Generator.description = 'And add a custom description by adding a `description` property to your function.';
-Generator.usage = 'Usage can be used to customize the help output';
+SimpleGenerator.description = 'And add a custom description by adding a `description` property to your function.';
+SimpleGenerator.usage = 'Usage can be used to customize the help output';
