@@ -15,13 +15,13 @@
   "repository": "yeoman/yeoman-test",
   "devDependencies": {
     "eslint": "^4.2.0",
-    "gulp": "^3.6.0",
+    "gulp": "^4.0.0",
     "gulp-coveralls": "^0.1.0",
     "gulp-eslint": "^4.0.0",
     "gulp-exclude-gitignore": "^1.0.0",
     "gulp-istanbul": "^1.1.2",
-    "gulp-mocha": "^3.0.1",
-    "gulp-nsp": "^2.1.0",
+    "gulp-mocha": "^5.0.0",
+    "gulp-nsp": "^3.0.1",
     "gulp-plumber": "^1.0.0"
   },
   "scripts": {
@@ -37,6 +37,6 @@
     "rimraf": "^2.4.4",
     "sinon": "^2.3.6",
     "yeoman-environment": "^2.0.0",
-    "yeoman-generator": "^1.1.0"
+    "yeoman-generator": "^2.0.5"
   }
 }
