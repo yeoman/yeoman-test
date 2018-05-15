@@ -14,9 +14,11 @@ var Generator = require('yeoman-generator');
 // stuff, extend from Generator.Base and defines your generator steps
 // in several methods.
 
-var SimpleGenerator = module.exports = Generator.extend({
-  exec: function () {}
-});
+class SimpleGenerator extends Generator {
+  exec() {}
+}
 
 SimpleGenerator.description = 'And add a custom description by adding a `description` property to your function.';
 SimpleGenerator.usage = 'Usage can be used to customize the help output';
+
+module.exports = SimpleGenerator;

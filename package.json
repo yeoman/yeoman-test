@@ -21,7 +21,7 @@
     "gulp-exclude-gitignore": "^1.0.0",
     "gulp-istanbul": "^1.1.2",
     "gulp-mocha": "^5.0.0",
-    "gulp-nsp": "^2.4.0",
+    "gulp-nsp": "^3.0.1",
     "gulp-plumber": "^1.0.0"
   },
   "scripts": {
@@ -30,12 +30,12 @@
   },
   "license": "MIT",
   "dependencies": {
-    "inquirer": "^3.0.1",
+    "inquirer": "^5.2.0",
     "lodash": "^4.3.0",
     "mkdirp": "^0.5.1",
     "pinkie-promise": "^2.0.1",
     "rimraf": "^2.4.4",
-    "sinon": "^2.3.6",
+    "sinon": "^5.0.7",
     "yeoman-environment": "^2.0.0",
     "yeoman-generator": "^2.0.5"
   }

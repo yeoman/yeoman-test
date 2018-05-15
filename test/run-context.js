@@ -16,10 +16,12 @@ describe('RunContext', function () {
     process.chdir(__dirname);
 
     this.defaultInput = inquirer.prompts.input;
-    this.execSpy = sinon.spy();
-    this.Dummy = Generator.extend({
-      exec: this.execSpy
-    });
+    const execSpy = this.execSpy = sinon.spy();
+    this.Dummy = class extends Generator {
+      exec(...args) {
+        execSpy.apply(this, args);
+      }
+    };
 
     this.ctx = new RunContext(this.Dummy);
   });
