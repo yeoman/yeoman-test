@@ -31,7 +31,7 @@
   "license": "MIT",
   "dependencies": {
     "inquirer": "^5.2.0",
-    "lodash": "^4.3.0",
+    "lodash": "^4.17.10",
     "mkdirp": "^0.5.1",
     "pinkie-promise": "^2.0.1",
     "rimraf": "^2.4.4",
