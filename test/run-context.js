@@ -75,10 +75,9 @@ describe('RunContext', function () {
       }.bind(this));
     });
 
-    it('set resolved path in generator', function (done) {
-      var ctx = new RunContext(
-        require.resolve('./fixtures/generator-simple/app'),
-        { resolved: 'path' }
+    it('set namespace and resolved path in generator', function (done) {
+      var ctx = new RunContext(this.Dummy,
+        { resolved: 'path', namespace: 'simple:app' }
       );
 
       ctx
@@ -122,9 +121,14 @@ describe('RunContext', function () {
 
     it('accepts settings', function () {
       var Dummy = helpers.createDummyGenerator();
-      var ctx = new RunContext(Dummy, { tmpdir: false, resolved: 'path' });
+      var ctx = new RunContext(Dummy, {
+        tmpdir: false,
+        resolved: 'path',
+        namespace: 'simple:app'
+      });
       assert.equal(ctx.settings.tmpdir, false);
       assert.equal(ctx.settings.resolved, 'path');
+      assert.equal(ctx.settings.namespace, 'simple:app');
     });
 
     it('only run a generator once', function (done) {
