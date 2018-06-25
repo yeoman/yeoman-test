@@ -31,12 +31,12 @@
   "license": "MIT",
   "dependencies": {
     "inquirer": "^5.2.0",
-    "lodash": "^4.3.0",
+    "lodash": "^4.17.10",
     "mkdirp": "^0.5.1",
     "pinkie-promise": "^2.0.1",
     "rimraf": "^2.4.4",
     "sinon": "^5.0.7",
-    "yeoman-environment": "^2.0.0",
+    "yeoman-environment": "^2.3.0",
     "yeoman-generator": "^2.0.5"
   }
 }

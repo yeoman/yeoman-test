@@ -75,6 +75,18 @@ describe('RunContext', function () {
       }.bind(this));
     });
 
+    it('set namespace and resolved path in generator', function (done) {
+      var ctx = new RunContext(this.Dummy,
+        { resolved: 'path', namespace: 'simple:app' }
+      );
+
+      ctx
+        .on('ready', function () {
+          assert.equal(ctx.env.get('simple:app').resolved, 'path');
+          done();
+        });
+    });
+
     it('run the generator asynchronously', function (done) {
       assert(this.execSpy.notCalled);
       this.ctx.on('end', function () {
@@ -109,8 +121,14 @@ describe('RunContext', function () {
 
     it('accepts settings', function () {
       var Dummy = helpers.createDummyGenerator();
-      var ctx = new RunContext(Dummy, { tmpdir: false });
+      var ctx = new RunContext(Dummy, {
+        tmpdir: false,
+        resolved: 'path',
+        namespace: 'simple:app'
+      });
       assert.equal(ctx.settings.tmpdir, false);
+      assert.equal(ctx.settings.resolved, 'path');
+      assert.equal(ctx.settings.namespace, 'simple:app');
     });
 
     it('only run a generator once', function (done) {
