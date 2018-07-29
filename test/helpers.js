@@ -9,12 +9,12 @@ var Generator = require('yeoman-generator');
 var helpers = require('../lib');
 var env = yeoman.createEnv();
 
-describe('yeoman-test', function () {
-  beforeEach(function () {
+describe('yeoman-test', function() {
+  beforeEach(function() {
     process.chdir(path.join(__dirname, './fixtures'));
     var self = this;
 
-    this.StubGenerator = function (args, options) {
+    this.StubGenerator = function(args, options) {
       self.args = args;
       self.options = options;
     };
@@ -22,22 +22,22 @@ describe('yeoman-test', function () {
     util.inherits(this.StubGenerator, Generator);
   });
 
-  describe('.registerDependencies()', function () {
-    it('accepts dependency as a path', function () {
+  describe('.registerDependencies()', function() {
+    it('accepts dependency as a path', function() {
       helpers.registerDependencies(env, [
         require.resolve('./fixtures/generator-simple/app')
       ]);
       assert(env.get('simple:app'));
     });
 
-    it('accepts dependency as array of [<generator>, <name>]', function () {
+    it('accepts dependency as array of [<generator>, <name>]', function() {
       helpers.registerDependencies(env, [[this.StubGenerator, 'stub:app']]);
       assert(env.get('stub:app'));
     });
   });
 
-  describe('.createGenerator()', function () {
-    it('create a new generator', function () {
+  describe('.createGenerator()', function() {
+    it('create a new generator', function() {
       var generator = helpers.createGenerator('unicorn:app', [
         [this.StubGenerator, 'unicorn:app']
       ]);
@@ -45,133 +45,139 @@ describe('yeoman-test', function () {
       assert.ok(generator instanceof this.StubGenerator);
     });
 
-    it('pass args params to the generator', function () {
-      helpers.createGenerator('unicorn:app', [
-        [this.StubGenerator, 'unicorn:app']
-      ], ['temp']);
+    it('pass args params to the generator', function() {
+      helpers.createGenerator(
+        'unicorn:app',
+        [[this.StubGenerator, 'unicorn:app']],
+        ['temp']
+      );
 
       assert.deepEqual(this.args, ['temp']);
     });
 
-    it('pass options param to the generator', function () {
-      helpers.createGenerator('unicorn:app', [
-        [this.StubGenerator, 'unicorn:app']
-      ], ['temp'], { ui: 'tdd' });
+    it('pass options param to the generator', function() {
+      helpers.createGenerator(
+        'unicorn:app',
+        [[this.StubGenerator, 'unicorn:app']],
+        ['temp'],
+        { ui: 'tdd' }
+      );
 
       assert.equal(this.options.ui, 'tdd');
     });
   });
 
-  describe('.mockPrompt()', function () {
-    beforeEach(function () {
+  describe('.mockPrompt()', function() {
+    beforeEach(function() {
       this.generator = env.instantiate(helpers.createDummyGenerator());
       helpers.mockPrompt(this.generator, { answer: 'foo' });
     });
 
-    it('uses default values', function () {
-      return this.generator.prompt([{ name: 'respuesta', type: 'input', default: 'bar' }])
-        .then(function (answers) {
+    it('uses default values', function() {
+      return this.generator
+        .prompt([{ name: 'respuesta', type: 'input', default: 'bar' }])
+        .then(function(answers) {
           assert.equal(answers.respuesta, 'bar');
         });
     });
 
-    it('uses default values when no answer is passed', function () {
+    it('uses default values when no answer is passed', function() {
       var generator = env.instantiate(helpers.createDummyGenerator());
       helpers.mockPrompt(generator);
-      return generator.prompt([
-        { name: 'respuesta', message: 'foo', type: 'input', default: 'bar' }
-      ]).then(function (answers) {
-        assert.equal(answers.respuesta, 'bar');
-      });
+      return generator
+        .prompt([{ name: 'respuesta', message: 'foo', type: 'input', default: 'bar' }])
+        .then(function(answers) {
+          assert.equal(answers.respuesta, 'bar');
+        });
     });
 
-    it('supports `null` answer for `list` type', function () {
+    it('supports `null` answer for `list` type', function() {
       var generator = env.instantiate(helpers.createDummyGenerator());
 
       helpers.mockPrompt(generator, {
         respuesta: null
       });
 
-      return generator.prompt([
-        { name: 'respuesta', message: 'foo', type: 'list', default: 'bar' }
-      ]).then(function (answers) {
-        assert.equal(answers.respuesta, null);
-      });
+      return generator
+        .prompt([{ name: 'respuesta', message: 'foo', type: 'list', default: 'bar' }])
+        .then(function(answers) {
+          assert.equal(answers.respuesta, null);
+        });
     });
 
-    it('treats `null` as no answer for `input` type', function () {
+    it('treats `null` as no answer for `input` type', function() {
       var generator = env.instantiate(helpers.createDummyGenerator());
 
       helpers.mockPrompt(generator, {
         respuesta: null
       });
 
-      return generator.prompt([
-        { name: 'respuesta', message: 'foo', type: 'input', default: 'bar' }
-      ]).then(function (answers) {
-        assert.equal(answers.respuesta, 'bar');
-      });
+      return generator
+        .prompt([{ name: 'respuesta', message: 'foo', type: 'input', default: 'bar' }])
+        .then(function(answers) {
+          assert.equal(answers.respuesta, 'bar');
+        });
     });
 
-    it('uses `true` as the default value for `confirm` type', function () {
+    it('uses `true` as the default value for `confirm` type', function() {
       var generator = env.instantiate(helpers.createDummyGenerator());
       helpers.mockPrompt(generator, {});
 
-      return generator.prompt([
-        { name: 'respuesta', message: 'foo', type: 'confirm' }
-      ]).then(function (answers) {
-        assert.equal(answers.respuesta, true);
-      });
+      return generator
+        .prompt([{ name: 'respuesta', message: 'foo', type: 'confirm' }])
+        .then(function(answers) {
+          assert.equal(answers.respuesta, true);
+        });
     });
 
-    it('supports `false` answer for `confirm` type', function () {
+    it('supports `false` answer for `confirm` type', function() {
       var generator = env.instantiate(helpers.createDummyGenerator());
       helpers.mockPrompt(generator, { respuesta: false });
 
-      return generator.prompt([
-        { name: 'respuesta', message: 'foo', type: 'confirm' }
-      ]).then(function (answers) {
-        assert.equal(answers.respuesta, false);
-      });
+      return generator
+        .prompt([{ name: 'respuesta', message: 'foo', type: 'confirm' }])
+        .then(function(answers) {
+          assert.equal(answers.respuesta, false);
+        });
     });
 
-    it('prefers mocked values over defaults', function () {
-      return this.generator.prompt([
-        { name: 'answer', type: 'input', default: 'bar' }
-      ]).then(function (answers) {
-        assert.equal(answers.answer, 'foo');
-      });
+    it('prefers mocked values over defaults', function() {
+      return this.generator
+        .prompt([{ name: 'answer', type: 'input', default: 'bar' }])
+        .then(function(answers) {
+          assert.equal(answers.answer, 'foo');
+        });
     });
 
-    it('can be call multiple time on the same generator', function () {
+    it('can be call multiple time on the same generator', function() {
       var generator = env.instantiate(helpers.createDummyGenerator());
       helpers.mockPrompt(generator, { foo: 1 });
       helpers.mockPrompt(generator, { foo: 2 });
-      return generator.prompt({ message: 'bar', name: 'foo' }).then(function (answers) {
+      return generator.prompt({ message: 'bar', name: 'foo' }).then(function(answers) {
         assert.equal(answers.foo, 2);
       });
     });
 
-    it('keep prompt method asynchronous', function () {
+    it('keep prompt method asynchronous', function() {
       var spy = sinon.spy();
 
-      var promise = this.generator.prompt(
-        { name: 'answer', type: 'input' }
-      ).then(function () {
-        sinon.assert.called(spy);
-      });
+      var promise = this.generator
+        .prompt({ name: 'answer', type: 'input' })
+        .then(function() {
+          sinon.assert.called(spy);
+        });
 
       spy();
       return promise;
     });
   });
 
-  describe('.run()', function () {
-    it('return a RunContext object', function () {
+  describe('.run()', function() {
+    it('return a RunContext object', function() {
       assert(helpers.run(helpers.createDummyGenerator()) instanceof RunContext);
     });
 
-    it('pass settings to RunContext', function () {
+    it('pass settings to RunContext', function() {
       var runContext = helpers.run(helpers.createDummyGenerator(), { foo: 1 });
       assert.equal(runContext.settings.foo, 1);
     });

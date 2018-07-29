@@ -18,7 +18,8 @@ class SimpleGenerator extends Generator {
   exec() {}
 }
 
-SimpleGenerator.description = 'And add a custom description by adding a `description` property to your function.';
+SimpleGenerator.description =
+  'And add a custom description by adding a `description` property to your function.';
 SimpleGenerator.usage = 'Usage can be used to customize the help output';
 
 module.exports = SimpleGenerator;
