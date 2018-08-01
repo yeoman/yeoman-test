@@ -1,6 +1,6 @@
 {
   "name": "yeoman-test",
-  "version": "1.8.0",
+  "version": "1.9.1",
   "description": "Test utilities for Yeoman generators",
   "homepage": "http://yeoman.io/authoring/testing.html",
   "author": "The Yeoman Team",
