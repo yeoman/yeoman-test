@@ -628,6 +628,23 @@ describe('RunContext', function() {
     });
   });
 
+  describe('#withEnvironment()', function() {
+    it('register paths', function(done) {
+      this.ctx
+        .withEnvironment(env => {
+          env.register(require.resolve('./fixtures/generator-simple/app'));
+          return env;
+        })
+        .on(
+          'ready',
+          function() {
+            assert(this.ctx.env.get('simple:app'));
+            done();
+          }.bind(this)
+        );
+    });
+  });
+
   describe('#withLocalConfig()', function() {
     it('provides config to the generator', function(done) {
       this.ctx
