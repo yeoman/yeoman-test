@@ -1,0 +1,27 @@
+name: NPM test
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        node: ['10', '12', '13']
+    runs-on: ${{ matrix.os }}
+    name: Yeoman test (${{ matrix.os }}|node-${{ matrix.node }})
+
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1.2.0
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Node Version
+        run: node --version
+      - name: Npm version
+        run: npm --version
+      - name: Npm ci
+        run: npm ci
+      - name: Npm test
+        run: npm test
+
