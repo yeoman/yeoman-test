@@ -15,26 +15,26 @@
   "repository": "yeoman/yeoman-test",
   "license": "MIT",
   "devDependencies": {
-    "coveralls": "^3.0.2",
-    "eslint": "^5.2.0",
-    "eslint-config-prettier": "^2.4.0",
-    "eslint-config-xo": "^0.23.0",
-    "eslint-plugin-prettier": "^2.2.0",
-    "husky": "^0.14.3",
-    "lint-staged": "^7.2.0",
-    "mocha": "^5.2.0",
-    "nyc": "^12.0.2",
-    "prettier": "^1.7.0"
+    "coveralls": "^3.0.9",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.9.0",
+    "eslint-config-xo": "^0.27.2",
+    "eslint-plugin-prettier": "^3.1.2",
+    "husky": "^4.0.5",
+    "lint-staged": "^9.5.0",
+    "mocha": "^7.0.0",
+    "nyc": "^15.0.0",
+    "prettier": "^1.19.1"
   },
   "dependencies": {
-    "inquirer": "^6.0.0",
-    "lodash": "^4.17.10",
+    "inquirer": "^7.0.3",
+    "lodash": "^4.17.15",
     "mkdirp": "^0.5.1",
     "pinkie-promise": "^2.0.1",
-    "rimraf": "^2.4.4",
-    "sinon": "^6.1.4",
-    "yeoman-environment": "^2.3.0",
-    "yeoman-generator": "^3.1.1"
+    "rimraf": "^3.0.0",
+    "sinon": "^8.0.4",
+    "yeoman-environment": "^2.7.0",
+    "yeoman-generator": "^4.4.0"
   },
   "scripts": {
     "test": "nyc mocha",
