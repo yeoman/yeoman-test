@@ -33,7 +33,7 @@
     "pinkie-promise": "^2.0.1",
     "rimraf": "^3.0.0",
     "sinon": "^8.0.4",
-    "yeoman-environment": "^2.7.0",
+    "yeoman-environment": "github:mshima/environment#catch",
     "yeoman-generator": "^4.4.0"
   },
   "scripts": {
