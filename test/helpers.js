@@ -224,7 +224,7 @@ describe('yeoman-test', function() {
         });
     });
 
-    // This is a workaround for corn case were an error is not correctly emitted
+    // This is a workaround for corner case were an error is not correctly emitted
     // See https://github.com/yeoman/generator/pull/1155
     it('catch run errors', function(done) {
       helpers
