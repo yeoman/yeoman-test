@@ -531,42 +531,51 @@ describe('RunContext', function() {
   });
 
   describe('#withPrompts()', function() {
-    it('is call automatically', function(done) {
+    it('is call automatically', function() {
+      const askFor = sinon.spy();
+      const prompt = sinon.spy();
       this.Dummy.prototype.askFor = function() {
-        this.prompt(
-          {
-            name: 'yeoman',
-            type: 'input',
-            message: 'Hey!',
-            default: 'pass'
-          },
-          function(answers) {
-            assert.equal(answers.yeoman, 'pass');
-          }
-        );
+        askFor();
+        return this.prompt({
+          name: 'yeoman',
+          type: 'input',
+          message: 'Hey!',
+          default: 'pass'
+        }).then(function(answers) {
+          assert.equal(answers.yeoman, 'pass');
+          prompt();
+        });
       };
 
-      this.ctx.on('end', done);
+      return this.ctx.toPromise().then(function() {
+        sinon.assert.calledOnce(askFor);
+        sinon.assert.calledOnce(prompt);
+      });
     });
 
-    it('mock the prompt', function(done) {
+    it('mock the prompt', function() {
+      const execSpy = sinon.spy();
       this.Dummy.prototype.askFor = function() {
-        this.prompt(
-          {
-            name: 'yeoman',
-            type: 'input',
-            message: 'Hey!'
-          },
-          function(answers) {
-            assert.equal(answers.yeoman, 'yes please');
-          }
-        );
+        return this.prompt({
+          name: 'yeoman',
+          type: 'input',
+          message: 'Hey!'
+        }).then(function(answers) {
+          assert.equal(answers.yeoman, 'yes please');
+          execSpy();
+        });
       };
 
-      this.ctx.withPrompts({ yeoman: 'yes please' }).on('end', done);
+      return this.ctx
+        .withPrompts({ yeoman: 'yes please' })
+        .toPromise()
+        .then(function() {
+          sinon.assert.calledOnce(execSpy);
+        });
     });
 
     it('is chainable', function() {
+      const execSpy = sinon.spy();
       this.Dummy.prototype.askFor = function() {
         return this.prompt([
           {
@@ -580,6 +589,7 @@ describe('RunContext', function() {
             message: 'Yo!'
           }
         ]).then(function(answers) {
+          execSpy();
           assert.equal(answers.yeoman, 'yes please');
           assert.equal(answers.yo, 'yo man');
         });
@@ -588,7 +598,10 @@ describe('RunContext', function() {
       return this.ctx
         .withPrompts({ yeoman: 'yes please' })
         .withPrompts({ yo: 'yo man' })
-        .toPromise();
+        .toPromise()
+        .then(function() {
+          sinon.assert.calledOnce(execSpy);
+        });
     });
   });
 
