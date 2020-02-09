@@ -181,5 +181,57 @@ describe('yeoman-test', function() {
       var runContext = helpers.run(helpers.createDummyGenerator(), { foo: 1 });
       assert.equal(runContext.settings.foo, 1);
     });
+
+    it('catch env errors', function(done) {
+      helpers
+        .run(
+          class extends helpers.createDummyGenerator() {
+            throws() {
+              this.env.emit('error', new Error());
+            }
+          }
+        )
+        .on('error', _ => {
+          done();
+        });
+    });
+
+    it('catch generator emitted errors', function(done) {
+      helpers
+        .run(
+          class extends helpers.createDummyGenerator() {
+            throws() {
+              this.emit('error', new Error());
+            }
+          }
+        )
+        .on('error', _ => {
+          done();
+        });
+    });
+
+    it('catch generator thrown errors', function(done) {
+      helpers
+        .run(
+          class extends helpers.createDummyGenerator() {
+            throws() {
+              throw new Error();
+            }
+          }
+        )
+        .on('error', _ => {
+          done();
+        });
+    });
+
+    // This is a workaround for corner case were an error is not correctly emitted
+    // See https://github.com/yeoman/generator/pull/1155
+    it('catch run errors', function(done) {
+      helpers
+        .run(class extends Generator {}, { catchGeneratorError: true })
+        .on('error', _ => {
+          done();
+        });
+    });
   });
 });
