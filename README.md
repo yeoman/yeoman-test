@@ -11,6 +11,8 @@ $ npm install --save-dev yeoman-test
 
 [See our documentation](http://yeoman.io/authoring/testing.html)
 
+[See our api documentation](https://yeoman.github.io/yeoman-test)
+
 ## License
 
 MIT © [The Yeoman Team](http://yeoman.io)
