@@ -11,6 +11,7 @@ var Generator = require('yeoman-generator');
 var tmpdir = path.join(os.tmpdir(), 'yeoman-run-context');
 var helpers = require('../lib');
 var mkdirp = require('mkdirp');
+var DummyPrompt = require('../lib/adapter').DummyPrompt;
 
 describe('RunContext', function() {
   beforeEach(function() {
@@ -601,6 +602,31 @@ describe('RunContext', function() {
         .toPromise()
         .then(function() {
           sinon.assert.calledOnce(execSpy);
+        });
+    });
+
+    it('calls the callback', function() {
+      const execSpy = sinon.spy();
+      const promptSpy = sinon.fake.returns('yes please');
+      this.Dummy.prototype.askFor = function() {
+        return this.prompt({
+          name: 'yeoman',
+          type: 'input',
+          message: 'Hey!'
+        }).then(function(answers) {
+          execSpy();
+          assert.equal(answers.yeoman, 'yes please');
+        });
+      };
+
+      return this.ctx
+        .withPrompts({ yeoman: 'no please' }, promptSpy)
+        .toPromise()
+        .then(function() {
+          sinon.assert.calledOnce(execSpy);
+          sinon.assert.calledOnce(promptSpy);
+          assert.equal(promptSpy.getCall(0).args[0], 'no please');
+          assert.ok(promptSpy.getCall(0).thisValue instanceof DummyPrompt);
         });
     });
   });
