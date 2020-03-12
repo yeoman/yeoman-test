@@ -28,7 +28,7 @@
     "tui-jsdoc-template": "^1.2.2"
   },
   "dependencies": {
-    "inquirer": "^7.0.3",
+    "inquirer": "^7.1.0",
     "lodash": "^4.17.15",
     "mkdirp": "^0.5.1",
     "pinkie-promise": "^2.0.1",
