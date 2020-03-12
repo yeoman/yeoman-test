@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
-        node: ['10', '12', '13']
+        node: ['10', '12']
     runs-on: ${{ matrix.os }}
     name: Yeoman test (${{ matrix.os }}|node-${{ matrix.node }})
 
