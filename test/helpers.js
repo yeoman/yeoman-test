@@ -173,8 +173,21 @@ describe('yeoman-test', function() {
   });
 
   describe('.run()', function() {
-    it('return a RunContext object', function() {
-      assert(helpers.run(helpers.createDummyGenerator()) instanceof RunContext);
+    describe('with a generator', function() {
+      it('return a RunContext object', function() {
+        assert(helpers.run(helpers.createDummyGenerator()) instanceof RunContext);
+      });
+    });
+
+    describe('with a namespace', function() {
+      it('return a RunContext object', function() {
+        const context = helpers.run('simple:app').withEnvironment(env => {
+          helpers.registerDependencies(env, [
+            require.resolve('./fixtures/generator-simple/app')
+          ]);
+        });
+        assert(context instanceof RunContext);
+      });
     });
 
     it('pass settings to RunContext', function() {
