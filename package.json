@@ -17,12 +17,12 @@
   "devDependencies": {
     "coveralls": "^3.0.9",
     "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.9.0",
-    "eslint-config-xo": "^0.27.2",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-config-xo": "^0.29.1",
     "eslint-plugin-prettier": "^3.1.2",
-    "husky": "^4.0.5",
-    "lint-staged": "^9.5.0",
-    "mocha": "^7.0.0",
+    "husky": "^4.2.3",
+    "lint-staged": "^10.0.8",
+    "mocha": "^7.1.0",
     "nyc": "^15.0.0",
     "prettier": "^1.19.1",
     "tui-jsdoc-template": "^1.2.2"
@@ -32,10 +32,10 @@
     "lodash": "^4.17.15",
     "mkdirp": "^1.0.3",
     "pinkie-promise": "^2.0.1",
-    "rimraf": "^3.0.0",
-    "sinon": "^8.0.4",
+    "rimraf": "^3.0.2",
+    "sinon": "^9.0.1",
     "yeoman-environment": "^2.8.1",
-    "yeoman-generator": "^4.7.1"
+    "yeoman-generator": "^4.7.2"
   },
   "scripts": {
     "test": "nyc mocha",
