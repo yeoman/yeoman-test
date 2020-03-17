@@ -359,6 +359,16 @@ describe('RunContext', function() {
         })
         .on('end', done);
     });
+
+    it('additional calls with dirPath throws error', function() {
+      assert(this.ctx.inDir(this.tmp));
+      try {
+        this.ctx.inDir(this.tmp);
+        assert.fail();
+      } catch (err) {
+        assert(err.message.indexOf('Test directory already has been set.') !== -1);
+      }
+    });
   });
 
   describe('#cd()', function() {
