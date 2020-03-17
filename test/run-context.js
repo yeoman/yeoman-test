@@ -370,7 +370,7 @@ describe('RunContext', function() {
       }
     });
 
-    it('accepts only `cb` to be invoked with resolved `dir`', function(done) {
+    it('accepts `cb` alone to be invoked with resolved `dir`', function(done) {
       let cbCalled = false;
       this.ctx
         .inDir(this.tmp)
@@ -385,7 +385,7 @@ describe('RunContext', function() {
         });
     });
 
-    it('accepts multiples call with `cb` to be invoked with resolved `dir`', function(done) {
+    it('accepts multiples call with `cb` alone to be invoked with resolved `dir`', function(done) {
       let cbCalled1 = false;
       let cbCalled2 = false;
       this.ctx
