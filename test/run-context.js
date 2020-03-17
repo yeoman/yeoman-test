@@ -369,6 +369,41 @@ describe('RunContext', function() {
         assert(err.message.indexOf('Test directory has already been set.') !== -1);
       }
     });
+
+    it('accepts `cb` alone to be invoked with resolved `dir`', function(done) {
+      let cbCalled = false;
+      this.ctx
+        .inDir(this.tmp)
+        .inDir(dirPath => {
+          cbCalled = true;
+          assert.equal(dirPath, this.tmp);
+        })
+        .on('end', () => {
+          if (cbCalled) {
+            done();
+          }
+        });
+    });
+
+    it('accepts multiples call with `cb` alone to be invoked with resolved `dir`', function(done) {
+      let cbCalled1 = false;
+      let cbCalled2 = false;
+      this.ctx
+        .inDir(this.tmp)
+        .inDir(dirPath => {
+          cbCalled1 = true;
+          assert.equal(dirPath, this.tmp);
+        })
+        .inDir(dirPath => {
+          cbCalled2 = true;
+          assert.equal(dirPath, this.tmp);
+        })
+        .on('end', () => {
+          if (cbCalled1 && cbCalled2) {
+            done();
+          }
+        });
+    });
   });
 
   describe('#cd()', function() {
