@@ -366,7 +366,7 @@ describe('RunContext', function() {
         this.ctx.inDir(this.tmp);
         assert.fail();
       } catch (err) {
-        assert(err.message.indexOf('Test directory already has been set.') !== -1);
+        assert(err.message.indexOf('Test directory has already been set.') !== -1);
       }
     });
   });
