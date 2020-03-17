@@ -360,7 +360,7 @@ describe('RunContext', function() {
         .on('end', done);
     });
 
-    it('additional calls with dirPath throws error', function() {
+    it('throws error at additional calls with dirPath', function() {
       assert(this.ctx.inDir(this.tmp));
       try {
         this.ctx.inDir(this.tmp);
