@@ -1,0 +1,44 @@
+name: Integration Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node-version: [12.x]
+
+    steps:
+    - name: Checkout yeoman-environment
+      uses: actions/checkout@v2
+      with:
+        repository: yeoman/environment
+        path: yeoman-environment
+    - name: Checkout yeoman-generator
+      uses: actions/checkout@v2
+      with:
+        repository: yeoman/generator
+        path: yeoman-generator
+    - uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Run yeoman-environment test
+      run: |
+        cd $GITHUB_WORKSPACE/yeoman-environment
+        npm ci
+        npm install ${{ github.repository }}#$GITHUB_SHA
+        npm install yeoman/generator#master
+        npm test
+
+    - name: Run yeoman-generator test
+      run: |
+        cd $GITHUB_WORKSPACE/yeoman-generator
+        npm ci
+        npm install ${{ github.repository }}#$GITHUB_SHA
+        npm install yeoman/environment#master
+        npm test
