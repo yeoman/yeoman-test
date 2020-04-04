@@ -33,15 +33,11 @@ describe('RunContext', function () {
   afterEach(function (done) {
     process.chdir(__dirname);
 
-    if (this.ctx.errored) {
-      throw new Error('The context errored');
-    }
-
     if (this.ctx.settings.tmpdir) {
       this.ctx.cleanTestDirectory();
     }
 
-    if (this.ctx.completed) {
+    if (this.ctx.completed || this.ctx.errored) {
       done();
       return;
     }

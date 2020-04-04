@@ -1,13 +1,15 @@
 'use strict';
-const util = require('util');
-const path = require('path');
 const assert = require('assert');
+const path = require('path');
 const sinon = require('sinon');
-const RunContext = require('../lib/run-context');
+const util = require('util');
 const yeoman = require('yeoman-environment');
 const Generator = require('yeoman-generator');
+
 const helpers = require('../lib');
-const env = yeoman.createEnv();
+const {TestAdapter} = require('../lib/adapter');
+const RunContext = require('../lib/run-context');
+const env = yeoman.createEnv(undefined, undefined, new TestAdapter());
 
 describe('yeoman-test', function () {
   beforeEach(function () {
@@ -164,6 +166,17 @@ describe('yeoman-test', function () {
         .then(function (answers) {
           assert.equal(answers.foo, 2);
         });
+    });
+
+    it('throws if answer is not provided', function () {
+      const generator = env.instantiate(helpers.createDummyGenerator());
+      helpers.mockPrompt(generator, {foo: 1}, {throwOnMissingAnswer: true});
+      return this.generator.prompt([{message: 'bar', name: 'notFound'}]).then(
+        () => assert.fail(),
+        (error) => {
+          assert.equal(error.message, 'Answer for notFound was not provided');
+        }
+      );
     });
 
     it('keep prompt method asynchronous', function () {
