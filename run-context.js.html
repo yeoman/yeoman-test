@@ -1,66 +1,170 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
+  <head>
+    <meta charset="utf-8" />
     <title>Source: run-context.js | yeoman-test</title>
 
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
     <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/bootstrap.min.css">
-    <link type="text/css" rel="stylesheet" href="styles/prettify-jsdoc.css">
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/tui-doc.css">
-
-    
-</head>
-<body>
-<nav class="lnb" id="lnb">
-    <div class="logo" style="width: 127px; height: 14px">
-        
-            <img src="https://raw.githubusercontent.com/yeoman/yeoman.github.io/source/app/assets/img/logo.png" width="100%" height="100%">
-        
-    </div>
-    <div class="title">
+    <link type="text/css" rel="stylesheet" href="styles/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="styles/prettify-jsdoc.css" />
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="styles/prettify-tomorrow.css"
+    />
+    <link type="text/css" rel="stylesheet" href="styles/tui-doc.css" />
+  </head>
+  <body>
+    <nav class="lnb" id="lnb">
+      <div class="logo" style="width: 127px; height: 14px;">
+        <img
+          src="https://raw.githubusercontent.com/yeoman/yeoman.github.io/source/app/assets/img/logo.png"
+          width="100%"
+          height="100%"
+        />
+      </div>
+      <div class="title">
         <h1><a href="index.html" class="link">yeoman-test</a></h1>
-        
-            <span class="version">v2.2.0</span>
-        
-    </div>
-    <div class="search-container" id="search-container">
-        <input type="text" placeholder="Search">
+
+        <span class="version">v2.4.1</span>
+      </div>
+      <div class="search-container" id="search-container">
+        <input type="text" placeholder="Search" />
         <ul></ul>
-    </div>
-    
-    <div class="lnb-api hidden"><h3>Modules</h3><ul><li><a href="module-test_helpers.html">test/helpers</a><button type="button" class="hidden toggle-subnav btn btn-link">  <span class="glyphicon glyphicon-plus"></span></button><div class="hidden" id="module:test/helpers_sub"><div class="member-type">Methods</div><ul class="inner"><li><a href="module-test_helpers.html#.createDummyGenerator">createDummyGenerator</a></li><li><a href="module-test_helpers.html#.createGenerator">createGenerator</a></li><li><a href="module-test_helpers.html#.gruntfile">gruntfile</a></li><li><a href="module-test_helpers.html#.mockLocalConfig">mockLocalConfig</a></li><li><a href="module-test_helpers.html#.mockPrompt">mockPrompt</a></li><li><a href="module-test_helpers.html#.registerDependencies">registerDependencies</a></li><li><a href="module-test_helpers.html#.restorePrompt">restorePrompt</a></li><li><a href="module-test_helpers.html#.run">run</a></li><li><a href="module-test_helpers.html#.setUpTestDirectory">setUpTestDirectory</a></li><li><a href="module-test_helpers.html#.testDirectory">testDirectory</a></li></ul></div></li></ul></div><div class="lnb-api hidden"><h3>Classes</h3><ul><li><a href="RunContext.html">RunContext</a><button type="button" class="hidden toggle-subnav btn btn-link">  <span class="glyphicon glyphicon-plus"></span></button><div class="hidden" id="RunContext_sub"><div class="member-type">Methods</div><ul class="inner"><li><a href="RunContext.html#async">async</a></li><li><a href="RunContext.html#catch">catch</a></li><li><a href="RunContext.html#cd">cd</a></li><li><a href="RunContext.html#cleanTestDirectory">cleanTestDirectory</a></li><li><a href="RunContext.html#inDir">inDir</a></li><li><a href="RunContext.html#inTmpDir">inTmpDir</a></li><li><a href="RunContext.html#then">then</a></li><li><a href="RunContext.html#toPromise">toPromise</a></li><li><a href="RunContext.html#withArguments">withArguments</a></li><li><a href="RunContext.html#withEnvironment">withEnvironment</a></li><li><a href="RunContext.html#withGenerators">withGenerators</a></li><li><a href="RunContext.html#withLocalConfig">withLocalConfig</a></li><li><a href="RunContext.html#withOptions">withOptions</a></li><li><a href="RunContext.html#withPrompts">withPrompts</a></li></ul></div></li></ul></div><div class="lnb-api hidden"><h3>Global</h3><ul><li><a href="global.html#callbackWrapper">callbackWrapper</a></li></ul></div>
-</nav>
-<div id="resizer"></div>
+      </div>
 
-<div class="main" id="main">
-    
+      <div class="lnb-api hidden">
+        <h3>Modules</h3>
+        <ul>
+          <li>
+            <a href="module-test_helpers.html">test/helpers</a
+            ><button type="button" class="hidden toggle-subnav btn btn-link">
+              <span class="glyphicon glyphicon-plus"></span>
+            </button>
+            <div class="hidden" id="module:test/helpers_sub">
+              <div class="member-type">Methods</div>
+              <ul class="inner">
+                <li>
+                  <a href="module-test_helpers.html#.createDummyGenerator"
+                    >createDummyGenerator</a
+                  >
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.createGenerator"
+                    >createGenerator</a
+                  >
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.createTestEnv"
+                    >createTestEnv</a
+                  >
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.gruntfile">gruntfile</a>
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.mockLocalConfig"
+                    >mockLocalConfig</a
+                  >
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.mockPrompt">mockPrompt</a>
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.registerDependencies"
+                    >registerDependencies</a
+                  >
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.restorePrompt"
+                    >restorePrompt</a
+                  >
+                </li>
+                <li><a href="module-test_helpers.html#.run">run</a></li>
+                <li>
+                  <a href="module-test_helpers.html#.setUpTestDirectory"
+                    >setUpTestDirectory</a
+                  >
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.testDirectory"
+                    >testDirectory</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="lnb-api hidden">
+        <h3>Classes</h3>
+        <ul>
+          <li>
+            <a href="RunContext.html">RunContext</a
+            ><button type="button" class="hidden toggle-subnav btn btn-link">
+              <span class="glyphicon glyphicon-plus"></span>
+            </button>
+            <div class="hidden" id="RunContext_sub">
+              <div class="member-type">Methods</div>
+              <ul class="inner">
+                <li><a href="RunContext.html#async">async</a></li>
+                <li><a href="RunContext.html#catch">catch</a></li>
+                <li><a href="RunContext.html#cd">cd</a></li>
+                <li>
+                  <a href="RunContext.html#cleanTestDirectory"
+                    >cleanTestDirectory</a
+                  >
+                </li>
+                <li><a href="RunContext.html#doInDir">doInDir</a></li>
+                <li><a href="RunContext.html#inDir">inDir</a></li>
+                <li><a href="RunContext.html#inTmpDir">inTmpDir</a></li>
+                <li><a href="RunContext.html#then">then</a></li>
+                <li><a href="RunContext.html#toPromise">toPromise</a></li>
+                <li>
+                  <a href="RunContext.html#withArguments">withArguments</a>
+                </li>
+                <li>
+                  <a href="RunContext.html#withEnvironment">withEnvironment</a>
+                </li>
+                <li>
+                  <a href="RunContext.html#withGenerators">withGenerators</a>
+                </li>
+                <li>
+                  <a href="RunContext.html#withLocalConfig">withLocalConfig</a>
+                </li>
+                <li><a href="RunContext.html#withOptions">withOptions</a></li>
+                <li><a href="RunContext.html#withPrompts">withPrompts</a></li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="lnb-api hidden">
+        <h3>Global</h3>
+        <ul>
+          <li><a href="global.html#callbackWrapper">callbackWrapper</a></li>
+        </ul>
+      </div>
+    </nav>
+    <div id="resizer"></div>
 
-
-
-    
-    <section>
+    <div class="main" id="main">
+      <section>
         <article>
-            <pre class="prettyprint source linenums"><code>'use strict';
+          <pre class="prettyprint source linenums"><code>'use strict';
 var crypto = require('crypto');
 var path = require('path');
 var os = require('os');
 var assert = require('assert');
 var _ = require('lodash');
-var Promise = require('pinkie-promise');
-var yeoman = require('yeoman-environment');
 var util = require('util');
 var rimraf = require('rimraf');
 var EventEmitter = require('events').EventEmitter;
 var helpers = require('./');
-var TestAdapter = require('./adapter').TestAdapter;
 
 /**
  * Wrap callback so it can't get called twice
@@ -102,6 +206,7 @@ function RunContext(Generator, settings) {
   this.localConfig = null;
   this.dependencies = [];
   this.Generator = Generator;
+  this.inDirCallbacks = [];
   this.settings = _.extend(
     { tmpdir: true, namespace: 'gen:test', compatibility: false },
     settings
@@ -145,17 +250,23 @@ RunContext.prototype._run = function() {
   }
 
   this.ran = true;
+  if (this.inDirCallbacks.length) {
+    const targetDirectory = path.resolve(this.targetDirectory);
+    this.inDirCallbacks.forEach(cb => cb(targetDirectory));
+  }
+
   var namespace;
-  this.env = (this.envCB || (env => env)).call(
-    this,
-    yeoman.createEnv([], {}, new TestAdapter())
-  );
+  const testEnv = helpers.createTestEnv();
+  this.env = this.envCB ? this.envCB(testEnv) || testEnv : testEnv;
 
   helpers.registerDependencies(this.env, this.dependencies);
 
-  if (_.isString(this.Generator)) {
+  if (typeof this.Generator === 'string') {
     namespace = this.env.namespace(this.Generator);
-    this.env.register(this.Generator);
+    if (namespace !== this.Generator) {
+      // Generator is a file path, it should be registered.
+      this.env.register(this.Generator);
+    }
   } else {
     namespace = this.settings.namespace;
     this.env.registerStub(this.Generator, namespace, this.settings.resolved);
@@ -236,6 +347,24 @@ RunContext.prototype.catch = function() {
 };
 
 /**
+ * Set the target directory.
+ * @private
+ * @param  {String} dirPath - Directory path (relative to CWD). Prefer passing an absolute
+ *                            file path for predictable results
+ * @return {this} run context instance
+ */
+
+RunContext.prototype.setDir = function(dirPath) {
+  if (this.inDirSet) {
+    throw new Error('Test directory has already been set.');
+  }
+
+  this.inDirSet = true;
+  this.targetDirectory = dirPath;
+  return this;
+};
+
+/**
  * Clean the provided directory, then change directory into it
  * @param  {String} dirPath - Directory path (relative to CWD). Prefer passing an absolute
  *                            file path for predictable results
@@ -244,8 +373,7 @@ RunContext.prototype.catch = function() {
  */
 
 RunContext.prototype.inDir = function(dirPath, cb) {
-  this.inDirSet = true;
-  this.targetDirectory = dirPath;
+  this.setDir(dirPath);
   var release = this.async();
   var callBackThenRelease = _.flowRight(
     release,
@@ -256,14 +384,24 @@ RunContext.prototype.inDir = function(dirPath, cb) {
 };
 
 /**
+ * Register an callback to prepare the destination folder.
+ * @param {Function} [cb] - callback who'll receive the folder path as argument
+ * @return {this} run context instance
+ */
+
+RunContext.prototype.doInDir = function(cb) {
+  this.inDirCallbacks.push(cb);
+  return this;
+};
+
+/**
  * Change directory without deleting directory content.
  * @param  {String} dirPath - Directory path (relative to CWD). Prefer passing an absolute
  *                            file path for predictable results
  * @return {this} run context instance
  */
 RunContext.prototype.cd = function(dirPath) {
-  this.inDirSet = true;
-  this.targetDirectory = dirPath;
+  this.setDir(dirPath);
   dirPath = path.resolve(dirPath);
   try {
     process.chdir(dirPath);
@@ -394,31 +532,36 @@ RunContext.prototype.withLocalConfig = function(localConfig) {
 module.exports = RunContext;
 </code></pre>
         </article>
-    </section>
+      </section>
+    </div>
 
-
-
-
-</div>
-
-<footer>
-    <img class="logo" src="https://raw.githubusercontent.com/yeoman/yeoman.github.io/source/app/assets/img/logo.png" style="width: 127px; height: 14px">
-    <div class="footer-text">BSD license Copyright (c) Google</div>
-</footer>
-<script>prettyPrint();</script>
-<script src="scripts/jquery.min.js"></script>
-<script src="scripts/tui-doc.js"></script>
-<script src="scripts/linenumber.js"></script>
+    <footer>
+      <img
+        class="logo"
+        src="https://raw.githubusercontent.com/yeoman/yeoman.github.io/source/app/assets/img/logo.png"
+        style="width: 127px; height: 14px;"
+      />
+      <div class="footer-text">BSD license Copyright (c) Google</div>
+    </footer>
+    <script>
+      prettyPrint();
+    </script>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/tui-doc.js"></script>
+    <script src="scripts/linenumber.js"></script>
 
     <script>
-        var id = '_sub'.replace(/"/g, '_');
-        var selectedApi = document.getElementById(id); // do not use jquery selector
-        var $selectedApi = $(selectedApi);
+      var id = "_sub".replace(/"/g, "_");
+      var selectedApi = document.getElementById(id); // do not use jquery selector
+      var $selectedApi = $(selectedApi);
 
-        $selectedApi.removeClass('hidden');
-        $selectedApi.parent().find('.glyphicon').removeClass('glyphicon-plus').addClass('glyphicon-minus');
-        showLnbApi();
+      $selectedApi.removeClass("hidden");
+      $selectedApi
+        .parent()
+        .find(".glyphicon")
+        .removeClass("glyphicon-plus")
+        .addClass("glyphicon-minus");
+      showLnbApi();
     </script>
-
-</body>
+  </body>
 </html>
