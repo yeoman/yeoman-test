@@ -195,6 +195,12 @@ describe('yeoman-test', function() {
       assert.equal(runContext.settings.foo, 1);
     });
 
+    it('pass envOptions to RunContext', function() {
+      const envOptions = { foo: 2 };
+      var runContext = helpers.run(helpers.createDummyGenerator(), undefined, envOptions);
+      assert.equal(runContext.envOptions, envOptions);
+    });
+
     it('catch env errors', function(done) {
       helpers
         .run(

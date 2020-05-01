@@ -14,6 +14,8 @@ var mkdirp = require('mkdirp');
 var DummyPrompt = require('../lib/adapter').DummyPrompt;
 
 describe('RunContext', function() {
+  const envOptions = { foo: 'bar' };
+
   beforeEach(function() {
     process.chdir(__dirname);
 
@@ -26,7 +28,7 @@ describe('RunContext', function() {
       }
     };
 
-    this.ctx = new RunContext(this.Dummy);
+    this.ctx = new RunContext(this.Dummy, undefined, envOptions);
   });
 
   afterEach(function(done) {
@@ -42,6 +44,12 @@ describe('RunContext', function() {
   });
 
   describe('constructor', function() {
+    it('forwards envOptions to the environment', function() {
+      this.ctx.on('ready', function() {
+        assert.equal(this.env.options, envOptions);
+      });
+    });
+
     it('accept path parameter', function(done) {
       var ctx = new RunContext(require.resolve('./fixtures/generator-simple/app'));
 
