@@ -30,7 +30,7 @@
       <div class="title">
         <h1><a href="index.html" class="link">yeoman-test</a></h1>
 
-        <span class="version">v2.4.1</span>
+        <span class="version">v2.5.0</span>
       </div>
       <div class="search-container" id="search-container">
         <input type="text" placeholder="Search" />
@@ -353,20 +353,26 @@ exports.registerDependencies = function(env, dependencies) {
  * Creates a test environment.
  *
  * @param {Function} envContructor - environment constructor method.
- * @param {Boolean} [localConfigOnly=true] - passes localConfigOnly option to the generators
+ * @param {Object} [options] - Options to be passed to the environment
  * @returns {Object} environment instance
  * const env = setupEnv(require('yeoman-environment').createEnv);
  */
 
 exports.createTestEnv = function(
   envContructor = yeoman.createEnv,
-  localConfigOnly = true
+  options = { localConfigOnly: true }
 ) {
-  return envContructor(
-    [],
-    { sharedOptions: { localConfigOnly } },
-    new adapter.TestAdapter()
-  );
+  if (typeof options === 'boolean') {
+    options = { sharedOptions: { localConfigOnly: options } };
+  } else if (
+    !options.sharedOptions ||
+    options.sharedOptions.localConfigOnly === undefined
+  ) {
+    options.sharedOptions = options.sharedOptions || {};
+    options.sharedOptions.localConfigOnly = true;
+  }
+
+  return envContructor([], options, new adapter.TestAdapter());
 };
 
 /**
@@ -375,9 +381,9 @@ exports.createTestEnv = function(
  * @return {RunContext}
  */
 
-exports.run = function(GeneratorOrNamespace, settings) {
+exports.run = function(GeneratorOrNamespace, settings, envOptions) {
   var RunContext = require('./run-context');
-  return new RunContext(GeneratorOrNamespace, settings);
+  return new RunContext(GeneratorOrNamespace, settings, envOptions);
 };
 </code></pre>
         </article>

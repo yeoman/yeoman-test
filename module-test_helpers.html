@@ -30,7 +30,7 @@
       <div class="title">
         <h1><a href="index.html" class="link">yeoman-test</a></h1>
 
-        <span class="version">v2.4.1</span>
+        <span class="version">v2.5.0</span>
       </div>
       <div class="search-container" id="search-container">
         <input type="text" placeholder="Search" />
@@ -353,8 +353,7 @@ var angular = createGenerator('angular:app', deps);</code></pre>
                 <span class="type-signature"
                   ><span class="icon green">static</span> </span
                 >createTestEnv<span class="signature"
-                  >(envContructor, localConfigOnly<span
-                    class="signature-attributes"
+                  >(envContructor, options<span class="signature-attributes"
                     >opt</span
                   >)</span
                 ><span class="type-signature"> &rarr; {Object}</span>
@@ -383,8 +382,6 @@ var angular = createGenerator('angular:app', deps);</code></pre>
 
                       <th>Attributes</th>
 
-                      <th>Default</th>
-
                       <th class="last">Description</th>
                     </tr>
                   </thead>
@@ -399,28 +396,22 @@ var angular = createGenerator('angular:app', deps);</code></pre>
 
                       <td class="attributes"></td>
 
-                      <td class="default"></td>
-
                       <td class="description last">
                         <p>environment constructor method.</p>
                       </td>
                     </tr>
 
                     <tr>
-                      <td class="name"><code>localConfigOnly</code></td>
+                      <td class="name"><code>options</code></td>
 
                       <td class="type">
-                        <span class="param-type">Boolean</span>
+                        <span class="param-type">Object</span>
                       </td>
 
                       <td class="attributes">&lt;optional><br /></td>
 
-                      <td class="default">
-                        true
-                      </td>
-
                       <td class="description last">
-                        <p>passes localConfigOnly option to the generators</p>
+                        <p>Options to be passed to the environment</p>
                       </td>
                     </tr>
                   </tbody>
@@ -777,7 +768,7 @@ var angular = createGenerator('angular:app', deps);</code></pre>
                 <div class="container-source members">
                   <code><a href="index.js.html">index.js</a></code
                   >,
-                  <code><a href="index.js.html#line221">line 221</a></code>
+                  <code><a href="index.js.html#line227">line 227</a></code>
                 </div>
               </h4>
             </dt>
