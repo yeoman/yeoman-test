@@ -49,7 +49,7 @@ describe('RunContext', function() {
   describe('constructor', function() {
     it('forwards envOptions to the environment', function() {
       this.ctx.on('ready', function() {
-        assert.equal(this.env.options, envOptions);
+        assert.equal(this.env.options.foo, envOptions.foo);
       });
     });
 

@@ -2,7 +2,8 @@
   "extends": ["xo", "prettier"],
   "env": {
     "jest": true,
-    "node": true
+    "node": true,
+    "mocha": true
   },
   "rules": {
     "prettier/prettier": [

@@ -16,7 +16,7 @@ var Generator = require('yeoman-generator');
 
 class SimpleGenerator extends Generator {
   exec() {
-    this.env.generatorTestExecuted = true;
+    throw new Error('throwing error');
   }
 }
 
