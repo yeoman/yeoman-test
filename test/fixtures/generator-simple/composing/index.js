@@ -15,8 +15,9 @@ var Generator = require('yeoman-generator');
 // in several methods.
 
 class SimpleGenerator extends Generator {
-  exec() {
-    this.env.generatorTestExecuted = true;
+  exec(toCompose) {
+    console.log(toCompose);
+    this.composeWith(toCompose);
   }
 }
 
