@@ -33,7 +33,10 @@ describe('RunContext', function() {
 
   afterEach(function(done) {
     process.chdir(__dirname);
-    this.ctx.cleanTestDirectory();
+
+    if (this.ctx.settings.tmpdir) {
+      this.ctx.cleanTestDirectory();
+    }
 
     if (this.ctx.completed) {
       done();
@@ -136,6 +139,18 @@ describe('RunContext', function() {
         assert.equal(cwd, process.cwd());
         done();
       });
+    });
+
+    it('throws an error when calling cleanTestDirectory with not tmpdir settings', function() {
+      this.ctx.settings.tmpdir = false;
+      try {
+        this.ctx.cleanTestDirectory();
+        assert.fail();
+      } catch (err) {
+        assert(
+          err.message.indexOf('Cleanup test dir called with false tmpdir option.') !== -1
+        );
+      }
     });
 
     it('accepts settings', function() {
