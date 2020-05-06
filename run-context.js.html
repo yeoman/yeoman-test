@@ -30,7 +30,7 @@
       <div class="title">
         <h1><a href="index.html" class="link">yeoman-test</a></h1>
 
-        <span class="version">v2.5.0</span>
+        <span class="version">v2.6.0</span>
       </div>
       <div class="search-container" id="search-container">
         <input type="text" placeholder="Search" />
@@ -48,6 +48,7 @@
             <div class="hidden" id="module:test/helpers_sub">
               <div class="member-type">Methods</div>
               <ul class="inner">
+                <li><a href="module-test_helpers.html#.create">create</a></li>
                 <li>
                   <a href="module-test_helpers.html#.createDummyGenerator"
                     >createDummyGenerator</a
@@ -112,6 +113,7 @@
               <div class="member-type">Methods</div>
               <ul class="inner">
                 <li><a href="RunContext.html#async">async</a></li>
+                <li><a href="RunContext.html#build">build</a></li>
                 <li><a href="RunContext.html#catch">catch</a></li>
                 <li><a href="RunContext.html#cd">cd</a></li>
                 <li>
@@ -122,6 +124,7 @@
                 <li><a href="RunContext.html#doInDir">doInDir</a></li>
                 <li><a href="RunContext.html#inDir">inDir</a></li>
                 <li><a href="RunContext.html#inTmpDir">inTmpDir</a></li>
+                <li><a href="RunContext.html#run">run</a></li>
                 <li><a href="RunContext.html#then">then</a></li>
                 <li><a href="RunContext.html#toPromise">toPromise</a></li>
                 <li>
@@ -136,6 +139,7 @@
                 <li>
                   <a href="RunContext.html#withLocalConfig">withLocalConfig</a>
                 </li>
+                <li><a href="RunContext.html#withLookups">withLookups</a></li>
                 <li><a href="RunContext.html#withOptions">withOptions</a></li>
                 <li><a href="RunContext.html#withPrompts">withPrompts</a></li>
               </ul>
@@ -192,6 +196,7 @@ const callbackWrapper = done => {
  * @param {Boolean} [settings.tmpdir=true] - Automatically run this generator in a tmp dir
  * @param {String} [settings.resolved] - File path to the generator (only used if Generator is a constructor)
  * @param {String} [settings.namespace='gen:test'] - Namespace (only used if Generator is a constructor)
+ * @param {String} [settings.runEnvironment=false] - Require the run context to call run.
  * @param {Object} [envOptions] - Options to be passed to environment.
  * @return {this}
  */
@@ -207,7 +212,11 @@ function RunContext(Generator, settings, envOptions = {}) {
   this.dependencies = [];
   this.Generator = Generator;
   this.inDirCallbacks = [];
-  this.settings = _.extend({ tmpdir: true, namespace: 'gen:test' }, settings);
+  this.lookups = [];
+  this.settings = _.extend(
+    { tmpdir: true, namespace: 'gen:test', runEnvironment: false },
+    settings
+  );
   this.envOptions = envOptions;
 
   this.withOptions({
@@ -215,7 +224,9 @@ function RunContext(Generator, settings, envOptions = {}) {
     skipCache: true,
     skipInstall: true
   });
-  setTimeout(this._run.bind(this), 10);
+  if (!this.settings.runEnvironment) {
+    setTimeout(this._run.bind(this), 10);
+  }
 }
 
 util.inherits(RunContext, EventEmitter);
@@ -244,8 +255,8 @@ RunContext.prototype._run = function() {
     this.inTmpDir();
   }
 
-  if (this._asyncHolds !== 0 || this.ran) {
-    return;
+  if (this._asyncHolds !== 0 || this.ran || this.completed) {
+    return false;
   }
 
   this.ran = true;
@@ -254,17 +265,30 @@ RunContext.prototype._run = function() {
     this.inDirCallbacks.forEach(cb => cb(targetDirectory));
   }
 
-  var namespace;
-  const testEnv = helpers.createTestEnv(this.envOptions.createEnv, this.envOptions);
+  const envOptions = { ...this.envOptions };
+  if (this.settings.runEnvironment) {
+    envOptions.newErrorHandler = true;
+  }
+
+  const testEnv = helpers.createTestEnv(this.envOptions.createEnv, envOptions);
   this.env = this.envCB ? this.envCB(testEnv) || testEnv : testEnv;
+
+  this.lookups.forEach(lookup => {
+    this.env.lookup(lookup);
+  });
 
   helpers.registerDependencies(this.env, this.dependencies);
 
+  let namespace;
   if (typeof this.Generator === 'string') {
-    namespace = this.env.namespace(this.Generator);
-    if (namespace !== this.Generator) {
-      // Generator is a file path, it should be registered.
-      this.env.register(this.Generator);
+    if (this.settings.runEnvironment) {
+      namespace = this.Generator;
+    } else {
+      namespace = this.env.namespace(this.Generator);
+      if (namespace !== this.Generator) {
+        // Generator is a file path, it should be registered.
+        this.env.register(this.Generator);
+      }
     }
   } else {
     namespace = this.settings.namespace;
@@ -276,32 +300,65 @@ RunContext.prototype._run = function() {
     options: this.options
   });
 
-  helpers.mockPrompt(this.generator, this.answers, this.promptCallback);
+  helpers.mockPrompt(this.env, this.answers, this.promptCallback);
 
   if (this.localConfig) {
     // Only mock local config when withLocalConfig was called
     helpers.mockLocalConfig(this.generator, this.localConfig);
   }
 
+  const endCallback = callbackWrapper(envOrGenerator => {
+    helpers.restorePrompt(envOrGenerator);
+    this.emit('end');
+    this.completed = true;
+  });
+
+  if (this.settings.runEnvironment) {
+    this.env.once('end', () => endCallback(this.env));
+    return true;
+  }
+
   const callback = callbackWrapper(
     function(err) {
+      helpers.restorePrompt(this.env);
       this.emit('error', err);
     }.bind(this)
   );
 
   this.generator.on('error', callback);
-  this.generator.once(
-    'end',
-    function() {
-      helpers.restorePrompt(this.generator);
-      this.emit('end');
-      this.completed = true;
-    }.bind(this)
-  );
-
+  this.generator.once('end', () => endCallback(this.generator));
   this.emit('ready', this.generator);
 
   this.generator.run().catch(callback);
+  return true;
+};
+
+/**
+ * Build the generator and the environment.
+ * @return {RunContext} this
+ */
+RunContext.prototype.build = function() {
+  if (!this._run()) {
+    throw new Error('The context is not ready');
+  }
+
+  return this;
+};
+
+/**
+ * Run the generator on the environment and returns the promise.
+ * @return {Promise} Promise
+ */
+RunContext.prototype.run = function() {
+  if (!this.settings.runEnvironment) {
+    throw new Error('Should be called with runEnvironment option');
+  }
+
+  if (!this.ran) {
+    this.build();
+  }
+
+  return this.env.runGenerator(this.generator);
 };
 
 /**
@@ -309,6 +366,10 @@ RunContext.prototype._run = function() {
  * @return {Promise} Promise resolved on end or rejected on error
  */
 RunContext.prototype.toPromise = function() {
+  if (this.settings.runEnvironment) {
+    throw new Error('RunContext with runEnvironment uses promises by default');
+  }
+
   return new Promise(
     function(resolve, reject) {
       this.on(
@@ -350,6 +411,7 @@ RunContext.prototype.catch = function() {
 
 RunContext.prototype.setDir = function(dirPath) {
   if (this.inDirSet) {
+    this.completed = true;
     throw new Error('Test directory has already been set.');
   }
 
@@ -368,12 +430,7 @@ RunContext.prototype.setDir = function(dirPath) {
 
 RunContext.prototype.inDir = function(dirPath, cb) {
   this.setDir(dirPath);
-  var release = this.async();
-  var callBackThenRelease = _.flowRight(
-    release,
-    (cb || _.noop).bind(this, path.resolve(dirPath))
-  );
-  helpers.testDirectory(dirPath, callBackThenRelease);
+  helpers.testDirectory(dirPath, (cb || _.noop).bind(this, path.resolve(dirPath)));
   return this;
 };
 
@@ -400,6 +457,7 @@ RunContext.prototype.cd = function(dirPath) {
   try {
     process.chdir(dirPath);
   } catch (err) {
+    this.completed = true;
     throw new Error(err.message + ' ' + dirPath);
   }
 
@@ -435,9 +493,25 @@ RunContext.prototype.withEnvironment = function(cb) {
 };
 
 /**
+ * Run lookup on the environment.
+ *
+ * @param {Object|Array} [lookups] - lookup to run.
+ * @return {this} run context instance.
+ */
+RunContext.prototype.withLookups = function(lookups) {
+  lookups = Array.isArray(lookups) ? lookups : [lookups];
+  this.lookups = this.lookups.concat(lookups);
+  return this;
+};
+
+/**
  * Clean the directory used for tests inside inDir/inTmpDir
  */
 RunContext.prototype.cleanTestDirectory = function() {
+  if (!this.settings.tmpdir) {
+    throw new Error('Cleanup test dir called with false tmpdir option.');
+  }
+
   if (this.targetDirectory) {
     rimraf.sync(this.targetDirectory);
   }
