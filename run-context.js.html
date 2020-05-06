@@ -30,7 +30,7 @@
       <div class="title">
         <h1><a href="index.html" class="link">yeoman-test</a></h1>
 
-        <span class="version">v2.4.1</span>
+        <span class="version">v2.5.0</span>
       </div>
       <div class="search-container" id="search-container">
         <input type="text" placeholder="Search" />
@@ -190,13 +190,13 @@ const callbackWrapper = done => {
  *                                       'gen:test' in all cases
  * @param {Object} [settings]
  * @param {Boolean} [settings.tmpdir=true] - Automatically run this generator in a tmp dir
- * @param {Boolean} [settings.compatibility=false] - Run with yeoman-test 1.x compatibility
  * @param {String} [settings.resolved] - File path to the generator (only used if Generator is a constructor)
  * @param {String} [settings.namespace='gen:test'] - Namespace (only used if Generator is a constructor)
+ * @param {Object} [envOptions] - Options to be passed to environment.
  * @return {this}
  */
 
-function RunContext(Generator, settings) {
+function RunContext(Generator, settings, envOptions = {}) {
   this._asyncHolds = 0;
   this.ran = false;
   this.inDirSet = false;
@@ -207,10 +207,9 @@ function RunContext(Generator, settings) {
   this.dependencies = [];
   this.Generator = Generator;
   this.inDirCallbacks = [];
-  this.settings = _.extend(
-    { tmpdir: true, namespace: 'gen:test', compatibility: false },
-    settings
-  );
+  this.settings = _.extend({ tmpdir: true, namespace: 'gen:test' }, settings);
+  this.envOptions = envOptions;
+
   this.withOptions({
     force: true,
     skipCache: true,
@@ -256,7 +255,7 @@ RunContext.prototype._run = function() {
   }
 
   var namespace;
-  const testEnv = helpers.createTestEnv();
+  const testEnv = helpers.createTestEnv(this.envOptions.createEnv, this.envOptions);
   this.env = this.envCB ? this.envCB(testEnv) || testEnv : testEnv;
 
   helpers.registerDependencies(this.env, this.dependencies);
@@ -286,9 +285,7 @@ RunContext.prototype._run = function() {
 
   const callback = callbackWrapper(
     function(err) {
-      if (!this.emit('error', err)) {
-        throw err;
-      }
+      this.emit('error', err);
     }.bind(this)
   );
 
@@ -304,10 +301,7 @@ RunContext.prototype._run = function() {
 
   this.emit('ready', this.generator);
 
-  const generatorPromise = this.generator.run();
-  if (!this.settings.compatibility) {
-    generatorPromise.catch(callback);
-  }
+  this.generator.run().catch(callback);
 };
 
 /**
