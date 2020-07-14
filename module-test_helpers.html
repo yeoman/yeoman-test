@@ -30,7 +30,7 @@
       <div class="title">
         <h1><a href="index.html" class="link">yeoman-test</a></h1>
 
-        <span class="version">v2.5.0</span>
+        <span class="version">v2.6.0</span>
       </div>
       <div class="search-container" id="search-container">
         <input type="text" placeholder="Search" />
@@ -48,6 +48,7 @@
             <div class="hidden" id="module:test/helpers_sub">
               <div class="member-type">Methods</div>
               <ul class="inner">
+                <li><a href="module-test_helpers.html#.create">create</a></li>
                 <li>
                   <a href="module-test_helpers.html#.createDummyGenerator"
                     >createDummyGenerator</a
@@ -112,6 +113,7 @@
               <div class="member-type">Methods</div>
               <ul class="inner">
                 <li><a href="RunContext.html#async">async</a></li>
+                <li><a href="RunContext.html#build">build</a></li>
                 <li><a href="RunContext.html#catch">catch</a></li>
                 <li><a href="RunContext.html#cd">cd</a></li>
                 <li>
@@ -122,6 +124,7 @@
                 <li><a href="RunContext.html#doInDir">doInDir</a></li>
                 <li><a href="RunContext.html#inDir">inDir</a></li>
                 <li><a href="RunContext.html#inTmpDir">inTmpDir</a></li>
+                <li><a href="RunContext.html#run">run</a></li>
                 <li><a href="RunContext.html#then">then</a></li>
                 <li><a href="RunContext.html#toPromise">toPromise</a></li>
                 <li>
@@ -136,6 +139,7 @@
                 <li>
                   <a href="RunContext.html#withLocalConfig">withLocalConfig</a>
                 </li>
+                <li><a href="RunContext.html#withLookups">withLookups</a></li>
                 <li><a href="RunContext.html#withOptions">withOptions</a></li>
                 <li><a href="RunContext.html#withPrompts">withPrompts</a></li>
               </ul>
@@ -177,6 +181,71 @@
 
           <dl>
             <dt>
+              <h4 class="name" id=".create">
+                <span class="type-signature"
+                  ><span class="icon green">static</span> </span
+                >create<span class="signature">(GeneratorOrNamespace)</span
+                ><span class="type-signature">
+                  &rarr; {<a href="RunContext.html">RunContext</a>}</span
+                >
+
+                <div class="container-source members">
+                  <code><a href="index.js.html">index.js</a></code
+                  >,
+                  <code><a href="index.js.html#line240">line 240</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>Prepare a run context</p>
+              </div>
+
+              <div class="container-params">
+                <h5>Parameters:</h5>
+
+                <table class="params">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+
+                      <th>Type</th>
+
+                      <th class="last">Description</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td class="name"><code>GeneratorOrNamespace</code></td>
+
+                      <td class="type">
+                        <span class="param-type">String</span>
+                        |
+
+                        <span class="param-type">function</span>
+                      </td>
+
+                      <td class="description last">
+                        <p>Generator constructor or namespace</p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="container-returns">
+                <h5>Returns:</h5>
+
+                <span class="param-type"
+                  ><a href="RunContext.html">RunContext</a></span
+                >
+              </div>
+
+              <dl class="details"></dl>
+            </dd>
+
+            <dt>
               <h4 class="name" id=".createDummyGenerator">
                 <span class="type-signature"
                   ><span class="icon green">static</span> </span
@@ -186,7 +255,7 @@
                 <div class="container-source members">
                   <code><a href="index.js.html">index.js</a></code
                   >,
-                  <code><a href="index.js.html#line138">line 138</a></code>
+                  <code><a href="index.js.html#line140">line 140</a></code>
                 </div>
               </h4>
             </dt>
@@ -212,7 +281,7 @@
                 <div class="container-source members">
                   <code><a href="index.js.html">index.js</a></code
                   >,
-                  <code><a href="index.js.html#line165">line 165</a></code>
+                  <code><a href="index.js.html#line167">line 167</a></code>
                 </div>
               </h4>
             </dt>
@@ -361,7 +430,7 @@ var angular = createGenerator('angular:app', deps);</code></pre>
                 <div class="container-source members">
                   <code><a href="index.js.html">index.js</a></code
                   >,
-                  <code><a href="index.js.html#line204">line 204</a></code>
+                  <code><a href="index.js.html#line206">line 206</a></code>
                 </div>
               </h4>
             </dt>
@@ -443,7 +512,7 @@ var angular = createGenerator('angular:app', deps);</code></pre>
                 <div class="container-source members">
                   <code><a href="index.js.html">index.js</a></code
                   >,
-                  <code><a href="index.js.html#line49">line 49</a></code>
+                  <code><a href="index.js.html#line50">line 50</a></code>
                 </div>
               </h4>
             </dt>
@@ -519,7 +588,7 @@ var angular = createGenerator('angular:app', deps);</code></pre>
                 <div class="container-source members">
                   <code><a href="index.js.html">index.js</a></code
                   >,
-                  <code><a href="index.js.html#line130">line 130</a></code>
+                  <code><a href="index.js.html#line132">line 132</a></code>
                 </div>
               </h4>
             </dt>
@@ -615,10 +684,13 @@ var angular = createGenerator('angular:app', deps);</code></pre>
 
                       <td class="type">
                         <span class="param-type">Generator</span>
+                        |
+
+                        <span class="param-type">Environment</span>
                       </td>
 
                       <td class="description last">
-                        <p>a Yeoman generator</p>
+                        <p>a Yeoman generator or environment</p>
                       </td>
                     </tr>
 
@@ -660,7 +732,7 @@ var angular = createGenerator('angular:app', deps);</code></pre>
                 <div class="container-source members">
                   <code><a href="index.js.html">index.js</a></code
                   >,
-                  <code><a href="index.js.html#line185">line 185</a></code>
+                  <code><a href="index.js.html#line187">line 187</a></code>
                 </div>
               </h4>
             </dt>
@@ -716,7 +788,7 @@ var angular = createGenerator('angular:app', deps);</code></pre>
                 <div class="container-source members">
                   <code><a href="index.js.html">index.js</a></code
                   >,
-                  <code><a href="index.js.html#line121">line 121</a></code>
+                  <code><a href="index.js.html#line122">line 122</a></code>
                 </div>
               </h4>
             </dt>
@@ -745,9 +817,12 @@ var angular = createGenerator('angular:app', deps);</code></pre>
 
                       <td class="type">
                         <span class="param-type">Generator</span>
+                        |
+
+                        <span class="param-type">Environment</span>
                       </td>
 
-                      <td class="description last"></td>
+                      <td class="description last"><p>or environment</p></td>
                     </tr>
                   </tbody>
                 </table>
@@ -768,7 +843,7 @@ var angular = createGenerator('angular:app', deps);</code></pre>
                 <div class="container-source members">
                   <code><a href="index.js.html">index.js</a></code
                   >,
-                  <code><a href="index.js.html#line227">line 227</a></code>
+                  <code><a href="index.js.html#line229">line 229</a></code>
                 </div>
               </h4>
             </dt>
@@ -831,7 +906,7 @@ var angular = createGenerator('angular:app', deps);</code></pre>
                 <div class="container-source members">
                   <code><a href="index.js.html">index.js</a></code
                   >,
-                  <code><a href="index.js.html#line25">line 25</a></code>
+                  <code><a href="index.js.html#line26">line 26</a></code>
                 </div>
               </h4>
             </dt>
@@ -896,7 +971,7 @@ var angular = createGenerator('angular:app', deps);</code></pre>
                 <div class="container-source members">
                   <code><a href="index.js.html">index.js</a></code
                   >,
-                  <code><a href="index.js.html#line75">line 75</a></code>
+                  <code><a href="index.js.html#line76">line 76</a></code>
                 </div>
               </h4>
             </dt>
