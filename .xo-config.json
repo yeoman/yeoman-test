@@ -1,0 +1,11 @@
+{
+  "space": true,
+  "envs": ["es2020", "node", "mocha"],
+  "prettier": true,
+  "rules": {
+    "promise/prefer-await-to-then": "off",
+    "prefer-rest-params": "off",
+    "node/prefer-promises/fs": "off"
+  }
+}
+

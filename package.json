@@ -19,10 +19,6 @@
   },
   "devDependencies": {
     "coveralls": "^3.0.10",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.10.0",
-    "eslint-config-xo": "^0.29.1",
-    "eslint-plugin-prettier": "^3.1.2",
     "husky": "^4.2.3",
     "lint-staged": "^10.0.8",
     "mem-fs": "^1.2.0",
@@ -30,7 +26,7 @@
     "mocha": "^7.1.1",
     "nyc": "^15.0.0",
     "prettier": "^1.19.1",
-    "tui-jsdoc-template": "^1.2.2"
+    "xo": "^0.32.1"
   },
   "dependencies": {
     "inquirer": "^7.1.0",
@@ -41,13 +37,13 @@
   },
   "scripts": {
     "test": "nyc mocha",
-    "pretest": "eslint .",
+    "pretest": "xo",
     "precommit": "lint-staged",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "lint-staged": {
     "*.js": [
-      "eslint --fix",
+      "xo --fix",
       "git add"
     ],
     "*.json": [

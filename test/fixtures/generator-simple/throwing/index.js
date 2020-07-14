@@ -1,5 +1,5 @@
 'use strict';
-var Generator = require('yeoman-generator');
+const Generator = require('yeoman-generator');
 
 // Example of a simple generator.
 //

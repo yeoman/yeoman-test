@@ -1,18 +1,18 @@
 'use strict';
-var util = require('util');
-var path = require('path');
-var assert = require('assert');
-var sinon = require('sinon');
-var RunContext = require('../lib/run-context');
-var yeoman = require('yeoman-environment');
-var Generator = require('yeoman-generator');
-var helpers = require('../lib');
-var env = yeoman.createEnv();
+const util = require('util');
+const path = require('path');
+const assert = require('assert');
+const sinon = require('sinon');
+const RunContext = require('../lib/run-context');
+const yeoman = require('yeoman-environment');
+const Generator = require('yeoman-generator');
+const helpers = require('../lib');
+const env = yeoman.createEnv();
 
 describe('yeoman-test', function() {
   beforeEach(function() {
     process.chdir(path.join(__dirname, './fixtures'));
-    var self = this;
+    const self = this;
 
     this.StubGenerator = function(args, options) {
       self.args = args;
@@ -38,7 +38,7 @@ describe('yeoman-test', function() {
 
   describe('.createGenerator()', function() {
     it('create a new generator', function() {
-      var generator = helpers.createGenerator('unicorn:app', [
+      const generator = helpers.createGenerator('unicorn:app', [
         [this.StubGenerator, 'unicorn:app']
       ]);
 
@@ -60,7 +60,7 @@ describe('yeoman-test', function() {
         'unicorn:app',
         [[this.StubGenerator, 'unicorn:app']],
         ['temp'],
-        { ui: 'tdd' }
+        {ui: 'tdd'}
       );
 
       assert.equal(this.options.ui, 'tdd');
@@ -70,72 +70,78 @@ describe('yeoman-test', function() {
   describe('.mockPrompt()', function() {
     beforeEach(function() {
       this.generator = env.instantiate(helpers.createDummyGenerator());
-      helpers.mockPrompt(this.generator, { answer: 'foo' });
+      helpers.mockPrompt(this.generator, {answer: 'foo'});
     });
 
     it('uses default values', function() {
       return this.generator
-        .prompt([{ name: 'respuesta', type: 'input', default: 'bar' }])
+        .prompt([{name: 'respuesta', type: 'input', default: 'bar'}])
         .then(function(answers) {
           assert.equal(answers.respuesta, 'bar');
         });
     });
 
     it('uses default values when no answer is passed', function() {
-      var generator = env.instantiate(helpers.createDummyGenerator());
+      const generator = env.instantiate(helpers.createDummyGenerator());
       helpers.mockPrompt(generator);
       return generator
-        .prompt([{ name: 'respuesta', message: 'foo', type: 'input', default: 'bar' }])
+        .prompt([
+          {name: 'respuesta', message: 'foo', type: 'input', default: 'bar'}
+        ])
         .then(function(answers) {
           assert.equal(answers.respuesta, 'bar');
         });
     });
 
     it('supports `null` answer for `list` type', function() {
-      var generator = env.instantiate(helpers.createDummyGenerator());
+      const generator = env.instantiate(helpers.createDummyGenerator());
 
       helpers.mockPrompt(generator, {
         respuesta: null
       });
 
       return generator
-        .prompt([{ name: 'respuesta', message: 'foo', type: 'list', default: 'bar' }])
+        .prompt([
+          {name: 'respuesta', message: 'foo', type: 'list', default: 'bar'}
+        ])
         .then(function(answers) {
           assert.equal(answers.respuesta, null);
         });
     });
 
     it('treats `null` as no answer for `input` type', function() {
-      var generator = env.instantiate(helpers.createDummyGenerator());
+      const generator = env.instantiate(helpers.createDummyGenerator());
 
       helpers.mockPrompt(generator, {
         respuesta: null
       });
 
       return generator
-        .prompt([{ name: 'respuesta', message: 'foo', type: 'input', default: 'bar' }])
+        .prompt([
+          {name: 'respuesta', message: 'foo', type: 'input', default: 'bar'}
+        ])
         .then(function(answers) {
           assert.equal(answers.respuesta, 'bar');
         });
     });
 
     it('uses `true` as the default value for `confirm` type', function() {
-      var generator = env.instantiate(helpers.createDummyGenerator());
+      const generator = env.instantiate(helpers.createDummyGenerator());
       helpers.mockPrompt(generator, {});
 
       return generator
-        .prompt([{ name: 'respuesta', message: 'foo', type: 'confirm' }])
+        .prompt([{name: 'respuesta', message: 'foo', type: 'confirm'}])
         .then(function(answers) {
           assert.equal(answers.respuesta, true);
         });
     });
 
     it('supports `false` answer for `confirm` type', function() {
-      var generator = env.instantiate(helpers.createDummyGenerator());
-      helpers.mockPrompt(generator, { respuesta: false });
+      const generator = env.instantiate(helpers.createDummyGenerator());
+      helpers.mockPrompt(generator, {respuesta: false});
 
       return generator
-        .prompt([{ name: 'respuesta', message: 'foo', type: 'confirm' }])
+        .prompt([{name: 'respuesta', message: 'foo', type: 'confirm'}])
         .then(function(answers) {
           assert.equal(answers.respuesta, false);
         });
@@ -143,26 +149,28 @@ describe('yeoman-test', function() {
 
     it('prefers mocked values over defaults', function() {
       return this.generator
-        .prompt([{ name: 'answer', type: 'input', default: 'bar' }])
+        .prompt([{name: 'answer', type: 'input', default: 'bar'}])
         .then(function(answers) {
           assert.equal(answers.answer, 'foo');
         });
     });
 
     it('can be call multiple time on the same generator', function() {
-      var generator = env.instantiate(helpers.createDummyGenerator());
-      helpers.mockPrompt(generator, { foo: 1 });
-      helpers.mockPrompt(generator, { foo: 2 });
-      return generator.prompt({ message: 'bar', name: 'foo' }).then(function(answers) {
-        assert.equal(answers.foo, 2);
-      });
+      const generator = env.instantiate(helpers.createDummyGenerator());
+      helpers.mockPrompt(generator, {foo: 1});
+      helpers.mockPrompt(generator, {foo: 2});
+      return generator
+        .prompt({message: 'bar', name: 'foo'})
+        .then(function(answers) {
+          assert.equal(answers.foo, 2);
+        });
     });
 
     it('keep prompt method asynchronous', function() {
-      var spy = sinon.spy();
+      const spy = sinon.spy();
 
-      var promise = this.generator
-        .prompt({ name: 'answer', type: 'input' })
+      const promise = this.generator
+        .prompt({name: 'answer', type: 'input'})
         .then(function() {
           sinon.assert.called(spy);
         });
@@ -175,7 +183,9 @@ describe('yeoman-test', function() {
   describe('.run()', function() {
     describe('with a generator', function() {
       it('return a RunContext object', function() {
-        assert(helpers.run(helpers.createDummyGenerator()) instanceof RunContext);
+        assert(
+          helpers.run(helpers.createDummyGenerator()) instanceof RunContext
+        );
       });
     });
 
@@ -191,13 +201,17 @@ describe('yeoman-test', function() {
     });
 
     it('pass settings to RunContext', function() {
-      var runContext = helpers.run(helpers.createDummyGenerator(), { foo: 1 });
+      const runContext = helpers.run(helpers.createDummyGenerator(), {foo: 1});
       assert.equal(runContext.settings.foo, 1);
     });
 
     it('pass envOptions to RunContext', function() {
-      const envOptions = { foo: 2 };
-      var runContext = helpers.run(helpers.createDummyGenerator(), undefined, envOptions);
+      const envOptions = {foo: 2};
+      const runContext = helpers.run(
+        helpers.createDummyGenerator(),
+        undefined,
+        envOptions
+      );
       assert.equal(runContext.envOptions, envOptions);
     });
 
@@ -234,7 +248,7 @@ describe('yeoman-test', function() {
         .run(
           class extends helpers.createDummyGenerator() {
             throws() {
-              throw new Error();
+              throw new Error('Some error.');
             }
           }
         )
@@ -247,7 +261,7 @@ describe('yeoman-test', function() {
     // See https://github.com/yeoman/generator/pull/1155
     it('catch run errors', function(done) {
       helpers
-        .run(class extends Generator {}, { catchGeneratorError: true })
+        .run(class extends Generator {}, {catchGeneratorError: true})
         .on('error', _ => {
           done();
         });
