@@ -2,9 +2,9 @@
 const assert = require('assert');
 const {TestAdapter} = require('../lib/adapter');
 
-describe('TestAdapter', function() {
-  describe('#prompt()', function() {
-    it('allows pre-filled answers', function() {
+describe('TestAdapter', function () {
+  describe('#prompt()', function () {
+    it('allows pre-filled answers', function () {
       const adapter = new TestAdapter();
       return adapter
         .prompt(
@@ -13,7 +13,7 @@ describe('TestAdapter', function() {
             respuesta: 'foo'
           }
         )
-        .then(function(answers) {
+        .then(function (answers) {
           assert.equal(answers.respuesta, 'foo');
         });
     });

@@ -14,7 +14,7 @@ describe('test-result', () => {
   [
     {description: 'using memory fs', fs},
     {description: 'using node fs'}
-  ].forEach(testFs => {
+  ].forEach((testFs) => {
     const yoAssert = new RunResult({
       fs: testFs.fs,
       cwd: path.join(__dirname, 'fixtures/assert')

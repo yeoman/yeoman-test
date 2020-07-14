@@ -8,7 +8,7 @@ const RunContext = require('../lib/run-context');
 const RunResult = require('../lib/run-result');
 const SimpleApp = require('./fixtures/generator-simple/app');
 
-describe('RunContext running environment', function() {
+describe('RunContext running environment', function () {
   const defaultEnvOptions = {foo: 'bar'};
   const defaultRunContextOptions = {};
 
@@ -19,7 +19,7 @@ describe('RunContext running environment', function() {
   let build = true;
   let lookups = [];
 
-  beforeEach(function() {
+  beforeEach(function () {
     process.chdir(__dirname);
 
     if (!gen) {
@@ -38,7 +38,7 @@ describe('RunContext running environment', function() {
     }
   });
 
-  afterEach(function() {
+  afterEach(function () {
     process.chdir(__dirname);
     ctx.cleanTestDirectory();
   });
@@ -60,7 +60,7 @@ describe('RunContext running environment', function() {
     });
 
     it('promises a RunResult', () => {
-      return ctx.run().then(runResult => {
+      return ctx.run().then((runResult) => {
         assert(runResult instanceof RunResult);
       });
     });
@@ -183,7 +183,7 @@ describe('RunContext running environment', function() {
       it('rejects with the error', () => {
         return ctx.run().then(
           () => assert.fail(),
-          error => assert(/throwing error/.test(error.message))
+          (error) => assert(/throwing error/.test(error.message))
         );
       });
     });
@@ -213,7 +213,7 @@ describe('RunContext running environment', function() {
           .run()
           .then(
             () => assert.fail(),
-            error => assert(/throwing error/.test(error.message))
+            (error) => assert(/throwing error/.test(error.message))
           );
       });
     });

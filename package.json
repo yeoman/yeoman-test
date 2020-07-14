@@ -23,9 +23,9 @@
     "lint-staged": "^10.2.11",
     "mem-fs": "^1.2.0",
     "mem-fs-editor": "^7.0.1",
-    "mocha": "^7.1.1",
+    "mocha": "^8.0.1",
     "nyc": "^15.0.0",
-    "prettier": "^1.19.1",
+    "prettier": "^2.0.5",
     "xo": "^0.32.1"
   },
   "dependencies": {
@@ -42,9 +42,9 @@
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "husky": {
-     "hooks": {
-       "pre-commit": "npm run pretest"
-     }
+    "hooks": {
+      "pre-commit": "npm run pretest"
+    }
   },
   "lint-staged": {
     "*.js": [
