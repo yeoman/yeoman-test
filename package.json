@@ -25,6 +25,8 @@
     "eslint-plugin-prettier": "^3.1.2",
     "husky": "^4.2.3",
     "lint-staged": "^10.0.8",
+    "mem-fs": "^1.2.0",
+    "mem-fs-editor": "^7.0.1",
     "mocha": "^7.1.1",
     "nyc": "^15.0.0",
     "prettier": "^1.19.1",
@@ -33,8 +35,6 @@
   "dependencies": {
     "inquirer": "^7.1.0",
     "lodash": "^4.17.15",
-    "mem-fs": "^1.2.0",
-    "mem-fs-editor": "^7.0.1",
     "mkdirp": "^1.0.3",
     "rimraf": "^3.0.2",
     "sinon": "^9.0.1",
