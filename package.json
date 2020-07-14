@@ -18,22 +18,22 @@
     "node": ">=12.10.0"
   },
   "devDependencies": {
-    "coveralls": "^3.0.10",
+    "coveralls": "^3.1.0",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.11",
     "mem-fs": "^1.2.0",
     "mem-fs-editor": "^7.0.1",
     "mocha": "^8.0.1",
-    "nyc": "^15.0.0",
+    "nyc": "^15.1.0",
     "prettier": "^2.0.5",
     "xo": "^0.32.1"
   },
   "dependencies": {
-    "inquirer": "^7.1.0",
-    "lodash": "^4.17.15",
-    "sinon": "^9.0.1",
-    "yeoman-environment": "^2.10.0",
-    "yeoman-generator": "^4.10.0"
+    "inquirer": "^7.3.2",
+    "lodash": "^4.17.19",
+    "sinon": "^9.0.2",
+    "yeoman-environment": "^2.10.3",
+    "yeoman-generator": "^4.11.0"
   },
   "scripts": {
     "test": "nyc mocha",
