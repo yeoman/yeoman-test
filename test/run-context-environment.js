@@ -5,6 +5,7 @@ var path = require('path');
 
 var helpers = require('../lib');
 var RunContext = require('../lib/run-context');
+var RunResult = require('../lib/run-result');
 const SimpleApp = require('./fixtures/generator-simple/app');
 
 describe('RunContext running environment', function() {
@@ -56,6 +57,12 @@ describe('RunContext running environment', function() {
 
     it('passes runEnvironment to RunContext', () => {
       assert.equal(ctx.settings.runEnvironment, true);
+    });
+
+    it('promises a RunResult', () => {
+      return ctx.run().then(runResult => {
+        assert(runResult instanceof RunResult);
+      });
     });
 
     it('forwards envOptions to the environment', () => {

@@ -5,7 +5,7 @@ const assert = require('assert');
 const memFsEditor = require('mem-fs-editor');
 const memFs = require('mem-fs');
 
-const TestResult = require('../lib/test-result');
+const RunResult = require('../lib/run-result');
 
 describe('test-result', () => {
   const sharedFs = memFs.create();
@@ -13,7 +13,7 @@ describe('test-result', () => {
 
   [{ description: 'using memory fs', fs }, { description: 'using node fs' }].forEach(
     testFs => {
-      const yoAssert = new TestResult({
+      const yoAssert = new RunResult({
         fs: testFs.fs,
         cwd: path.join(__dirname, 'fixtures/assert')
       });
