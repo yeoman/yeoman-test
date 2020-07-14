@@ -34,6 +34,10 @@ describe('RunContext', function() {
   afterEach(function(done) {
     process.chdir(__dirname);
 
+    if (this.ctx.errored) {
+      throw new Error('The context errored');
+    }
+
     if (this.ctx.settings.tmpdir) {
       this.ctx.cleanTestDirectory();
     }
@@ -47,9 +51,10 @@ describe('RunContext', function() {
   });
 
   describe('constructor', function() {
-    it('forwards envOptions to the environment', function() {
+    it('forwards envOptions to the environment', function(done) {
       this.ctx.on('ready', function() {
         assert.equal(this.env.options.foo, envOptions.foo);
+        done();
       });
     });
 
@@ -166,13 +171,10 @@ describe('RunContext', function() {
     });
 
     it('only run a generator once', function(done) {
-      this.ctx.on(
-        'end',
-        function() {
-          sinon.assert.calledOnce(this.execSpy);
-          done();
-        }.bind(this)
-      );
+      this.ctx.on('end', () => {
+        sinon.assert.calledOnce(this.execSpy);
+        done();
+      });
 
       this.ctx._run();
       this.ctx._run();
