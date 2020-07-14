@@ -35,7 +35,6 @@
   "dependencies": {
     "inquirer": "^7.1.0",
     "lodash": "^4.17.15",
-    "mkdirp": "^1.0.3",
     "rimraf": "^3.0.2",
     "sinon": "^9.0.1",
     "yeoman-environment": "^2.10.0",

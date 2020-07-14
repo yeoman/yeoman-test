@@ -10,7 +10,6 @@ var RunContext = require('../lib/run-context');
 var Generator = require('yeoman-generator');
 var tmpdir = path.join(os.tmpdir(), 'yeoman-run-context');
 var helpers = require('../lib');
-var mkdirp = require('mkdirp');
 var DummyPrompt = require('../lib/adapter').DummyPrompt;
 
 describe('RunContext', function() {
@@ -442,7 +441,7 @@ describe('RunContext', function() {
     beforeEach(function() {
       process.chdir(__dirname);
       this.tmp = tmpdir;
-      mkdirp.sync(tmpdir);
+      fs.mkdirSync(tmpdir, { recursive: true });
     });
 
     it('do not call helpers.testDirectory()', function() {
