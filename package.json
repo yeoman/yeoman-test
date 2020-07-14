@@ -30,6 +30,8 @@
   "dependencies": {
     "inquirer": "^7.1.0",
     "lodash": "^4.17.15",
+    "mem-fs": "^1.2.0",
+    "mem-fs-editor": "^7.0.1",
     "mkdirp": "^1.0.3",
     "rimraf": "^3.0.2",
     "sinon": "^9.0.1",
