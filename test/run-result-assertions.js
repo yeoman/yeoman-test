@@ -7,7 +7,7 @@ const memFs = require('mem-fs');
 
 const RunResult = require('../lib/run-result');
 
-describe('test-result', () => {
+describe('run-result-assertions', () => {
   const sharedFs = memFs.create();
   const fs = memFsEditor.create(sharedFs);
 
