@@ -1,6 +1,12 @@
 name: Integration Build
 
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore:
+      - 'dependabot/**'
+  pull_request:
+    branches:
+      - '*'
 
 jobs:
   build:
@@ -10,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node-version: [12.x]
+        node-version: [14.x]
 
     steps:
     - name: Checkout yeoman-test
@@ -27,7 +33,7 @@ jobs:
       with:
         repository: yeoman/environment
         path: yeoman-environment
-    - uses: actions/setup-node@v1
+    - uses: actions/setup-node@v2.1.0
       with:
         node-version: ${{ matrix.node-version }}
 
@@ -40,6 +46,7 @@ jobs:
         npm test
 
     - name: Run yeoman-generator test
+      if: always()
       run: |
         cd $GITHUB_WORKSPACE/yeoman-generator
         npm ci
@@ -48,6 +55,7 @@ jobs:
         npm test
 
     - name: Run yeoman-environment test
+      if: always()
       run: |
         cd $GITHUB_WORKSPACE/yeoman-environment
         npm ci
