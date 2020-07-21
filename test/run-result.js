@@ -1,6 +1,10 @@
 /* eslint-disable max-nested-callbacks */
 'use strict';
 const assert = require('assert');
+const MemFs = require('mem-fs');
+const MemFsEditor = require('mem-fs-editor');
+const path = require('path');
+const sinon = require('sinon');
 
 const RunContext = require('../lib/run-context');
 const RunResult = require('../lib/run-result');
@@ -26,7 +30,7 @@ describe('run-result', () => {
         runResult = new RunResult(options);
       });
       it('loads fs option', () => {
-        assert.equal(runResult.cwd, cwd);
+        assert.equal(runResult.fs, fs);
       });
       it('loads cwd option', () => {
         assert.equal(runResult.cwd, cwd);
@@ -48,6 +52,66 @@ describe('run-result', () => {
           assert.equal(runResult.options, options);
         });
       });
+    });
+  });
+  describe('#dumpFiles', () => {
+    let runResult;
+    let consoleMock;
+    beforeEach(() => {
+      const memFs = MemFs.create();
+      const memFsEditor = MemFsEditor.create(memFs);
+      runResult = new RunResult({
+        fs: memFsEditor,
+        cwd: process.cwd(),
+        env: {sharedFs: memFs}
+      });
+      consoleMock = sinon.stub(console, 'log');
+      runResult.fs.write(path.resolve('test.txt'), 'test content');
+      runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
+    });
+    afterEach(() => {
+      consoleMock.restore();
+    });
+    it('dumps every file without an argument', () => {
+      runResult.dumpFiles();
+      assert.equal(consoleMock.callCount, 4);
+      assert.equal(consoleMock.getCall(0).args[0], path.resolve('test.txt'));
+      assert.equal(consoleMock.getCall(1).args[0], 'test content');
+      assert.equal(consoleMock.getCall(2).args[0], path.resolve('test2.txt'));
+      assert.equal(consoleMock.getCall(3).args[0], 'test2 content');
+    });
+    it('dumps a file with an argument', () => {
+      runResult.dumpFiles(path.resolve('test.txt'));
+      assert.equal(consoleMock.callCount, 1);
+      assert.equal(consoleMock.getCall(0).args[0], 'test content');
+      runResult.dumpFiles(path.resolve('test2.txt'));
+      assert.equal(consoleMock.callCount, 2);
+      assert.equal(consoleMock.getCall(1).args[0], 'test2 content');
+    });
+  });
+  describe('#dumpFilenames', () => {
+    let runResult;
+    let consoleMock;
+    beforeEach(() => {
+      const memFs = MemFs.create();
+      const memFsEditor = MemFsEditor.create(memFs);
+      runResult = new RunResult({
+        fs: memFsEditor,
+        cwd: process.cwd(),
+        env: {sharedFs: memFs}
+      });
+      consoleMock = sinon.stub(console, 'log');
+      runResult.fs.write(path.resolve('test.txt'), 'test content');
+      runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
+    });
+    afterEach(() => {
+      consoleMock.restore();
+    });
+    it('dumps every filename', () => {
+      runResult.dumpFilenames();
+      assert.equal(consoleMock.callCount, 2);
+      assert.equal(consoleMock.getCall(0).args[0], path.resolve('test.txt'));
+      assert.equal(consoleMock.getCall(1).args[0], path.resolve('test2.txt'));
     });
   });
   describe('#createContext', () => {
