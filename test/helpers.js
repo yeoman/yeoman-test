@@ -196,21 +196,22 @@ describe('yeoman-test', function () {
 
   describe('.run()', function () {
     describe('with a generator', function () {
-      it('return a RunContext object', function () {
-        assert(
-          helpers.run(helpers.createDummyGenerator()) instanceof RunContext
-        );
+      it('return a RunContext object', function (done) {
+        const context = helpers.run(helpers.createDummyGenerator());
+        assert(context instanceof RunContext);
+        context.on('end', done);
       });
     });
 
     describe('with a namespace', function () {
-      it('return a RunContext object', function () {
+      it('return a RunContext object', function (done) {
         const context = helpers.run('simple:app').withEnvironment((env) => {
           helpers.registerDependencies(env, [
             require.resolve('./fixtures/generator-simple/app')
           ]);
         });
         assert(context instanceof RunContext);
+        context.on('end', done);
       });
     });
 
@@ -279,6 +280,34 @@ describe('yeoman-test', function () {
         .on('error', (_) => {
           done();
         });
+    });
+  });
+
+  describe('.createTestEnv', () => {
+    let mockedCreateEnv;
+    const createEnvReturn = {};
+    beforeEach(() => {
+      mockedCreateEnv = sinon
+        .stub(helpers, 'createEnv')
+        .returns(createEnvReturn);
+    });
+    afterEach(() => {
+      mockedCreateEnv.restore();
+    });
+    it('calls mocked createEnv', () => {
+      assert.equal(helpers.createTestEnv(), createEnvReturn);
+      assert.ok(mockedCreateEnv.calledOnce);
+    });
+    it('calls mocked createEnv with newErrorHandler option', () => {
+      assert.equal(helpers.createTestEnv(), createEnvReturn);
+      assert.equal(mockedCreateEnv.getCall(0).args[1].newErrorHandler, true);
+    });
+    it('calls mocked createEnv with sharedOptions.localConfigOnly option', () => {
+      assert.equal(helpers.createTestEnv(), createEnvReturn);
+      assert.equal(
+        mockedCreateEnv.getCall(0).args[1].sharedOptions.localConfigOnly,
+        true
+      );
     });
   });
 });
