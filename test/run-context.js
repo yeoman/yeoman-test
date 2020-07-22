@@ -1,5 +1,4 @@
 'use strict';
-const _ = require('lodash');
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
@@ -66,7 +65,6 @@ describe('RunContext', function () {
     });
 
     it('propagate generator error events', function (done) {
-      const onceDone = _.once(done);
       const error = new Error();
       const Dummy = helpers.createDummyGenerator();
       const execSpy = sinon.stub().throws(error);
@@ -79,7 +77,7 @@ describe('RunContext', function () {
         sinon.assert.calledOnce(execSpy);
         assert.equal(err, error);
         sinon.assert.notCalled(endSpy);
-        onceDone();
+        done();
       });
     });
 
