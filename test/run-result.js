@@ -1,6 +1,7 @@
 /* eslint-disable max-nested-callbacks */
 'use strict';
 const assert = require('assert');
+const fs = require('fs');
 const MemFs = require('mem-fs');
 const MemFsEditor = require('mem-fs-editor');
 const path = require('path');
@@ -18,19 +19,19 @@ describe('run-result', () => {
     });
     describe('with fs option', () => {
       it('throws error without cwd', () => {
-        assert.throws(() => new RunResult({fs: {}}));
+        assert.throws(() => new RunResult({memFs: {}}));
       });
     });
     describe('with fs and cwd options', () => {
-      const fs = {};
+      const memFs = {};
       const cwd = {};
-      const options = {fs, cwd};
+      const options = {memFs, cwd};
       let runResult;
       before(() => {
         runResult = new RunResult(options);
       });
-      it('loads fs option', () => {
-        assert.equal(runResult.fs, fs);
+      it('loads memFs option', () => {
+        assert.equal(runResult.memFs, memFs);
       });
       it('loads cwd option', () => {
         assert.equal(runResult.cwd, cwd);
@@ -61,9 +62,9 @@ describe('run-result', () => {
       const memFs = MemFs.create();
       const memFsEditor = MemFsEditor.create(memFs);
       runResult = new RunResult({
+        memFs,
         fs: memFsEditor,
-        cwd: process.cwd(),
-        env: {sharedFs: memFs}
+        cwd: process.cwd()
       });
       consoleMock = sinon.stub(console, 'log');
       runResult.fs.write(path.resolve('test.txt'), 'test content');
@@ -96,9 +97,9 @@ describe('run-result', () => {
       const memFs = MemFs.create();
       const memFsEditor = MemFsEditor.create(memFs);
       runResult = new RunResult({
+        memFs,
         fs: memFsEditor,
-        cwd: process.cwd(),
-        env: {sharedFs: memFs}
+        cwd: process.cwd()
       });
       consoleMock = sinon.stub(console, 'log');
       runResult.fs.write(path.resolve('test.txt'), 'test content');
@@ -114,7 +115,28 @@ describe('run-result', () => {
       assert.equal(consoleMock.getCall(1).args[0], path.resolve('test2.txt'));
     });
   });
-  describe('#createContext', () => {
+  describe('#cleanup', () => {
+    let cwd;
+    let runResult;
+    beforeEach(() => {
+      cwd = path.join(process.cwd(), 'fixtures', 'tmp');
+      if (!fs.existsSync(cwd)) {
+        fs.mkdirSync(cwd);
+      }
+
+      runResult = new RunResult({
+        cwd,
+        oldCwd: path.join(process.cwd(), 'fixtures')
+      });
+    });
+    afterEach(() => {});
+    it('removes cwd', () => {
+      assert.ok(fs.existsSync(runResult.cwd));
+      runResult.cleanup();
+      assert.ok(!fs.existsSync(runResult.cwd));
+    });
+  });
+  describe('#create', () => {
     const newSettings = {newOnly: 'foo', overrided: 'newOverrided'};
     const newEnvOptions = {newOnlyEnv: 'bar', overridedEnv: 'newOverridedEnv'};
     const originalEnvOptions = {
@@ -125,19 +147,19 @@ describe('run-result', () => {
       originalOnly: 'originalOnly',
       overrided: 'originalOverrided'
     };
-    const fs = {};
+    const memFs = {};
     let cwd;
     const oldCwd = {};
     let runContext;
     before(() => {
       cwd = process.cwd();
       runContext = new RunResult({
-        fs,
+        memFs,
         cwd,
         oldCwd,
         envOptions: originalEnvOptions,
         settings: originalSetting
-      }).createContext('foo', newSettings, newEnvOptions);
+      }).create('foo', newSettings, newEnvOptions);
     });
     it('returns a RunContext instance', () => {
       assert.ok(runContext instanceof RunContext);
@@ -160,8 +182,8 @@ describe('run-result', () => {
     it('forwards oldCwd from the original RunResult', () => {
       assert.equal(runContext.oldCwd, oldCwd);
     });
-    it('forwards fs from the original RunResult to new envOptions', () => {
-      assert.equal(runContext.envOptions.fs, fs);
+    it('forwards memFs from the original RunResult to new envOptions', () => {
+      assert.equal(runContext.envOptions.memFs, memFs);
     });
     it('prefers settings passed to the method', () => {
       assert.equal(runContext.settings.overrided, 'newOverrided');

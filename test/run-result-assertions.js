@@ -1,26 +1,37 @@
-/* eslint-disable max-nested-callbacks */
 'use strict';
 const path = require('path');
 const assert = require('assert');
-const memFsEditor = require('mem-fs-editor');
-const memFs = require('mem-fs');
+const MemFs = require('mem-fs');
 
 const RunResult = require('../lib/run-result');
 
 describe('run-result-assertions', () => {
-  const sharedFs = memFs.create();
-  const fs = memFsEditor.create(sharedFs);
+  const memFs = MemFs.create();
 
   [
-    {description: 'using memory fs', fs},
-    {description: 'using node fs'}
+    {
+      description: 'using memory fs',
+      options: {memFs},
+      verify: (runResult) => {
+        assert(runResult.fs);
+      }
+    },
+    {
+      description: 'using node fs',
+      verify: (runResult) => {
+        assert(!runResult.fs);
+      }
+    }
   ].forEach((testFs) => {
     const yoAssert = new RunResult({
-      fs: testFs.fs,
+      ...testFs.options,
       cwd: path.join(__dirname, 'fixtures/assert')
     });
 
     describe(testFs.description, () => {
+      it('fs is correct', () => {
+        testFs.verify(yoAssert);
+      });
       describe('.assertFile()', () => {
         it('accept a file that exists', () => {
           assert.doesNotThrow(yoAssert.assertFile.bind(yoAssert, 'testFile'));
