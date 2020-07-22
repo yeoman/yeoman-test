@@ -1,4 +1,9 @@
-# yeoman-test [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url] [![Coverage percentage][coveralls-image]][coveralls-url]
+# yeoman-test
+[![NPM version][npm-image]][npm-url]
+[![NPM Test](https://github.com/yeoman/yeoman-test/workflows/NPM%20Test/badge.svg)](https://github.com/yeoman/yeoman-test/actions?query=workflow%3A%22NPM+Test%22)
+[![Integration Build](https://github.com/yeoman/yeoman-test/workflows/Integration%20Build/badge.svg)](https://github.com/yeoman/yeoman-test/actions?query=workflow%3A%22Integration+Build%22)
+[![Dependency Status][daviddm-image]][daviddm-url]
+[![Coverage percentage][coveralls-image]][coveralls-url]
 > Test utilities for Yeoman generators
 
 ## Installation
