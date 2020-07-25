@@ -168,14 +168,16 @@ describe('yeoman-test', function () {
         });
     });
 
-    // Disabled due to https://github.com/SBoudrias/Inquirer.js/pull/947
-    it.skip('throws if answer is not provided', function () {
+    it('throws if answer is not provided', function () {
       const generator = env.instantiate(helpers.createDummyGenerator());
       helpers.mockPrompt(generator, {foo: 1}, {throwOnMissingAnswer: true});
       return this.generator.prompt([{message: 'bar', name: 'notFound'}]).then(
         () => assert.fail(),
         (error) => {
-          assert.equal(error.message, 'Answer for notFound was not provided');
+          assert.equal(
+            error.message,
+            'yeoman-test: question notFound was asked but answer was not provided'
+          );
         }
       );
     });

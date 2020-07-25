@@ -29,7 +29,7 @@
     "xo": "^0.32.1"
   },
   "dependencies": {
-    "inquirer": "^7.3.2",
+    "inquirer": "^7.3.3",
     "lodash": "^4.17.19",
     "sinon": "^9.0.2",
     "yeoman-environment": "^2.10.3",
