@@ -1,25 +1,25 @@
 /* eslint-disable max-nested-callbacks */
 'use strict';
-var assert = require('assert');
-var path = require('path');
+const assert = require('assert');
+const path = require('path');
 
-var helpers = require('../lib');
-var RunContext = require('../lib/run-context');
-var RunResult = require('../lib/run-result');
+const helpers = require('../lib');
+const RunContext = require('../lib/run-context');
+const RunResult = require('../lib/run-result');
 const SimpleApp = require('./fixtures/generator-simple/app');
 
-describe('RunContext running environment', function() {
-  const defaultEnvOptions = { foo: 'bar' };
+describe('RunContext running environment', function () {
+  const defaultEnvOptions = {foo: 'bar'};
   const defaultRunContextOptions = {};
 
   let gen;
-  let ctxOptions = {};
+  const ctxOptions = {};
   let ctx;
-  let envOptions = {};
+  const envOptions = {};
   let build = true;
   let lookups = [];
 
-  beforeEach(function() {
+  beforeEach(function () {
     process.chdir(__dirname);
 
     if (!gen) {
@@ -29,8 +29,8 @@ describe('RunContext running environment', function() {
     ctx = helpers
       .create(
         gen,
-        { ...defaultRunContextOptions, ...ctxOptions },
-        { ...defaultEnvOptions, envOptions }
+        {...defaultRunContextOptions, ...ctxOptions},
+        {...defaultEnvOptions, envOptions}
       )
       .withLookups(lookups);
     if (build) {
@@ -38,7 +38,7 @@ describe('RunContext running environment', function() {
     }
   });
 
-  afterEach(function() {
+  afterEach(function () {
     process.chdir(__dirname);
     ctx.cleanTestDirectory();
   });
@@ -60,7 +60,7 @@ describe('RunContext running environment', function() {
     });
 
     it('promises a RunResult', () => {
-      return ctx.run().then(runResult => {
+      return ctx.run().then((runResult) => {
         assert(runResult instanceof RunResult);
       });
     });
@@ -122,7 +122,7 @@ describe('RunContext running environment', function() {
 
   describe('with lookups with packagePaths', () => {
     before(() => {
-      lookups = { packagePaths: path.resolve('./fixtures/generator-simple') };
+      lookups = {packagePaths: path.resolve('./fixtures/generator-simple')};
       gen = 'simple:app';
     });
     after(() => {
@@ -145,7 +145,7 @@ describe('RunContext running environment', function() {
 
   describe('with lookups with npmPaths', () => {
     before(() => {
-      lookups = [{ npmPaths: path.resolve('./fixtures/') }];
+      lookups = [{npmPaths: path.resolve('./fixtures/')}];
     });
     after(() => {
       lookups = [];
@@ -183,7 +183,7 @@ describe('RunContext running environment', function() {
       it('rejects with the error', () => {
         return ctx.run().then(
           () => assert.fail(),
-          error => assert(/throwing error/.test(error.message))
+          (error) => assert(/throwing error/.test(error.message))
         );
       });
     });
@@ -213,7 +213,7 @@ describe('RunContext running environment', function() {
           .run()
           .then(
             () => assert.fail(),
-            error => assert(/throwing error/.test(error.message))
+            (error) => assert(/throwing error/.test(error.message))
           );
       });
     });

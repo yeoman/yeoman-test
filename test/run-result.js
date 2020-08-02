@@ -1,438 +1,195 @@
 /* eslint-disable max-nested-callbacks */
 'use strict';
-const path = require('path');
 const assert = require('assert');
-const memFsEditor = require('mem-fs-editor');
-const memFs = require('mem-fs');
+const fs = require('fs');
+const MemFs = require('mem-fs');
+const MemFsEditor = require('mem-fs-editor');
+const path = require('path');
+const sinon = require('sinon');
 
+const RunContext = require('../lib/run-context');
 const RunResult = require('../lib/run-result');
 
-describe('test-result', () => {
-  const sharedFs = memFs.create();
-  const fs = memFsEditor.create(sharedFs);
-
-  [{ description: 'using memory fs', fs }, { description: 'using node fs' }].forEach(
-    testFs => {
-      const yoAssert = new RunResult({
-        fs: testFs.fs,
-        cwd: path.join(__dirname, 'fixtures/assert')
+describe('run-result', () => {
+  describe('constructor', () => {
+    describe('without options', () => {
+      it('uses current cwd', () => {
+        assert.equal(new RunResult().cwd, process.cwd());
       });
-
-      describe(testFs.description, () => {
-        describe('.assertFile()', () => {
-          it('accept a file that exists', () => {
-            assert.doesNotThrow(yoAssert.assertFile.bind(yoAssert, 'testFile'));
-          });
-
-          it('accept an array of files all of which exist', () => {
-            assert.doesNotThrow(
-              yoAssert.assertFile.bind(yoAssert, ['testFile', 'testFile2'])
-            );
-          });
-
-          it('reject a file that does not exist', () => {
-            assert.throws(yoAssert.assertFile.bind(yoAssert, 'etherealTestFile'));
-          });
-
-          it('reject multiple files one of which does not exist', () => {
-            assert.throws(
-              yoAssert.assertFile.bind(yoAssert, ['testFile', 'intangibleTestFile'])
-            );
-          });
+    });
+    describe('with fs option', () => {
+      it('throws error without cwd', () => {
+        assert.throws(() => new RunResult({memFs: {}}));
+      });
+    });
+    describe('with fs and cwd options', () => {
+      const memFs = {};
+      const cwd = {};
+      const options = {memFs, cwd};
+      let runResult;
+      before(() => {
+        runResult = new RunResult(options);
+      });
+      it('loads memFs option', () => {
+        assert.equal(runResult.memFs, memFs);
+      });
+      it('loads cwd option', () => {
+        assert.equal(runResult.cwd, cwd);
+      });
+    });
+    ['env', 'oldCwd', 'cwd'].forEach((optionName) => {
+      describe(`with ${optionName} option`, () => {
+        const optionValue = {};
+        const options = {};
+        let runResult;
+        before(() => {
+          options[optionName] = optionValue;
+          runResult = new RunResult(options);
         });
-
-        describe('.assertNoFile()', () => {
-          it('accept a file that does not exist', () => {
-            assert.doesNotThrow(yoAssert.assertNoFile.bind(yoAssert, 'etherealTestFile'));
-          });
-
-          it('accept an array of files all of which do not exist', () => {
-            assert.doesNotThrow(
-              yoAssert.assertNoFile.bind(yoAssert, [
-                'etherealTestFile',
-                'intangibleTestFile'
-              ])
-            );
-          });
-
-          it('reject a file that exists', () => {
-            assert.throws(yoAssert.assertNoFile.bind(yoAssert, 'testFile'));
-          });
-
-          it('reject an array of files one of which exists', () => {
-            assert.throws(
-              yoAssert.assertNoFile.bind(yoAssert, ['testFile', 'etherealTestFile'])
-            );
-          });
+        it('loads it', () => {
+          assert.equal(runResult[optionName], optionValue);
         });
-
-        describe('.assertFileContent()', () => {
-          it('accept a file and regex when the file content matches the regex', () => {
-            assert.doesNotThrow(
-              yoAssert.assertFileContent.bind(yoAssert, 'testFile', /Roses are red/)
-            );
-          });
-
-          it('accept a file and string when the file contains the string', () => {
-            assert.doesNotThrow(
-              yoAssert.assertFileContent.bind(yoAssert, 'testFile', 'Roses are red')
-            );
-          });
-
-          it('reject a file and regex when the file content does not match the regex', () => {
-            assert.throws(
-              yoAssert.assertFileContent.bind(yoAssert, 'testFile', /Roses are blue/)
-            );
-          });
-
-          it('reject a file and string when the file content does not contain the string', () => {
-            assert.throws(
-              yoAssert.assertFileContent.bind(yoAssert, 'testFile', 'Roses are blue')
-            );
-          });
-
-          it("accept an array of file/regex pairs when each file's content matches the corresponding regex", () => {
-            const arg = [
-              ['testFile', /Roses are red/],
-              ['testFile2', /Violets are blue/]
-            ];
-            assert.doesNotThrow(yoAssert.assertFileContent.bind(yoAssert, arg));
-          });
-
-          it("reject an array of file/regex pairs when one file's content does not matches the corresponding regex", () => {
-            const arg = [
-              ['testFile', /Roses are red/],
-              ['testFile2', /Violets are orange/]
-            ];
-            assert.throws(yoAssert.assertFileContent.bind(yoAssert, arg));
-          });
-        });
-
-        describe('.assertEqualsFileContent()', () => {
-          it('accept a file and string when the file content equals the string', () => {
-            assert.doesNotThrow(
-              yoAssert.assertEqualsFileContent.bind(
-                yoAssert,
-                'testFile',
-                'Roses are red.\n'
-              )
-            );
-          });
-
-          it('reject a file and string when the file content does not equal the string', () => {
-            assert.throws(
-              yoAssert.assertEqualsFileContent.bind(yoAssert, 'testFile', 'Roses are red')
-            );
-          });
-
-          it("accept an array of file/string pairs when each file's content equals the corresponding string", () => {
-            const arg = [
-              ['testFile', 'Roses are red.\n'],
-              ['testFile2', 'Violets are blue.\n']
-            ];
-            assert.doesNotThrow(yoAssert.assertEqualsFileContent.bind(yoAssert, arg));
-          });
-
-          it("reject an array of file/string pairs when one file's content does not equal the corresponding string", () => {
-            const arg = [
-              ['testFile', 'Roses are red.\n'],
-              ['testFile2', 'Violets are green.\n']
-            ];
-            assert.throws(yoAssert.assertEqualsFileContent.bind(yoAssert, arg));
-          });
-        });
-
-        describe('.assertNoFileContent()', () => {
-          it('accept a file and regex when the file content does not match the regex', () => {
-            assert.doesNotThrow(
-              yoAssert.assertNoFileContent.bind(yoAssert, 'testFile', /Roses are blue/)
-            );
-          });
-
-          it('accept a file and string when the file content does not contain the string', () => {
-            assert.doesNotThrow(
-              yoAssert.assertNoFileContent.bind(yoAssert, 'testFile', 'Roses are blue')
-            );
-          });
-
-          it('reject a file and regex when the file content matches the regex', () => {
-            assert.throws(
-              yoAssert.assertNoFileContent.bind(yoAssert, 'testFile', /Roses are red/)
-            );
-          });
-
-          it('reject a file and string when the file content contain the string', () => {
-            assert.throws(
-              yoAssert.assertNoFileContent.bind(yoAssert, 'testFile', 'Roses are red')
-            );
-          });
-
-          it("accept an array of file/regex pairs when each file's content does not match its corresponding regex", () => {
-            const arg = [
-              ['testFile', /Roses are green/],
-              ['testFile2', /Violets are orange/]
-            ];
-            assert.doesNotThrow(yoAssert.assertNoFileContent.bind(yoAssert, arg));
-          });
-
-          it("reject an array of file/regex pairs when one file's content does matches its corresponding regex", () => {
-            const arg = [
-              ['testFile', /Roses are red/],
-              ['testFile2', /Violets are orange/]
-            ];
-            assert.throws(yoAssert.assertNoFileContent.bind(yoAssert, arg));
-          });
-        });
-
-        describe('.assertTextEqual()', () => {
-          it('pass with two similar simple lines', () => {
-            assert.doesNotThrow(
-              yoAssert.assertTextEqual.bind(
-                yoAssert,
-                'I have a yellow cat',
-                'I have a yellow cat'
-              )
-            );
-          });
-
-          it('fails with two different simple lines', () => {
-            assert.throws(
-              yoAssert.assertTextEqual.bind(
-                yoAssert,
-                'I have a yellow cat',
-                'I have a brown cat'
-              )
-            );
-          });
-
-          it('pass with two similar simple lines with different new line types', () => {
-            assert.doesNotThrow(
-              yoAssert.assertTextEqual.bind(
-                yoAssert,
-                'I have a\nyellow cat',
-                'I have a\r\nyellow cat'
-              )
-            );
-          });
-        });
-
-        describe('.assertObjectContent()', () => {
-          it('pass if object contains the keys', () => {
-            assert.doesNotThrow(
-              yoAssert.assertObjectContent.bind(
-                yoAssert,
-                {
-                  a: 'foo'
-                },
-                {
-                  a: 'foo'
-                }
-              )
-            );
-          });
-
-          it('pass if object contains nested objects and arrays', () => {
-            assert.doesNotThrow(
-              yoAssert.assertObjectContent.bind(
-                yoAssert,
-                {
-                  a: { b: 'foo' },
-                  b: [0, 'a'],
-                  c: 'a'
-                },
-                {
-                  a: { b: 'foo' },
-                  b: [0, 'a']
-                }
-              )
-            );
-          });
-
-          it('pass if array is incomplete', () => {
-            assert.doesNotThrow(
-              yoAssert.assertObjectContent.bind(
-                yoAssert,
-                {
-                  b: [0, 'a']
-                },
-                {
-                  b: [0]
-                }
-              )
-            );
-          });
-
-          it('fails if object does not contain a key', () => {
-            assert.throws(
-              yoAssert.assertObjectContent.bind(
-                yoAssert,
-                {},
-                {
-                  a: 'foo'
-                }
-              )
-            );
-          });
-
-          it('fails if nested object does not contain a key', () => {
-            assert.throws(
-              yoAssert.assertObjectContent.bind(
-                yoAssert,
-                {
-                  a: {}
-                },
-                {
-                  a: { b: 'foo' }
-                }
-              )
-            );
-          });
-        });
-
-        describe('.assertNoObjectContent()', () => {
-          it('fails if object contains the keys', () => {
-            assert.throws(
-              yoAssert.assertNoObjectContent.bind(
-                yoAssert,
-                {
-                  a: 'foo'
-                },
-                {
-                  a: 'foo'
-                }
-              )
-            );
-          });
-
-          it('pass if object contains nested objects and arrays', () => {
-            assert.throws(
-              yoAssert.assertNoObjectContent.bind(
-                yoAssert,
-                {
-                  a: { b: 'foo' },
-                  b: [0, 'a'],
-                  c: 'a'
-                },
-                {
-                  a: { b: 'foo' },
-                  b: [0, 'a']
-                }
-              )
-            );
-          });
-
-          it('pass if array is incomplete', () => {
-            assert.throws(
-              yoAssert.assertNoObjectContent.bind(
-                yoAssert,
-                {
-                  b: [0, 'a']
-                },
-                {
-                  b: [0]
-                }
-              )
-            );
-          });
-
-          it('pass if object does not contain a key', () => {
-            assert.doesNotThrow(
-              yoAssert.assertNoObjectContent.bind(
-                yoAssert,
-                {},
-                {
-                  a: 'foo'
-                }
-              )
-            );
-          });
-
-          it('pass if nested object does not contain a key', () => {
-            assert.doesNotThrow(
-              yoAssert.assertNoObjectContent.bind(
-                yoAssert,
-                {
-                  a: {}
-                },
-                {
-                  a: { b: 'foo' }
-                }
-              )
-            );
-          });
-        });
-
-        describe('.assertJsonFileContent()', () => {
-          const file = path.join(__dirname, 'fixtures/assert/dummy.json');
-
-          it('pass if file contains the keys', () => {
-            assert.doesNotThrow(
-              yoAssert.assertJsonFileContent.bind(yoAssert, file, {
-                a: { b: 1 },
-                b: [1, 2],
-                d: null
-              })
-            );
-          });
-
-          it('fails if file does not contain the keys', () => {
-            assert.throws(
-              yoAssert.assertJsonFileContent.bind(yoAssert, file, {
-                a: { b: 1 },
-                b: 'a'
-              })
-            );
-
-            assert.throws(
-              yoAssert.assertJsonFileContent.bind(yoAssert, file, {
-                a: { b: 3 },
-                b: [1]
-              })
-            );
-          });
-
-          it('fails if file does not exists', () => {
-            assert.throws(
-              yoAssert.assertJsonFileContent.bind(yoAssert, 'does-not-exist', {})
-            );
-          });
-        });
-
-        describe('.assertNoJsonFileContent()', () => {
-          const file = path.join(__dirname, 'fixtures/assert/dummy.json');
-
-          it('.assertNoJson', () => {
-            assert.throws(
-              yoAssert.assertNoJsonFileContent.bind(yoAssert, file, {
-                a: { b: 1 },
-                b: [1, 2]
-              })
-            );
-          });
-
-          it('pass if file does not contain the keys', () => {
-            assert.doesNotThrow(
-              yoAssert.assertNoJsonFileContent.bind(yoAssert, file, {
-                c: { b: 1 },
-                b: 'a'
-              })
-            );
-
-            assert.doesNotThrow(
-              yoAssert.assertNoJsonFileContent.bind(yoAssert, file, {
-                a: { b: 3 },
-                b: [2]
-              })
-            );
-          });
-
-          it('fails if file does not exists', () => {
-            assert.throws(
-              yoAssert.assertNoJsonFileContent.bind(yoAssert, 'does-not-exist', {})
-            );
-          });
+        it('loads options option', () => {
+          assert.equal(runResult.options, options);
         });
       });
-    }
-  );
+    });
+  });
+  describe('#dumpFiles', () => {
+    let runResult;
+    let consoleMock;
+    beforeEach(() => {
+      const memFs = MemFs.create();
+      const memFsEditor = MemFsEditor.create(memFs);
+      runResult = new RunResult({
+        memFs,
+        fs: memFsEditor,
+        cwd: process.cwd()
+      });
+      consoleMock = sinon.stub(console, 'log');
+      runResult.fs.write(path.resolve('test.txt'), 'test content');
+      runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
+    });
+    afterEach(() => {
+      consoleMock.restore();
+    });
+    it('dumps every file without an argument', () => {
+      runResult.dumpFiles();
+      assert.equal(consoleMock.callCount, 4);
+      assert.equal(consoleMock.getCall(0).args[0], path.resolve('test.txt'));
+      assert.equal(consoleMock.getCall(1).args[0], 'test content');
+      assert.equal(consoleMock.getCall(2).args[0], path.resolve('test2.txt'));
+      assert.equal(consoleMock.getCall(3).args[0], 'test2 content');
+    });
+    it('dumps a file with an argument', () => {
+      runResult.dumpFiles(path.resolve('test.txt'));
+      assert.equal(consoleMock.callCount, 1);
+      assert.equal(consoleMock.getCall(0).args[0], 'test content');
+      runResult.dumpFiles(path.resolve('test2.txt'));
+      assert.equal(consoleMock.callCount, 2);
+      assert.equal(consoleMock.getCall(1).args[0], 'test2 content');
+    });
+  });
+  describe('#dumpFilenames', () => {
+    let runResult;
+    let consoleMock;
+    beforeEach(() => {
+      const memFs = MemFs.create();
+      const memFsEditor = MemFsEditor.create(memFs);
+      runResult = new RunResult({
+        memFs,
+        fs: memFsEditor,
+        cwd: process.cwd()
+      });
+      consoleMock = sinon.stub(console, 'log');
+      runResult.fs.write(path.resolve('test.txt'), 'test content');
+      runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
+    });
+    afterEach(() => {
+      consoleMock.restore();
+    });
+    it('dumps every filename', () => {
+      runResult.dumpFilenames();
+      assert.equal(consoleMock.callCount, 2);
+      assert.equal(consoleMock.getCall(0).args[0], path.resolve('test.txt'));
+      assert.equal(consoleMock.getCall(1).args[0], path.resolve('test2.txt'));
+    });
+  });
+  describe('#cleanup', () => {
+    let cwd;
+    let runResult;
+    beforeEach(() => {
+      cwd = path.join(process.cwd(), 'fixtures', 'tmp');
+      if (!fs.existsSync(cwd)) {
+        fs.mkdirSync(cwd);
+      }
+
+      runResult = new RunResult({
+        cwd,
+        oldCwd: path.join(process.cwd(), 'fixtures')
+      });
+    });
+    afterEach(() => {});
+    it('removes cwd', () => {
+      assert.ok(fs.existsSync(runResult.cwd));
+      runResult.cleanup();
+      assert.ok(!fs.existsSync(runResult.cwd));
+    });
+  });
+  describe('#create', () => {
+    const newSettings = {newOnly: 'foo', overrided: 'newOverrided'};
+    const newEnvOptions = {newOnlyEnv: 'bar', overridedEnv: 'newOverridedEnv'};
+    const originalEnvOptions = {
+      originalOnlyEnv: 'originalOnlyEnv',
+      overridedEnv: 'originalOverridedEnv'
+    };
+    const originalSetting = {
+      originalOnly: 'originalOnly',
+      overrided: 'originalOverrided'
+    };
+    const memFs = {};
+    let cwd;
+    const oldCwd = {};
+    let runContext;
+    before(() => {
+      cwd = process.cwd();
+      runContext = new RunResult({
+        memFs,
+        cwd,
+        oldCwd,
+        envOptions: originalEnvOptions,
+        settings: originalSetting
+      }).create('foo', newSettings, newEnvOptions);
+    });
+    it('returns a RunContext instance', () => {
+      assert.ok(runContext instanceof RunContext);
+    });
+    it('forwards settings options', () => {
+      assert.equal(runContext.settings.newOnly, 'foo');
+    });
+    it('forwards envOptions options', () => {
+      assert.equal(runContext.envOptions.newOnlyEnv, 'bar');
+    });
+    it('forwards settings from the original RunResult', () => {
+      assert.equal(runContext.settings.originalOnly, 'originalOnly');
+    });
+    it('forwards envOptions from the original RunResult', () => {
+      assert.equal(runContext.envOptions.originalOnlyEnv, 'originalOnlyEnv');
+    });
+    it('forwards cwd from the original RunResult', () => {
+      assert.equal(runContext.targetDirectory, cwd);
+    });
+    it('forwards oldCwd from the original RunResult', () => {
+      assert.equal(runContext.oldCwd, oldCwd);
+    });
+    it('forwards memFs from the original RunResult to new envOptions', () => {
+      assert.equal(runContext.envOptions.memFs, memFs);
+    });
+    it('prefers settings passed to the method', () => {
+      assert.equal(runContext.settings.overrided, 'newOverrided');
+    });
+    it('prefers envOptions passed to the method', () => {
+      assert.equal(runContext.envOptions.overridedEnv, 'newOverridedEnv');
+    });
+  });
 });
