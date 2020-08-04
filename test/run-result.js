@@ -37,7 +37,7 @@ describe('run-result', () => {
         assert.equal(runResult.cwd, cwd);
       });
     });
-    ['env', 'oldCwd', 'cwd'].forEach((optionName) => {
+    ['env', 'oldCwd', 'cwd', 'mockedGenerators'].forEach((optionName) => {
       describe(`with ${optionName} option`, () => {
         const optionValue = {};
         const options = {};

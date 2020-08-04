@@ -735,6 +735,19 @@ describe('RunContext', function () {
     });
   });
 
+  describe('#withMockedGenerators()', function () {
+    it('creates mocked generator', function (done) {
+      this.ctx.withMockedGenerators(['foo:bar']).on(
+        'ready',
+        function () {
+          assert(this.ctx.env.get('foo:bar'));
+          assert(this.ctx.mockedGenerators['foo:bar']);
+          done();
+        }.bind(this)
+      );
+    });
+  });
+
   describe('#withGenerators()', function () {
     it('register paths', function (done) {
       this.ctx
@@ -804,6 +817,30 @@ describe('RunContext', function () {
           function () {
             assert.equal(this.ctx.generator.config.get('some'), true);
             assert.equal(this.ctx.generator.config.get('data'), 'here');
+            done();
+          }.bind(this)
+        );
+    });
+  });
+
+  describe('#_createRunResultOptions()', function () {
+    it('creates RunResult configuration', function (done) {
+      this.ctx
+        .withLocalConfig({
+          some: true,
+          data: 'here'
+        })
+        .on(
+          'ready',
+          function () {
+            const options = this.ctx._createRunResultOptions();
+            assert.equal(options.env, this.ctx.env);
+            assert.equal(options.memFs, this.ctx.env.sharedFs);
+            assert.equal(options.oldCwd, this.ctx.oldCwd);
+            assert.equal(options.cwd, this.ctx.targetDirectory);
+            assert.equal(options.envOptions, this.ctx.envOptions);
+            assert.equal(options.mockedGenerators, this.ctx.mockedGenerators);
+            assert.deepEqual(options.settings, this.ctx.settings);
             done();
           }.bind(this)
         );
