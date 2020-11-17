@@ -215,51 +215,11 @@ describe('RunContext', function () {
   });
 
   describe('error handling', function () {
-    function removeListeners(host, handlerName) {
-      if (!host) {
-        return;
-      }
-
-      // Store the original handlers for the host
-      const originalHandlers = host.listeners(handlerName);
-      // Remove the current handlers for the host
-      host.removeAllListeners(handlerName);
-      return originalHandlers;
-    }
-
-    function setListeners(host, handlerName, handlers) {
-      if (!host) {
-        return;
-      }
-
-      handlers.forEach((handler) => host.on(handlerName, handler));
-    }
-
-    function processError(host, handlerName, cb) {
-      if (!host) {
-        return;
-      }
-
-      host.once(handlerName, cb);
-    }
-
-    beforeEach(function () {
-      this.originalHandlersProcess = removeListeners(
-        process,
-        'uncaughtException'
-      );
-      this.originalHandlersProcessDomain = removeListeners(
-        process.domain,
-        'error'
-      );
+    afterEach(() => {
+      process.removeAllListeners('unhandledRejection');
     });
 
-    afterEach(function () {
-      setListeners(process, 'uncaughtException', this.originalHandlersProcess);
-      setListeners(process.domain, 'error', this.originalHandlersProcessDomain);
-    });
-
-    it('throw an error when no listener is present', function (done) {
+    it('throw an unhandledRejection when no listener is present', function (done) {
       const error = new Error('dummy exception');
       const execSpy = sinon.stub().throws(error);
       const errorHandler = function (err) {
@@ -268,12 +228,7 @@ describe('RunContext', function () {
         done();
       };
 
-      // Tests can be run via 2 commands : 'gulp test' or 'mocha'
-      // in 'mocha' case the error has to be caught using process.on('uncaughtException')
-      // in 'gulp' case the error has to be caught using process.domain.on('error')
-      // as we don't know in which case we are, we set the error handler for both
-      processError(process, 'uncaughtException', errorHandler);
-      processError(process.domain, 'error', errorHandler);
+      process.once('unhandledRejection', errorHandler);
 
       const Dummy = helpers.createDummyGenerator();
       Dummy.prototype.exec = execSpy;
