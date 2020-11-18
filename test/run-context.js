@@ -242,8 +242,8 @@ describe('RunContext', function () {
   describe('#toPromise()', function () {
     it('return a resolved promise with the target directory on success', function () {
       return this.ctx.toPromise().then(
-        function (dir) {
-          assert.equal(this.ctx.targetDirectory, dir);
+        function (runResult) {
+          assert.equal(this.ctx.targetDirectory, runResult.cwd);
         }.bind(this)
       );
     });
@@ -264,8 +264,8 @@ describe('RunContext', function () {
   describe('#then()', function () {
     it('handle success', function () {
       return this.ctx.then(
-        function (dir) {
-          assert.equal(this.ctx.targetDirectory, dir);
+        function (runResult) {
+          assert.equal(this.ctx.targetDirectory, runResult.cwd);
         }.bind(this)
       );
     });
