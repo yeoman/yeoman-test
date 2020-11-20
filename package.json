@@ -22,7 +22,7 @@
     "husky": "^4.2.5",
     "lint-staged": "^10.2.11",
     "mem-fs": "^1.2.0",
-    "mem-fs-editor": "^7.0.1",
+    "mem-fs-editor": "^8.0.0",
     "mocha": "^8.0.1",
     "nyc": "^15.1.0",
     "prettier": "^2.0.5",
