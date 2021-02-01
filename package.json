@@ -44,6 +44,8 @@
     "test": "mocha",
     "pretest": "xo",
     "precommit": "lint-staged",
+    "doc": "jsdoc -c jsdoc.json -d ../yeoman-test-doc",
+    "doc:prettier": "prettier ../yeoman-test-doc --write --ignore-path .prettierignore-doc",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "husky": {
