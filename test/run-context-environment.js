@@ -76,12 +76,6 @@ describe('RunContext running environment', function () {
         assert(ctx.env.options.newErrorHandler);
       });
     });
-
-    it('passes forwardErrorToEnvironment to the generator', () => {
-      return ctx.run().then(() => {
-        assert(ctx.generator.options.forwardErrorToEnvironment);
-      });
-    });
   });
 
   describe('with generator', () => {
