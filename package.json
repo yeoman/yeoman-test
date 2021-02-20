@@ -37,6 +37,10 @@
     "yeoman-environment": "^2.10.3",
     "yeoman-generator": "^4.12.0"
   },
+  "peerDependencies": {
+    "yeoman-environment": "^2.10.3",
+    "yeoman-generator": "^4.12.0"
+  },
   "acceptDependencies": {
     "yeoman-environment": "^3.0.0",
     "yeoman-generator": "^5.0.0"
