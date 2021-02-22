@@ -37,7 +37,7 @@
   },
   "peerDependencies": {
     "yeoman-environment": "^3.0.0 || ^2.10.3",
-    "yeoman-generator": "^5.0.0 || ^4.12.0"
+    "yeoman-generator": "*"
   },
   "scripts": {
     "test": "mocha",
