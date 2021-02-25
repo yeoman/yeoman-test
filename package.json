@@ -26,7 +26,6 @@
     "jsdoc": "^3.6.6",
     "lint-staged": "^10.2.11",
     "mem-fs": "^1.2.0",
-    "mem-fs-editor": "^8.0.0",
     "mocha": "^8.0.1",
     "nyc": "^15.1.0",
     "prettier": "^2.2.1",
@@ -38,6 +37,7 @@
   "dependencies": {
     "inquirer": "^7.3.3",
     "lodash": "^4.17.19",
+    "mem-fs-editor": "^8.0.0",
     "sinon": "^9.0.2"
   },
   "peerDependencies": {
