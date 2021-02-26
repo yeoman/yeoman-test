@@ -20,7 +20,7 @@
   </head>
   <body>
     <nav class="lnb" id="lnb">
-      <div class="logo" style="width: 127px; height: 14px;">
+      <div class="logo" style="width: 127px; height: 14px">
         <img
           src="https://raw.githubusercontent.com/yeoman/yeoman.github.io/source/app/assets/img/logo.png"
           width="100%"
@@ -30,7 +30,7 @@
       <div class="title">
         <h1><a href="index.html" class="link">yeoman-test</a></h1>
 
-        <span class="version">v2.7.0</span>
+        <span class="version">v5.0.1</span>
       </div>
       <div class="search-container" id="search-container">
         <input type="text" placeholder="Search" />
@@ -55,8 +55,16 @@
                   >
                 </li>
                 <li>
+                  <a href="module-test_helpers.html#.createEnv">createEnv</a>
+                </li>
+                <li>
                   <a href="module-test_helpers.html#.createGenerator"
                     >createGenerator</a
+                  >
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.createMockedGenerator"
+                    >createMockedGenerator</a
                   >
                 </li>
                 <li>
@@ -140,17 +148,16 @@
                   <a href="RunContext.html#withLocalConfig">withLocalConfig</a>
                 </li>
                 <li><a href="RunContext.html#withLookups">withLookups</a></li>
+                <li>
+                  <a href="RunContext.html#withMockedGenerators"
+                    >withMockedGenerators</a
+                  >
+                </li>
                 <li><a href="RunContext.html#withOptions">withOptions</a></li>
                 <li><a href="RunContext.html#withPrompts">withPrompts</a></li>
               </ul>
             </div>
           </li>
-        </ul>
-      </div>
-      <div class="lnb-api hidden">
-        <h3>Global</h3>
-        <ul>
-          <li><a href="global.html#callbackWrapper">callbackWrapper</a></li>
         </ul>
       </div>
     </nav>
@@ -159,17 +166,24 @@
     <div class="main" id="main">
       <section>
         <article class="readme">
-          <h1>
-            yeoman-test
+          <h1>yeoman-test</h1>
+          <p>
             <a href="https://npmjs.org/package/yeoman-test"
               ><img
                 src="https://badge.fury.io/js/yeoman-test.svg"
                 alt="NPM version"
             /></a>
-            <a href="https://travis-ci.org/yeoman/yeoman-test"
+            <a
+              href="https://github.com/yeoman/yeoman-test/actions?query=workflow%3A%22NPM+Test%22"
               ><img
-                src="https://travis-ci.org/yeoman/yeoman-test.svg?branch=master"
-                alt="Build Status"
+                src="https://github.com/yeoman/yeoman-test/workflows/NPM%20Test/badge.svg"
+                alt="NPM Test"
+            /></a>
+            <a
+              href="https://github.com/yeoman/yeoman-test/actions?query=workflow%3A%22Integration+Build%22"
+              ><img
+                src="https://github.com/yeoman/yeoman-test/workflows/Integration%20Build/badge.svg"
+                alt="Integration Build"
             /></a>
             <a href="https://david-dm.org/yeoman/yeoman-test"
               ><img
@@ -181,7 +195,7 @@
                 src="https://coveralls.io/repos/yeoman/yeoman-test/badge.svg"
                 alt="Coverage percentage"
             /></a>
-          </h1>
+          </p>
           <blockquote>
             <p>Test utilities for Yeoman generators</p>
           </blockquote>
@@ -190,16 +204,71 @@
             class="prettyprint source lang-sh"
           ><code>$ npm install --save-dev yeoman-test
 </code></pre>
+          <p>Install target environment and generator:</p>
+          <pre
+            class="prettyprint source lang-sh"
+          ><code>$ npm install --save-dev yeoman-generator@xxx yeoman-environment@xxx
+</code></pre>
           <h2>Usage</h2>
-          <p>
-            <a href="http://yeoman.io/authoring/testing.html"
-              >See our documentation</a
-            >
-          </p>
+          <p>Usage:</p>
+          <pre
+            class="prettyprint source"
+          ><code>describe('generator test', () => {
+  describe('test', () => {
+    let runResult;
+    beforeEach(async () => {
+      runResult = await helpers
+        .create(                   // instantiates RunContext
+          'namespace',             // namespace or generator
+          {},                      // test options
+          {}                       // environment options
+        )
+        [.cd(dir)]                  // runs the test inside a non temporary dir
+        [.doInDir(dir => {})        // prepares the test dir
+        [.withGenerators([])]       // registers additional generators
+        [.withLookups({})]          // runs Environment lookups
+        [.withOptions({})]          // passes options to the generator
+        [.withLocalConfig({})]      // sets the generator config as soon as it is instantiated
+        [.withPrompts()]            // simulates the prompt answers
+        [.build(runContext => {     // instantiates Environment/Generator
+          [runContext.env...]       // does something with the environment
+          [runContext.generator...] // does something with the generator
+        })]
+        .run();                     // runs the environment, promises a RunResult
+      [result.create().run()] // instantiates a new RunContext at the same directory
+    );
+    afterEach(() => {
+      if (runResult) {
+        runResult.restore();
+      }
+    });
+    it('runs correctly', () => {
+      // runs assertions using mem-fs.
+      [runResult.assertFile('file.txt');]
+      [runResult.assertNoFile('file.txt');]
+      [runResult.assertFileContent('file.txt', 'content');]
+      [runResult.assertEqualsFileContent('file.txt', 'content');]
+      [runResult.assertNoFileContent('file.txt', 'content');]
+      [runResult.assertJsonFileContent('file.txt', {});]
+      [runResult.assertNoJsonFileContent('file.txt', {});]
+    });
+  });
+});
+</code></pre>
           <p>
             <a href="https://yeoman.github.io/yeoman-test"
               >See our api documentation</a
             >
+            <a href="https://yeoman.github.io/yeoman-test/2.x"
+              >See our api documentation</a
+            >
+            for yeoman-test 2.x.
+          </p>
+          <p>
+            <a href="http://yeoman.io/authoring/testing.html"
+              >See our documentation</a
+            >
+            for yeoman-test 2.x.
           </p>
           <h2>License</h2>
           <p>MIT © <a href="http://yeoman.io">The Yeoman Team</a></p>
@@ -211,7 +280,7 @@
       <img
         class="logo"
         src="https://raw.githubusercontent.com/yeoman/yeoman.github.io/source/app/assets/img/logo.png"
-        style="width: 127px; height: 14px;"
+        style="width: 127px; height: 14px"
       />
       <div class="footer-text">BSD license Copyright (c) Google</div>
     </footer>
