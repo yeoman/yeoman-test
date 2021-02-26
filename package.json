@@ -17,8 +17,8 @@
   "engines": {
     "node": ">=12.10.0"
   },
-  "config" : {
-    "doc_path" : "../yeoman-test-doc"
+  "config": {
+    "doc_path": "../yeoman-test-doc"
   },
   "devDependencies": {
     "coveralls": "^3.1.0",
@@ -45,7 +45,7 @@
     "yeoman-generator": "*"
   },
   "scripts": {
-    "test": "mocha",
+    "test": "nyc mocha",
     "pretest": "xo",
     "precommit": "lint-staged",
     "doc": "npm run doc:generate && npm run doc:fix && npm run doc:prettier",
