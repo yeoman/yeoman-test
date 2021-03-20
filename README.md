@@ -22,7 +22,7 @@ $ npm install --save-dev yeoman-generator@xxx yeoman-environment@xxx
 
 Usage:
 
-```
+```js
 describe('generator test', () => {
   describe('test', () => {
     let runResult;
