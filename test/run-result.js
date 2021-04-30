@@ -115,6 +115,25 @@ describe('run-result', () => {
       assert.equal(consoleMock.getCall(1).args[0], path.resolve('test2.txt'));
     });
   });
+  describe('#getSnapshot', () => {
+    let runResult;
+    beforeEach(() => {
+      const memFs = MemFs.create();
+      const memFsEditor = MemFsEditor.create(memFs);
+      runResult = new RunResult({
+        memFs,
+        fs: memFsEditor,
+        cwd: process.cwd()
+      });
+      runResult.fs.write(path.resolve('test.txt'), 'test content');
+      runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
+    });
+    it('should return every changed file', () => {
+      assert.equal(Object.keys(runResult.getSnapshot()).length, 2);
+      assert(runResult.getSnapshot()['test.txt']);
+      assert(runResult.getSnapshot()['test2.txt']);
+    });
+  });
   describe('#cleanup', () => {
     let cwd;
     let runResult;
