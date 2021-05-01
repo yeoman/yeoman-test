@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Source: run-result.js | yeoman-test</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="styles/prettify-jsdoc.css" />
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="styles/prettify-tomorrow.css"
+    />
+    <link type="text/css" rel="stylesheet" href="styles/tui-doc.css" />
+  </head>
+  <body>
+    <nav class="lnb" id="lnb">
+      <div class="logo" style="width: 127px; height: 14px">
+        <img
+          src="https://raw.githubusercontent.com/yeoman/yeoman.github.io/source/app/assets/img/logo.png"
+          width="100%"
+          height="100%"
+        />
+      </div>
+      <div class="title">
+        <h1><a href="index.html" class="link">yeoman-test</a></h1>
+
+        <span class="version">v5.0.1</span>
+      </div>
+      <div class="search-container" id="search-container">
+        <input type="text" placeholder="Search" />
+        <ul></ul>
+      </div>
+
+      <div class="lnb-api hidden">
+        <h3>Modules</h3>
+        <ul>
+          <li>
+            <a href="module-test_helpers.html">test/helpers</a
+            ><button type="button" class="hidden toggle-subnav btn btn-link">
+              <span class="glyphicon glyphicon-plus"></span>
+            </button>
+            <div class="hidden" id="module:test/helpers_sub">
+              <div class="member-type">Methods</div>
+              <ul class="inner">
+                <li><a href="module-test_helpers.html#.create">create</a></li>
+                <li>
+                  <a href="module-test_helpers.html#.createDummyGenerator"
+                    >createDummyGenerator</a
+                  >
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.createEnv">createEnv</a>
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.createGenerator"
+                    >createGenerator</a
+                  >
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.createMockedGenerator"
+                    >createMockedGenerator</a
+                  >
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.createTestEnv"
+                    >createTestEnv</a
+                  >
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.gruntfile">gruntfile</a>
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.mockLocalConfig"
+                    >mockLocalConfig</a
+                  >
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.mockPrompt">mockPrompt</a>
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.registerDependencies"
+                    >registerDependencies</a
+                  >
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.restorePrompt"
+                    >restorePrompt</a
+                  >
+                </li>
+                <li><a href="module-test_helpers.html#.run">run</a></li>
+                <li>
+                  <a href="module-test_helpers.html#.setUpTestDirectory"
+                    >setUpTestDirectory</a
+                  >
+                </li>
+                <li>
+                  <a href="module-test_helpers.html#.testDirectory"
+                    >testDirectory</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="lnb-api hidden">
+        <h3>Classes</h3>
+        <ul>
+          <li>
+            <a href="RunContext.html">RunContext</a
+            ><button type="button" class="hidden toggle-subnav btn btn-link">
+              <span class="glyphicon glyphicon-plus"></span>
+            </button>
+            <div class="hidden" id="RunContext_sub">
+              <div class="member-type">Methods</div>
+              <ul class="inner">
+                <li><a href="RunContext.html#async">async</a></li>
+                <li><a href="RunContext.html#build">build</a></li>
+                <li><a href="RunContext.html#catch">catch</a></li>
+                <li><a href="RunContext.html#cd">cd</a></li>
+                <li>
+                  <a href="RunContext.html#cleanTestDirectory"
+                    >cleanTestDirectory</a
+                  >
+                </li>
+                <li><a href="RunContext.html#doInDir">doInDir</a></li>
+                <li><a href="RunContext.html#inDir">inDir</a></li>
+                <li><a href="RunContext.html#inTmpDir">inTmpDir</a></li>
+                <li><a href="RunContext.html#run">run</a></li>
+                <li><a href="RunContext.html#then">then</a></li>
+                <li><a href="RunContext.html#toPromise">toPromise</a></li>
+                <li>
+                  <a href="RunContext.html#withArguments">withArguments</a>
+                </li>
+                <li>
+                  <a href="RunContext.html#withEnvironment">withEnvironment</a>
+                </li>
+                <li>
+                  <a href="RunContext.html#withGenerators">withGenerators</a>
+                </li>
+                <li>
+                  <a href="RunContext.html#withLocalConfig">withLocalConfig</a>
+                </li>
+                <li><a href="RunContext.html#withLookups">withLookups</a></li>
+                <li>
+                  <a href="RunContext.html#withMockedGenerators"
+                    >withMockedGenerators</a
+                  >
+                </li>
+                <li><a href="RunContext.html#withOptions">withOptions</a></li>
+                <li><a href="RunContext.html#withPrompts">withPrompts</a></li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div id="resizer"></div>
+
+    <div class="main" id="main">
+      <section>
+        <article>
+          <pre class="prettyprint source linenums"><code>'use strict';
+const assert = require('assert');
+const fs = require('fs');
+const MemFsEditor = require('mem-fs-editor');
+const path = require('path');
+
+const helpers = require('.');
+
+const isObject = (object) =>
+  typeof object === 'object' &amp;&amp; object !== null &amp;&amp; object !== undefined;
+
+function convertArgs(args) {
+  if (args.length > 1) {
+    return [[...args]];
+  }
+
+  const arg = args[0];
+  return Array.isArray(arg) ? arg : [arg];
+}
+
+module.exports = class RunResult {
+  constructor(options = {cwd: process.cwd()}) {
+    this.env = options.env;
+    this.cwd = options.cwd;
+    this.oldCwd = options.oldCwd;
+    this.memFs = options.memFs;
+    this.fs = this.memFs &amp;&amp; MemFsEditor.create(this.memFs);
+    this.mockedGenerators = options.mockedGenerators || {};
+    this.options = options;
+    if (this.memFs &amp;&amp; !this.cwd) {
+      throw new Error('CWD option is required for mem-fs tests');
+    }
+  }
+
+  /**
+   * Create another RunContext reusing the settings.
+   * See helpers.create api
+   */
+  create(GeneratorOrNamespace, settings, envOptions) {
+    return helpers.create(
+      GeneratorOrNamespace,
+      {
+        ...this.options.settings,
+        cwd: this.cwd,
+        oldCwd: this.oldCwd,
+        ...settings
+      },
+      {...this.options.envOptions, memFs: this.memFs, ...envOptions}
+    );
+  }
+
+  /**
+   * Prints files names and contents from mem-fs
+   * @param {...string} files - Files to print or empty for entire mem-fs
+   * @returns {RunResult} this
+   */
+  dumpFiles(...files) {
+    if (files.length === 0) {
+      this.memFs.each((file) => {
+        console.log(file.path);
+        if (file.contents) {
+          console.log(file.contents.toString('utf8'));
+        }
+      });
+      return this;
+    }
+
+    files.forEach((file) => {
+      console.log(this.fs.read(this._fileName(file)));
+    });
+    return this;
+  }
+
+  /**
+   * Prints every file from mem-fs
+   * @returns {RunResult} this
+   */
+  dumpFilenames() {
+    this.memFs.each((file) => {
+      console.log(file.path);
+    });
+    return this;
+  }
+
+  /**
+   * Reverts to old cwd.
+   * @returns {RunResult} this
+   */
+  restore() {
+    process.chdir(this.oldCwd);
+    return this;
+  }
+
+  /**
+   * Deletes the test directory recursively.
+   * @returns {RunResult} this
+   */
+  cleanup() {
+    process.chdir(this.oldCwd);
+    fs.rmdirSync(this.cwd, {recursive: true});
+    return this;
+  }
+
+  _fileName(filename) {
+    if (path.isAbsolute(filename)) {
+      return filename;
+    }
+
+    return path.join(this.cwd, filename);
+  }
+
+  _readFile(filename, json) {
+    filename = this._fileName(filename);
+    let file;
+    if (this.fs) {
+      file = this.fs.read(filename, 'utf8');
+    } else {
+      file = fs.readFileSync(filename, 'utf8');
+    }
+
+    return json ? JSON.parse(file) : file;
+  }
+
+  _exists(filename) {
+    filename = this._fileName(filename);
+    if (this.fs) {
+      return this.fs.exists(filename);
+    }
+
+    return fs.existsSync(filename);
+  }
+
+  /**
+   * Assert that a file exists
+   * @param {String}       path     - path to a file
+   * @example
+   * result.assertFile('templates/user.hbs');
+   *
+   * @also
+   *
+   * Assert that each files in the array exists
+   * @param {Array}         paths    - an array of paths to files
+   * @example
+   * result.assertFile(['templates/user.hbs', 'templates/user/edit.hbs']);
+   */
+  assertFile() {
+    convertArgs(arguments).forEach((file) => {
+      const here = this._exists(file);
+      assert.ok(here, `${file}, no such file or directory`);
+    });
+  }
+
+  /**
+   * Assert that a file doesn't exist
+   * @param {String}       file     - path to a file
+   * @example
+   * result.assertNoFile('templates/user.hbs');
+   *
+   * @also
+   *
+   * Assert that each of an array of files doesn't exist
+   * @param {Array}         pairs    - an array of paths to files
+   * @example
+   * result.assertNoFile(['templates/user.hbs', 'templates/user/edit.hbs']);
+   */
+  assertNoFile() {
+    convertArgs(arguments).forEach((file) => {
+      const here = this._exists(file);
+      assert.ok(!here, `${file} exists`);
+    });
+  }
+
+  /**
+   * Assert that a file's content matches a regex or string
+   * @param {String}       file     - path to a file
+   * @param {Regex|String} reg      - regex / string that will be used to search the file
+   * @example
+   * result.assertFileContent('models/user.js', /App\.User = DS\.Model\.extend/);
+   * result.assertFileContent('models/user.js', 'App.User = DS.Model.extend');
+   *
+   * @also
+   *
+   * Assert that each file in an array of file-regex pairs matches its corresponding regex
+   * @param {Array}         pairs    - an array of arrays, where each subarray is a [String, RegExp] pair
+   * @example
+   * var arg = [
+   *   [ 'models/user.js', /App\.User = DS\.Model\.extend/ ],
+   *   [ 'controllers/user.js', /App\.UserController = Ember\.ObjectController\.extend/ ]
+   * ]
+   * result.assertFileContent(arg);
+   */
+
+  assertFileContent() {
+    convertArgs(arguments).forEach((pair) => {
+      const file = pair[0];
+      const regex = pair[1];
+      this.assertFile(file);
+      const body = this._readFile(file);
+
+      let match = false;
+      if (typeof regex === 'string') {
+        match = body.includes(regex);
+      } else {
+        match = regex.test(body);
+      }
+
+      assert(match, `${file} did not match '${regex}'. Contained:\n\n${body}`);
+    });
+  }
+
+  /**
+   * Assert that a file's content is the same as the given string
+   * @param {String}  file            - path to a file
+   * @param {String}  expectedContent - the expected content of the file
+   * @example
+   * result.assertEqualsFileContent(
+   *   'data.js',
+   *   'const greeting = "Hello";\nexport default { greeting }'
+   * );
+   *
+   * @also
+   *
+   * Assert that each file in an array of file-string pairs equals its corresponding string
+   * @param {Array}   pairs           - an array of arrays, where each subarray is a [String, String] pair
+   * @example
+   * result.assertEqualsFileContent([
+   *   ['data.js', 'const greeting = "Hello";\nexport default { greeting }'],
+   *   ['user.js', 'export default {\n  name: 'Coleman',\n  age: 0\n}']
+   * ]);
+   */
+
+  assertEqualsFileContent() {
+    convertArgs(arguments).forEach((pair) => {
+      const file = pair[0];
+      const expectedContent = pair[1];
+      this.assertFile(file);
+      this.assertTextEqual(this._readFile(file), expectedContent);
+    });
+  }
+
+  /**
+   * Assert that a file's content does not match a regex / string
+   * @param {String}       file     - path to a file
+   * @param {Regex|String} reg      - regex / string that will be used to search the file
+   * @example
+   * result.assertNoFileContent('models/user.js', /App\.User = DS\.Model\.extend/);
+   * result.assertNoFileContent('models/user.js', 'App.User = DS.Model.extend');
+   *
+   * @also
+   *
+   * Assert that each file in an array of file-regex pairs does not match its corresponding regex
+   * @param {Array}         pairs    - an array of arrays, where each subarray is a [String, RegExp] pair
+   * var arg = [
+   *   [ 'models/user.js', /App\.User \ DS\.Model\.extend/ ],
+   *   [ 'controllers/user.js', /App\.UserController = Ember\.ObjectController\.extend/ ]
+   * ]
+   * result.assertNoFileContent(arg);
+   */
+
+  assertNoFileContent() {
+    convertArgs(arguments).forEach((pair) => {
+      const file = pair[0];
+      const regex = pair[1];
+      this.assertFile(file);
+      const body = this._readFile(file);
+
+      if (typeof regex === 'string') {
+        assert.ok(!body.includes(regex), `${file} matched '${regex}'.`);
+        return;
+      }
+
+      assert.ok(!regex.test(body), `${file} matched '${regex}'.`);
+    });
+  }
+
+  /**
+   * Assert that two strings are equal after standardization of newlines
+   * @param {String} value    - a string
+   * @param {String} expected - the expected value of the string
+   * @example
+   * result.assertTextEqual('I have a yellow cat', 'I have a yellow cat');
+   */
+
+  assertTextEqual(value, expected) {
+    const eol = (string) => string.replace(/\r\n/g, '\n');
+
+    assert.equal(eol(value), eol(expected));
+  }
+
+  /**
+   * Assert an object contains the provided keys
+   * @param {Object} obj      Object that should match the given pattern
+   * @param {Object} content  An object of key/values the object should contains
+   */
+
+  assertObjectContent(object, content) {
+    Object.keys(content).forEach((key) => {
+      if (isObject(content[key])) {
+        this.assertObjectContent(object[key], content[key]);
+        return;
+      }
+
+      assert.equal(object[key], content[key]);
+    });
+  }
+
+  /**
+   * Assert an object does not contain the provided keys
+   * @param {Object} obj Object that should not match the given pattern
+   * @param {Object} content An object of key/values the object should not contain
+   */
+
+  assertNoObjectContent(object, content) {
+    Object.keys(content).forEach((key) => {
+      if (isObject(content[key])) {
+        this.assertNoObjectContent(object[key], content[key]);
+        return;
+      }
+
+      assert.notEqual(object[key], content[key]);
+    });
+  }
+
+  /**
+   * Assert a JSON file contains the provided keys
+   * @param {String} filename
+   * @param {Object} content An object of key/values the file should contains
+   */
+
+  assertJsonFileContent(filename, content) {
+    this.assertObjectContent(this._readFile(filename, true), content);
+  }
+
+  /**
+   * Assert a JSON file does not contain the provided keys
+   * @param {String} filename
+   * @param {Object} content An object of key/values the file should not contain
+   */
+
+  assertNoJsonFileContent(filename, content) {
+    this.assertNoObjectContent(this._readFile(filename, true), content);
+  }
+};
+</code></pre>
+        </article>
+      </section>
+    </div>
+
+    <footer>
+      <img
+        class="logo"
+        src="https://raw.githubusercontent.com/yeoman/yeoman.github.io/source/app/assets/img/logo.png"
+        style="width: 127px; height: 14px"
+      />
+      <div class="footer-text">BSD license Copyright (c) Google</div>
+    </footer>
+    <script>
+      prettyPrint();
+    </script>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/tui-doc.js"></script>
+    <script src="scripts/linenumber.js"></script>
+
+    <script>
+      var id = "_sub".replace(/"/g, "_");
+      var selectedApi = document.getElementById(id); // do not use jquery selector
+      var $selectedApi = $(selectedApi);
+
+      $selectedApi.removeClass("hidden");
+      $selectedApi
+        .parent()
+        .find(".glyphicon")
+        .removeClass("glyphicon-plus")
+        .addClass("glyphicon-minus");
+      showLnbApi();
+    </script>
+  </body>
+</html>
