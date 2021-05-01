@@ -1,15 +1,17 @@
 'use strict';
-const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
 const sinon = require('sinon');
 const inquirer = require('inquirer');
-const RunContext = require('../lib/run-context');
 const Generator = require('yeoman-generator');
-const tmpdir = path.join(os.tmpdir(), 'yeoman-run-context');
+const tempDirectory = require('temp-dir');
+
+const RunContext = require('../lib/run-context');
 const helpers = require('../lib');
 const {DummyPrompt} = require('../lib/adapter');
+
+const tmpdir = path.join(tempDirectory, 'yeoman-run-context');
 
 describe('RunContext', function () {
   const envOptions = {foo: 'bar'};
@@ -127,7 +129,7 @@ describe('RunContext', function () {
     it('automatically run in a random tmpdir', function (done) {
       this.ctx.on('end', function () {
         assert.notEqual(process.cwd(), __dirname);
-        assert.equal(fs.realpathSync(os.tmpdir()), path.dirname(process.cwd()));
+        assert.equal(tempDirectory, path.dirname(process.cwd()));
         done();
       });
     });
@@ -461,7 +463,7 @@ describe('RunContext', function () {
       const {ctx} = this;
       const cb = sinon.spy(function (dir) {
         assert.equal(this, ctx);
-        assert(dir.includes(os.tmpdir()));
+        assert(dir.includes(tempDirectory));
       });
 
       this.ctx.inTmpDir(cb).on('end', done);
