@@ -31,7 +31,7 @@
     "prettier": "^2.2.1",
     "tui-jsdoc-template": "^1.2.2",
     "xo": "^0.32.1",
-    "yeoman-environment": "^3.0.0",
+    "yeoman-environment": "^3.3.0",
     "yeoman-generator": "^5.0.0"
   },
   "dependencies": {
@@ -43,7 +43,7 @@
   },
   "peerDependencies": {
     "mem-fs": "^2.1.0",
-    "yeoman-environment": "^3.0.0 || ^2.10.3",
+    "yeoman-environment": "^3.3.0",
     "yeoman-generator": "*"
   },
   "scripts": {
