@@ -30,85 +30,13 @@
       <div class="title">
         <h1><a href="index.html" class="link">yeoman-test</a></h1>
 
-        <span class="version">v5.0.1</span>
+        <span class="version">v6.0.0</span>
       </div>
       <div class="search-container" id="search-container">
         <input type="text" placeholder="Search" />
         <ul></ul>
       </div>
 
-      <div class="lnb-api hidden">
-        <h3>Modules</h3>
-        <ul>
-          <li>
-            <a href="module-test_helpers.html">test/helpers</a
-            ><button type="button" class="hidden toggle-subnav btn btn-link">
-              <span class="glyphicon glyphicon-plus"></span>
-            </button>
-            <div class="hidden" id="module:test/helpers_sub">
-              <div class="member-type">Methods</div>
-              <ul class="inner">
-                <li><a href="module-test_helpers.html#.create">create</a></li>
-                <li>
-                  <a href="module-test_helpers.html#.createDummyGenerator"
-                    >createDummyGenerator</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.createEnv">createEnv</a>
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.createGenerator"
-                    >createGenerator</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.createMockedGenerator"
-                    >createMockedGenerator</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.createTestEnv"
-                    >createTestEnv</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.gruntfile">gruntfile</a>
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.mockLocalConfig"
-                    >mockLocalConfig</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.mockPrompt">mockPrompt</a>
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.registerDependencies"
-                    >registerDependencies</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.restorePrompt"
-                    >restorePrompt</a
-                  >
-                </li>
-                <li><a href="module-test_helpers.html#.run">run</a></li>
-                <li>
-                  <a href="module-test_helpers.html#.setUpTestDirectory"
-                    >setUpTestDirectory</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.testDirectory"
-                    >testDirectory</a
-                  >
-                </li>
-              </ul>
-            </div>
-          </li>
-        </ul>
-      </div>
       <div class="lnb-api hidden">
         <h3>Classes</h3>
         <ul>
@@ -129,9 +57,11 @@
                     >cleanTestDirectory</a
                   >
                 </li>
+                <li><a href="RunContext.html#cleanup">cleanup</a></li>
                 <li><a href="RunContext.html#doInDir">doInDir</a></li>
                 <li><a href="RunContext.html#inDir">inDir</a></li>
                 <li><a href="RunContext.html#inTmpDir">inTmpDir</a></li>
+                <li><a href="RunContext.html#restore">restore</a></li>
                 <li><a href="RunContext.html#run">run</a></li>
                 <li><a href="RunContext.html#then">then</a></li>
                 <li><a href="RunContext.html#toPromise">toPromise</a></li>
@@ -158,6 +88,57 @@
               </ul>
             </div>
           </li>
+          <li>
+            <a href="YeomanTest.html">YeomanTest</a
+            ><button type="button" class="hidden toggle-subnav btn btn-link">
+              <span class="glyphicon glyphicon-plus"></span>
+            </button>
+            <div class="hidden" id="YeomanTest_sub">
+              <div class="member-type">Methods</div>
+              <ul class="inner">
+                <li><a href="YeomanTest.html#create">create</a></li>
+                <li>
+                  <a href="YeomanTest.html#createDummyGenerator"
+                    >createDummyGenerator</a
+                  >
+                </li>
+                <li><a href="YeomanTest.html#createEnv">createEnv</a></li>
+                <li>
+                  <a href="YeomanTest.html#createGenerator">createGenerator</a>
+                </li>
+                <li>
+                  <a href="YeomanTest.html#createMockedGenerator"
+                    >createMockedGenerator</a
+                  >
+                </li>
+                <li>
+                  <a href="YeomanTest.html#createTestEnv">createTestEnv</a>
+                </li>
+                <li><a href="YeomanTest.html#gruntfile">gruntfile</a></li>
+                <li>
+                  <a href="YeomanTest.html#mockLocalConfig">mockLocalConfig</a>
+                </li>
+                <li><a href="YeomanTest.html#mockPrompt">mockPrompt</a></li>
+                <li>
+                  <a href="YeomanTest.html#registerDependencies"
+                    >registerDependencies</a
+                  >
+                </li>
+                <li>
+                  <a href="YeomanTest.html#restorePrompt">restorePrompt</a>
+                </li>
+                <li><a href="YeomanTest.html#run">run</a></li>
+                <li>
+                  <a href="YeomanTest.html#setUpTestDirectory"
+                    >setUpTestDirectory</a
+                  >
+                </li>
+                <li>
+                  <a href="YeomanTest.html#testDirectory">testDirectory</a>
+                </li>
+              </ul>
+            </div>
+          </li>
         </ul>
       </div>
     </nav>
@@ -169,16 +150,20 @@
           <pre
             class="prettyprint source linenums"
           ><code>/* eslint-disable max-params */
-/**
- * Collection of unit test helpers. (mostly related to Mocha syntax)
- * @module test/helpers
- */
 
 'use strict';
 const fs = require('fs');
+const _ = require('lodash');
 const path = require('path');
 const sinon = require('sinon');
 const adapter = require('./adapter');
+
+/**
+ * Collection of unit test helpers. (mostly related to Mocha syntax)
+ * @class YeomanTest
+ */
+
+class YeomanTest {}
 
 /**
  * Create a function that will clean up the test directory,
@@ -189,10 +174,10 @@ const adapter = require('./adapter');
  * @returns {Function} mocha callback
  */
 
-exports.setUpTestDirectory = function (dir) {
-  return function (done) {
-    exports.testDirectory(dir, function () {
-      exports.gruntfile({dummy: true}, done);
+YeomanTest.prototype.setUpTestDirectory = function (dir) {
+  return (done) => {
+    this.testDirectory(dir, () => {
+      this.gruntfile({dummy: true}, done);
     });
   };
 };
@@ -213,7 +198,7 @@ exports.setUpTestDirectory = function (dir) {
  *
  */
 
-exports.gruntfile = function (options, done) {
+YeomanTest.prototype.gruntfile = function (options, done) {
   let config = 'grunt.initConfig(' + JSON.stringify(options, null, 2) + ');';
 
   config = config
@@ -239,7 +224,7 @@ exports.gruntfile = function (options, done) {
  * });
  */
 
-exports.testDirectory = function (dir, cb) {
+YeomanTest.prototype.testDirectory = function (dir, cb) {
   if (!dir) {
     throw new Error('Missing directory');
   }
@@ -274,7 +259,11 @@ exports.testDirectory = function (dir, cb) {
  * mockPrompt(angular, {'bootstrap': 'Y', 'compassBoostrap': 'Y'});
  */
 
-exports.mockPrompt = function (envOrGenerator, mockedAnswers, options) {
+YeomanTest.prototype.mockPrompt = function (
+  envOrGenerator,
+  mockedAnswers,
+  options
+) {
   envOrGenerator = envOrGenerator.env || envOrGenerator;
   const {promptModule} = envOrGenerator.adapter;
   const {DummyPrompt} = adapter;
@@ -295,7 +284,7 @@ exports.mockPrompt = function (envOrGenerator, mockedAnswers, options) {
  * Restore defaults prompts on a generator.
  * @param {Generator|Environment} generator or environment
  */
-exports.restorePrompt = function (envOrGenerator) {
+YeomanTest.prototype.restorePrompt = function (envOrGenerator) {
   envOrGenerator = envOrGenerator.env || envOrGenerator;
   envOrGenerator.adapter.promptModule.restoreDefaultPrompts();
 };
@@ -305,7 +294,7 @@ exports.restorePrompt = function (envOrGenerator) {
  * @param  {Generator} generator - a Yeoman generator
  * @param  {Object} localConfig - localConfig - should look just like if called config.getAll()
  */
-exports.mockLocalConfig = function (generator, localConfig) {
+YeomanTest.prototype.mockLocalConfig = function (generator, localConfig) {
   generator.config.defaults(localConfig);
 };
 
@@ -313,11 +302,17 @@ exports.mockLocalConfig = function (generator, localConfig) {
  * Create a mocked generator
  */
 
-exports.createMockedGenerator = () => {
-  const generator = sinon.stub();
-  generator.prototype.run = sinon.stub();
-  generator.prototype.runWithOptions = sinon.stub();
-  generator.prototype.queueOwnTasks = sinon.stub();
+YeomanTest.prototype.createMockedGenerator = (
+  Generator = class MockedGenerator extends require('yeoman-generator') {}
+) => {
+  const generator = sinon.spy(Generator);
+  ['run', 'queueTasks', 'runWithOptions', 'queueOwnTasks'].forEach(
+    (methodName) => {
+      if (Generator.prototype[methodName]) {
+        generator.prototype[methodName] = sinon.stub();
+      }
+    }
+  );
   return generator;
 };
 
@@ -325,7 +320,9 @@ exports.createMockedGenerator = () => {
  * Create a simple, dummy generator
  */
 
-exports.createDummyGenerator = (Generator = require('yeoman-generator')) =>
+YeomanTest.prototype.createDummyGenerator = (
+  Generator = require('yeoman-generator')
+) =>
   class extends Generator {
     test() {
       this.shouldRun = true;
@@ -352,7 +349,7 @@ exports.createDummyGenerator = (Generator = require('yeoman-generator')) =>
  * var angular = createGenerator('angular:app', deps);
  */
 
-exports.createGenerator = function (
+YeomanTest.prototype.createGenerator = function (
   name,
   dependencies,
   args,
@@ -372,7 +369,7 @@ exports.createGenerator = function (
  * @param {Array} dependencies - paths to the generators dependencies
  */
 
-exports.registerDependencies = function (env, dependencies) {
+YeomanTest.prototype.registerDependencies = function (env, dependencies) {
   dependencies.forEach(function (dependency) {
     if (Array.isArray(dependency)) {
       env.registerStub(...dependency);
@@ -398,7 +395,7 @@ exports.registerDependencies = function (env, dependencies) {
  * });
  */
 
-exports.createEnv = (...args) => {
+YeomanTest.prototype.createEnv = (...args) => {
   return require('yeoman-environment').createEnv(...args);
 };
 
@@ -411,23 +408,29 @@ exports.createEnv = (...args) => {
  * const env = createTestEnv(require('yeoman-environment').createEnv);
  */
 
-exports.createTestEnv = function (
+YeomanTest.prototype.createTestEnv = function (
   envContructor = this.createEnv,
   options = {localConfigOnly: true}
 ) {
+  const envOptions = _.cloneDeep(this.environmentOptions || {});
   if (typeof options === 'boolean') {
     options = {
-      sharedOptions: {localConfigOnly: options},
-      newErrorHandler: true
+      newErrorHandler: true,
+      ...envOptions,
+      sharedOptions: {
+        localConfigOnly: options,
+        ...envOptions.sharedOptions
+      }
     };
   } else {
     options = {
-      sharedOptions: {localConfigOnly: true},
       newErrorHandler: true,
+      ...envOptions,
       ...options
     };
     options.sharedOptions = {
       localConfigOnly: true,
+      ...envOptions.sharedOptions,
       ...options.sharedOptions
     };
   }
@@ -441,9 +444,20 @@ exports.createTestEnv = function (
  * @return {RunContext}
  */
 
-exports.run = function (GeneratorOrNamespace, settings, envOptions) {
+YeomanTest.prototype.run = function (
+  GeneratorOrNamespace,
+  settings,
+  envOptions
+) {
   const RunContext = require('./run-context');
-  return new RunContext(GeneratorOrNamespace, settings, envOptions);
+  const contextSettings = _.cloneDeep(this.settings || {});
+  const generatorOptions = _.cloneDeep(this.generatorOptions || {});
+  return new RunContext(
+    GeneratorOrNamespace,
+    {...contextSettings, ...settings},
+    envOptions,
+    this
+  ).withOptions(generatorOptions);
 };
 
 /**
@@ -452,15 +466,27 @@ exports.run = function (GeneratorOrNamespace, settings, envOptions) {
  * @return {RunContext}
  */
 
-exports.create = function (GeneratorOrNamespace, settings, envOptions) {
-  const RunContext = require('./run-context');
-  const context = new RunContext(
+YeomanTest.prototype.create = function (
+  GeneratorOrNamespace,
+  settings,
+  envOptions
+) {
+  return this.run(
     GeneratorOrNamespace,
     {...settings, runEnvironment: true},
     envOptions
   );
+};
 
-  return context;
+const helpers = new YeomanTest();
+helpers.YeomanTest = YeomanTest;
+
+module.exports = helpers;
+
+helpers.createHelpers = (options) => {
+  const helpers = new YeomanTest();
+  Object.assign(helpers, options);
+  return helpers;
 };
 </code></pre>
         </article>
