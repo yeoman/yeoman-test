@@ -68,6 +68,8 @@ describe('generator test', () => {
 
 [See our api documentation](https://yeoman.github.io/yeoman-test) for latest yeoman-test release.
 
+[See our api documentation](https://yeoman.github.io/yeoman-test/5.0.1) for yeoman-test 5.0.1. Use 5.x for yeoman-environment 2.x support.
+
 [See our api documentation](https://yeoman.github.io/yeoman-test/2.x) for yeoman-test 2.x.
 
 [See our documentation](http://yeoman.io/authoring/testing.html) for yeoman-test 2.x.
