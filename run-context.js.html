@@ -30,85 +30,13 @@
       <div class="title">
         <h1><a href="index.html" class="link">yeoman-test</a></h1>
 
-        <span class="version">v5.0.1</span>
+        <span class="version">v6.0.0</span>
       </div>
       <div class="search-container" id="search-container">
         <input type="text" placeholder="Search" />
         <ul></ul>
       </div>
 
-      <div class="lnb-api hidden">
-        <h3>Modules</h3>
-        <ul>
-          <li>
-            <a href="module-test_helpers.html">test/helpers</a
-            ><button type="button" class="hidden toggle-subnav btn btn-link">
-              <span class="glyphicon glyphicon-plus"></span>
-            </button>
-            <div class="hidden" id="module:test/helpers_sub">
-              <div class="member-type">Methods</div>
-              <ul class="inner">
-                <li><a href="module-test_helpers.html#.create">create</a></li>
-                <li>
-                  <a href="module-test_helpers.html#.createDummyGenerator"
-                    >createDummyGenerator</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.createEnv">createEnv</a>
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.createGenerator"
-                    >createGenerator</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.createMockedGenerator"
-                    >createMockedGenerator</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.createTestEnv"
-                    >createTestEnv</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.gruntfile">gruntfile</a>
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.mockLocalConfig"
-                    >mockLocalConfig</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.mockPrompt">mockPrompt</a>
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.registerDependencies"
-                    >registerDependencies</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.restorePrompt"
-                    >restorePrompt</a
-                  >
-                </li>
-                <li><a href="module-test_helpers.html#.run">run</a></li>
-                <li>
-                  <a href="module-test_helpers.html#.setUpTestDirectory"
-                    >setUpTestDirectory</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.testDirectory"
-                    >testDirectory</a
-                  >
-                </li>
-              </ul>
-            </div>
-          </li>
-        </ul>
-      </div>
       <div class="lnb-api hidden">
         <h3>Classes</h3>
         <ul>
@@ -129,9 +57,11 @@
                     >cleanTestDirectory</a
                   >
                 </li>
+                <li><a href="RunContext.html#cleanup">cleanup</a></li>
                 <li><a href="RunContext.html#doInDir">doInDir</a></li>
                 <li><a href="RunContext.html#inDir">inDir</a></li>
                 <li><a href="RunContext.html#inTmpDir">inTmpDir</a></li>
+                <li><a href="RunContext.html#restore">restore</a></li>
                 <li><a href="RunContext.html#run">run</a></li>
                 <li><a href="RunContext.html#then">then</a></li>
                 <li><a href="RunContext.html#toPromise">toPromise</a></li>
@@ -158,6 +88,57 @@
               </ul>
             </div>
           </li>
+          <li>
+            <a href="YeomanTest.html">YeomanTest</a
+            ><button type="button" class="hidden toggle-subnav btn btn-link">
+              <span class="glyphicon glyphicon-plus"></span>
+            </button>
+            <div class="hidden" id="YeomanTest_sub">
+              <div class="member-type">Methods</div>
+              <ul class="inner">
+                <li><a href="YeomanTest.html#create">create</a></li>
+                <li>
+                  <a href="YeomanTest.html#createDummyGenerator"
+                    >createDummyGenerator</a
+                  >
+                </li>
+                <li><a href="YeomanTest.html#createEnv">createEnv</a></li>
+                <li>
+                  <a href="YeomanTest.html#createGenerator">createGenerator</a>
+                </li>
+                <li>
+                  <a href="YeomanTest.html#createMockedGenerator"
+                    >createMockedGenerator</a
+                  >
+                </li>
+                <li>
+                  <a href="YeomanTest.html#createTestEnv">createTestEnv</a>
+                </li>
+                <li><a href="YeomanTest.html#gruntfile">gruntfile</a></li>
+                <li>
+                  <a href="YeomanTest.html#mockLocalConfig">mockLocalConfig</a>
+                </li>
+                <li><a href="YeomanTest.html#mockPrompt">mockPrompt</a></li>
+                <li>
+                  <a href="YeomanTest.html#registerDependencies"
+                    >registerDependencies</a
+                  >
+                </li>
+                <li>
+                  <a href="YeomanTest.html#restorePrompt">restorePrompt</a>
+                </li>
+                <li><a href="YeomanTest.html#run">run</a></li>
+                <li>
+                  <a href="YeomanTest.html#setUpTestDirectory"
+                    >setUpTestDirectory</a
+                  >
+                </li>
+                <li>
+                  <a href="YeomanTest.html#testDirectory">testDirectory</a>
+                </li>
+              </ul>
+            </div>
+          </li>
         </ul>
       </div>
     </nav>
@@ -170,12 +151,12 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 const assert = require('assert');
 const _ = require('lodash/string');
 const util = require('util');
 const {EventEmitter} = require('events');
-const helpers = require('.');
+const tempDirectory = require('temp-dir');
+
 const RunResult = require('./run-result');
 
 /**
@@ -194,7 +175,12 @@ const RunResult = require('./run-result');
  * @return {this}
  */
 
-function RunContext(Generator, settings, envOptions = {}) {
+function RunContext(
+  Generator,
+  settings,
+  envOptions = {},
+  helpers = require('.')
+) {
   this._asyncHolds = 0;
   this.ran = false;
   this.inDirSet = false;
@@ -227,6 +213,8 @@ function RunContext(Generator, settings, envOptions = {}) {
   if (!this.settings.runEnvironment) {
     setTimeout(this._run.bind(this), 10);
   }
+
+  this.helpers = helpers;
 }
 
 util.inherits(RunContext, EventEmitter);
@@ -270,17 +258,18 @@ RunContext.prototype.build = function (callback = () => {}) {
 
   this.targetDirectory = this.targetDirectory || process.cwd();
 
-  const testEnv = helpers.createTestEnv(
-    this.envOptions.createEnv,
-    this.envOptions
-  );
+  const testEnv = this.helpers.createTestEnv(this.envOptions.createEnv, {
+    cwd: this.settings.forwardCwd ? this.targetDirectory : undefined,
+    ...this.options,
+    ...this.envOptions
+  });
   this.env = this.envCB ? this.envCB(testEnv) || testEnv : testEnv;
 
   this.lookups.forEach((lookup) => {
     this.env.lookup(lookup);
   });
 
-  helpers.registerDependencies(this.env, this.dependencies);
+  this.helpers.registerDependencies(this.env, this.dependencies);
 
   let namespace;
   if (typeof this.Generator === 'string') {
@@ -303,11 +292,11 @@ RunContext.prototype.build = function (callback = () => {}) {
     options: this.options
   });
 
-  helpers.mockPrompt(this.env, this.answers, this.promptOptions);
+  this.helpers.mockPrompt(this.env, this.answers, this.promptOptions);
 
   if (this.localConfig) {
     // Only mock local config when withLocalConfig was called
-    helpers.mockLocalConfig(this.generator, this.localConfig);
+    this.helpers.mockLocalConfig(this.generator, this.localConfig);
   }
 
   callback(this);
@@ -364,7 +353,7 @@ RunContext.prototype.run = function () {
     .runGenerator(this.generator)
     .then(() => new RunResult(this._createRunResultOptions()))
     .finally(() => {
-      helpers.restorePrompt(this.env);
+      this.helpers.restorePrompt(this.env);
     });
 };
 
@@ -457,7 +446,7 @@ RunContext.prototype.setDir = function (dirPath, tmpdir) {
 
 RunContext.prototype.inDir = function (dirPath, cb) {
   this.setDir(dirPath, true);
-  helpers.testDirectory(
+  this.helpers.testDirectory(
     dirPath,
     (cb || (() => {})).bind(this, path.resolve(dirPath))
   );
@@ -505,9 +494,33 @@ RunContext.prototype.cd = function (dirPath) {
  */
 RunContext.prototype.inTmpDir = function (cb) {
   return this.inDir(
-    path.join(os.tmpdir(), crypto.randomBytes(20).toString('hex')),
+    path.join(tempDirectory, crypto.randomBytes(20).toString('hex')),
     cb
   );
+};
+
+/**
+ * Restore cwd to initial cwd.
+ * @return {this} run context instance
+ */
+
+RunContext.prototype.restore = function () {
+  if (this.oldCwd) {
+    process.chdir(this.oldCwd);
+  }
+
+  return this;
+};
+
+/**
+ * Clean the directory used for tests inside inDir/inTmpDir
+ * @param  {Boolean} force - force directory cleanup for not tmpdir
+ */
+RunContext.prototype.cleanup = function () {
+  this.restore();
+  if (this.settings.tmpdir !== false) {
+    this.cleanTestDirectory();
+  }
 };
 
 /**
@@ -573,6 +586,10 @@ RunContext.prototype.withArguments = function (args) {
  */
 
 RunContext.prototype.withOptions = function (options) {
+  if (!options) {
+    return this;
+  }
+
   // Add options as both kebab and camel case. This is to stay backward compatibles with
   // the switch we made to meow for options parsing.
   Object.keys(options).forEach(function (key) {
@@ -643,7 +660,7 @@ RunContext.prototype.withMockedGenerators = function (namespaces) {
   assert(Array.isArray(namespaces), 'namespaces should be an array');
   const entries = namespaces.map((namespace) => [
     namespace,
-    helpers.createMockedGenerator()
+    this.helpers.createMockedGenerator()
   ]);
   this.mockedGenerators = {
     ...this.mockedGenerators,

@@ -30,85 +30,13 @@
       <div class="title">
         <h1><a href="index.html" class="link">yeoman-test</a></h1>
 
-        <span class="version">v5.0.1</span>
+        <span class="version">v6.0.0</span>
       </div>
       <div class="search-container" id="search-container">
         <input type="text" placeholder="Search" />
         <ul></ul>
       </div>
 
-      <div class="lnb-api hidden">
-        <h3>Modules</h3>
-        <ul>
-          <li>
-            <a href="module-test_helpers.html">test/helpers</a
-            ><button type="button" class="hidden toggle-subnav btn btn-link">
-              <span class="glyphicon glyphicon-plus"></span>
-            </button>
-            <div class="hidden" id="module:test/helpers_sub">
-              <div class="member-type">Methods</div>
-              <ul class="inner">
-                <li><a href="module-test_helpers.html#.create">create</a></li>
-                <li>
-                  <a href="module-test_helpers.html#.createDummyGenerator"
-                    >createDummyGenerator</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.createEnv">createEnv</a>
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.createGenerator"
-                    >createGenerator</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.createMockedGenerator"
-                    >createMockedGenerator</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.createTestEnv"
-                    >createTestEnv</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.gruntfile">gruntfile</a>
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.mockLocalConfig"
-                    >mockLocalConfig</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.mockPrompt">mockPrompt</a>
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.registerDependencies"
-                    >registerDependencies</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.restorePrompt"
-                    >restorePrompt</a
-                  >
-                </li>
-                <li><a href="module-test_helpers.html#.run">run</a></li>
-                <li>
-                  <a href="module-test_helpers.html#.setUpTestDirectory"
-                    >setUpTestDirectory</a
-                  >
-                </li>
-                <li>
-                  <a href="module-test_helpers.html#.testDirectory"
-                    >testDirectory</a
-                  >
-                </li>
-              </ul>
-            </div>
-          </li>
-        </ul>
-      </div>
       <div class="lnb-api hidden">
         <h3>Classes</h3>
         <ul>
@@ -129,9 +57,11 @@
                     >cleanTestDirectory</a
                   >
                 </li>
+                <li><a href="RunContext.html#cleanup">cleanup</a></li>
                 <li><a href="RunContext.html#doInDir">doInDir</a></li>
                 <li><a href="RunContext.html#inDir">inDir</a></li>
                 <li><a href="RunContext.html#inTmpDir">inTmpDir</a></li>
+                <li><a href="RunContext.html#restore">restore</a></li>
                 <li><a href="RunContext.html#run">run</a></li>
                 <li><a href="RunContext.html#then">then</a></li>
                 <li><a href="RunContext.html#toPromise">toPromise</a></li>
@@ -155,6 +85,57 @@
                 </li>
                 <li><a href="RunContext.html#withOptions">withOptions</a></li>
                 <li><a href="RunContext.html#withPrompts">withPrompts</a></li>
+              </ul>
+            </div>
+          </li>
+          <li>
+            <a href="YeomanTest.html">YeomanTest</a
+            ><button type="button" class="hidden toggle-subnav btn btn-link">
+              <span class="glyphicon glyphicon-plus"></span>
+            </button>
+            <div class="hidden" id="YeomanTest_sub">
+              <div class="member-type">Methods</div>
+              <ul class="inner">
+                <li><a href="YeomanTest.html#create">create</a></li>
+                <li>
+                  <a href="YeomanTest.html#createDummyGenerator"
+                    >createDummyGenerator</a
+                  >
+                </li>
+                <li><a href="YeomanTest.html#createEnv">createEnv</a></li>
+                <li>
+                  <a href="YeomanTest.html#createGenerator">createGenerator</a>
+                </li>
+                <li>
+                  <a href="YeomanTest.html#createMockedGenerator"
+                    >createMockedGenerator</a
+                  >
+                </li>
+                <li>
+                  <a href="YeomanTest.html#createTestEnv">createTestEnv</a>
+                </li>
+                <li><a href="YeomanTest.html#gruntfile">gruntfile</a></li>
+                <li>
+                  <a href="YeomanTest.html#mockLocalConfig">mockLocalConfig</a>
+                </li>
+                <li><a href="YeomanTest.html#mockPrompt">mockPrompt</a></li>
+                <li>
+                  <a href="YeomanTest.html#registerDependencies"
+                    >registerDependencies</a
+                  >
+                </li>
+                <li>
+                  <a href="YeomanTest.html#restorePrompt">restorePrompt</a>
+                </li>
+                <li><a href="YeomanTest.html#run">run</a></li>
+                <li>
+                  <a href="YeomanTest.html#setUpTestDirectory"
+                    >setUpTestDirectory</a
+                  >
+                </li>
+                <li>
+                  <a href="YeomanTest.html#testDirectory">testDirectory</a>
+                </li>
               </ul>
             </div>
           </li>
@@ -215,6 +196,15 @@ module.exports = class RunResult {
       },
       {...this.options.envOptions, memFs: this.memFs, ...envOptions}
     );
+  }
+
+  /**
+   * Return an object with fs changes.
+   * @param {Function} filter - parameter forwarded to mem-fs-editor#dump
+   * @returns {Object}
+   */
+  getSnapshot(filter) {
+    return this.fs.dump(this.cwd, filter);
   }
 
   /**
