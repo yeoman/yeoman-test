@@ -2,6 +2,7 @@
 'use strict';
 const assert = require('assert');
 const path = require('path');
+const sinon = require('sinon');
 
 const helpers = require('../lib');
 const RunContext = require('../lib/run-context');
@@ -89,6 +90,32 @@ describe('RunContext running environment', function () {
     it('runs the generator', () => {
       return ctx.run().then(() => {
         assert(ctx.env.generatorTestExecuted);
+      });
+    });
+  });
+
+  describe('with promised generator', () => {
+    before(() => {
+      gen = 'promised-generator';
+      build = false;
+    });
+    beforeEach(() => {
+      ctx.withEnvironment((env) => {
+        const FakeGenerator = helpers.createDummyGenerator();
+        const fake = sinon.fake.returns(
+          Promise.resolve(new FakeGenerator({env}))
+        );
+        sinon.replace(env, 'create', fake);
+      });
+    });
+    after(() => {
+      gen = undefined;
+      build = true;
+    });
+
+    it('runs the generator', () => {
+      return ctx.run().then(() => {
+        assert(ctx.generator.shouldRun);
       });
     });
   });
