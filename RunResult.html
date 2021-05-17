@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Class: YeomanTest | yeoman-test</title>
+    <title>Class: RunResult | yeoman-test</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -225,35 +225,32 @@
         <header>
           <h2>
             <span class="attribs"><span class="type-signature"></span></span
-            >YeomanTest<span class="signature">()</span
+            >RunResult<span class="signature">()</span
             ><span class="type-signature"></span>
           </h2>
+
+          <div class="class-description">
+            <p>This class provides utilities for testing generated content.</p>
+          </div>
         </header>
 
         <article>
           <div class="container-overview">
             <dt>
-              <h4 class="name" id="YeomanTest">
-                new <span class="type-signature"></span>YeomanTest<span
+              <h4 class="name" id="RunResult">
+                new <span class="type-signature"></span>RunResult<span
                   class="signature"
                   >()</span
                 ><span class="type-signature"></span>
 
                 <div class="container-source members">
-                  <code><a href="index.js.html">index.js</a></code
+                  <code><a href="run-result.js.html">run-result.js</a></code
                   >,
-                  <code><a href="index.js.html#line10">line 10</a></code>
+                  <code><a href="run-result.js.html#line25">line 25</a></code>
                 </div>
               </h4>
             </dt>
             <dd>
-              <div class="description">
-                <p>
-                  Collection of unit test helpers. (mostly related to Mocha
-                  syntax)
-                </p>
-              </div>
-
               <dl class="details"></dl>
             </dd>
           </div>
@@ -262,24 +259,24 @@
 
           <dl>
             <dt>
-              <h4 class="name" id="create">
-                <span class="type-signature"></span>create<span
+              <h4 class="name" id="assertEqualsFileContent">
+                <span class="type-signature"></span>assertEqualsFileContent<span
                   class="signature"
-                  >(GeneratorOrNamespace)</span
-                ><span class="type-signature">
-                  &rarr; {<a href="RunContext.html">RunContext</a>}</span
-                >
+                  >(file, expectedContent)</span
+                ><span class="type-signature"></span>
 
                 <div class="container-source members">
-                  <code><a href="index.js.html">index.js</a></code
+                  <code><a href="run-result.js.html">run-result.js</a></code
                   >,
-                  <code><a href="index.js.html#line318">line 318</a></code>
+                  <code><a href="run-result.js.html#line245">line 245</a></code>
                 </div>
               </h4>
             </dt>
             <dd>
               <div class="description">
-                <p>Prepare a run context</p>
+                <p>
+                  Assert that a file's content is the same as the given string
+                </p>
               </div>
 
               <div class="container-params">
@@ -298,73 +295,1053 @@
 
                   <tbody>
                     <tr>
-                      <td class="name"><code>GeneratorOrNamespace</code></td>
+                      <td class="name"><code>file</code></td>
 
                       <td class="type">
                         <span class="param-type">String</span>
-                        |
+                      </td>
 
-                        <span class="param-type">function</span>
+                      <td class="description last"><p>path to a file</p></td>
+                    </tr>
+
+                    <tr>
+                      <td class="name"><code>expectedContent</code></td>
+
+                      <td class="type">
+                        <span class="param-type">String</span>
                       </td>
 
                       <td class="description last">
-                        <p>Generator constructor or namespace</p>
+                        <p>the expected content of the file</p>
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
-              <div class="container-returns">
-                <h5>Returns:</h5>
+              <dl class="details"></dl>
 
-                <span class="param-type"
-                  ><a href="RunContext.html">RunContext</a></span
-                >
+              <h5>Example</h5>
+
+              <pre class="prettyprint"><code>result.assertEqualsFileContent(
+  'data.js',
+  'const greeting = "Hello";\nexport default { greeting }'
+);</code></pre>
+            </dd>
+
+            <dt>
+              <h4 class="name" id="assertEqualsFileContent">
+                <span class="type-signature"></span>assertEqualsFileContent<span
+                  class="signature"
+                  >(pairs)</span
+                ><span class="type-signature"></span>
+
+                <div class="container-source members">
+                  <code><a href="run-result.js.html">run-result.js</a></code
+                  >,
+                  <code><a href="run-result.js.html#line245">line 245</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>
+                  Assert that each file in an array of file-string pairs equals
+                  its corresponding string
+                </p>
+              </div>
+
+              <div class="container-params">
+                <h5>Parameters:</h5>
+
+                <table class="params">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+
+                      <th>Type</th>
+
+                      <th class="last">Description</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td class="name"><code>pairs</code></td>
+
+                      <td class="type">
+                        <span class="param-type">Array</span>
+                      </td>
+
+                      <td class="description last">
+                        <p>
+                          an array of arrays, where each subarray is a [String,
+                          String] pair
+                        </p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <dl class="details"></dl>
+
+              <h5>Example</h5>
+
+              <pre class="prettyprint"><code>result.assertEqualsFileContent([
+  ['data.js', 'const greeting = "Hello";\nexport default { greeting }'],
+  ['user.js', 'export default {\n  name: 'Coleman',\n  age: 0\n}']
+]);</code></pre>
+            </dd>
+
+            <dt>
+              <h4 class="name" id="assertFile">
+                <span class="type-signature"></span>assertFile<span
+                  class="signature"
+                  >(path)</span
+                ><span class="type-signature"></span>
+
+                <div class="container-source members">
+                  <code><a href="run-result.js.html">run-result.js</a></code
+                  >,
+                  <code><a href="run-result.js.html#line159">line 159</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>Assert that a file exists</p>
+              </div>
+
+              <div class="container-params">
+                <h5>Parameters:</h5>
+
+                <table class="params">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+
+                      <th>Type</th>
+
+                      <th class="last">Description</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td class="name"><code>path</code></td>
+
+                      <td class="type">
+                        <span class="param-type">String</span>
+                      </td>
+
+                      <td class="description last"><p>path to a file</p></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <dl class="details"></dl>
+
+              <h5>Example</h5>
+
+              <pre
+                class="prettyprint"
+              ><code>result.assertFile('templates/user.hbs');</code></pre>
+            </dd>
+
+            <dt>
+              <h4 class="name" id="assertFile">
+                <span class="type-signature"></span>assertFile<span
+                  class="signature"
+                  >(paths)</span
+                ><span class="type-signature"></span>
+
+                <div class="container-source members">
+                  <code><a href="run-result.js.html">run-result.js</a></code
+                  >,
+                  <code><a href="run-result.js.html#line159">line 159</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>Assert that each files in the array exists</p>
+              </div>
+
+              <div class="container-params">
+                <h5>Parameters:</h5>
+
+                <table class="params">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+
+                      <th>Type</th>
+
+                      <th class="last">Description</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td class="name"><code>paths</code></td>
+
+                      <td class="type">
+                        <span class="param-type">Array</span>
+                      </td>
+
+                      <td class="description last">
+                        <p>an array of paths to files</p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <dl class="details"></dl>
+
+              <h5>Example</h5>
+
+              <pre
+                class="prettyprint"
+              ><code>result.assertFile(['templates/user.hbs', 'templates/user/edit.hbs']);</code></pre>
+            </dd>
+
+            <dt>
+              <h4 class="name" id="assertFileContent">
+                <span class="type-signature"></span>assertFileContent<span
+                  class="signature"
+                  >(file, reg)</span
+                ><span class="type-signature"></span>
+
+                <div class="container-source members">
+                  <code><a href="run-result.js.html">run-result.js</a></code
+                  >,
+                  <code><a href="run-result.js.html#line206">line 206</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>Assert that a file's content matches a regex or string</p>
+              </div>
+
+              <div class="container-params">
+                <h5>Parameters:</h5>
+
+                <table class="params">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+
+                      <th>Type</th>
+
+                      <th class="last">Description</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td class="name"><code>file</code></td>
+
+                      <td class="type">
+                        <span class="param-type">String</span>
+                      </td>
+
+                      <td class="description last"><p>path to a file</p></td>
+                    </tr>
+
+                    <tr>
+                      <td class="name"><code>reg</code></td>
+
+                      <td class="type">
+                        <span class="param-type">Regex</span>
+                        |
+
+                        <span class="param-type">String</span>
+                      </td>
+
+                      <td class="description last">
+                        <p>
+                          regex / string that will be used to search the file
+                        </p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <dl class="details"></dl>
+
+              <h5>Example</h5>
+
+              <pre
+                class="prettyprint"
+              ><code>result.assertFileContent('models/user.js', /App\.User = DS\.Model\.extend/);
+result.assertFileContent('models/user.js', 'App.User = DS.Model.extend');</code></pre>
+            </dd>
+
+            <dt>
+              <h4 class="name" id="assertFileContent">
+                <span class="type-signature"></span>assertFileContent<span
+                  class="signature"
+                  >(pairs)</span
+                ><span class="type-signature"></span>
+
+                <div class="container-source members">
+                  <code><a href="run-result.js.html">run-result.js</a></code
+                  >,
+                  <code><a href="run-result.js.html#line206">line 206</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>
+                  Assert that each file in an array of file-regex pairs matches
+                  its corresponding regex
+                </p>
+              </div>
+
+              <div class="container-params">
+                <h5>Parameters:</h5>
+
+                <table class="params">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+
+                      <th>Type</th>
+
+                      <th class="last">Description</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td class="name"><code>pairs</code></td>
+
+                      <td class="type">
+                        <span class="param-type">Array</span>
+                      </td>
+
+                      <td class="description last">
+                        <p>
+                          an array of arrays, where each subarray is a [String,
+                          RegExp] pair
+                        </p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <dl class="details"></dl>
+
+              <h5>Example</h5>
+
+              <pre class="prettyprint"><code>var arg = [
+  [ 'models/user.js', /App\.User = DS\.Model\.extend/ ],
+  [ 'controllers/user.js', /App\.UserController = Ember\.ObjectController\.extend/ ]
+]
+result.assertFileContent(arg);</code></pre>
+            </dd>
+
+            <dt>
+              <h4 class="name" id="assertJsonFileContent">
+                <span class="type-signature"></span>assertJsonFileContent<span
+                  class="signature"
+                  >(filename, content)</span
+                ><span class="type-signature"></span>
+
+                <div class="container-source members">
+                  <code><a href="run-result.js.html">run-result.js</a></code
+                  >,
+                  <code><a href="run-result.js.html#line343">line 343</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>Assert a JSON file contains the provided keys</p>
+              </div>
+
+              <div class="container-params">
+                <h5>Parameters:</h5>
+
+                <table class="params">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+
+                      <th>Type</th>
+
+                      <th class="last">Description</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td class="name"><code>filename</code></td>
+
+                      <td class="type">
+                        <span class="param-type">String</span>
+                      </td>
+
+                      <td class="description last"></td>
+                    </tr>
+
+                    <tr>
+                      <td class="name"><code>content</code></td>
+
+                      <td class="type">
+                        <span class="param-type">Object</span>
+                      </td>
+
+                      <td class="description last">
+                        <p>An object of key/values the file should contains</p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
 
               <dl class="details"></dl>
             </dd>
 
             <dt>
-              <h4 class="name" id="createDummyGenerator">
-                <span class="type-signature"></span>createDummyGenerator<span
+              <h4 class="name" id="assertNoFile">
+                <span class="type-signature"></span>assertNoFile<span
+                  class="signature"
+                  >(file)</span
+                ><span class="type-signature"></span>
+
+                <div class="container-source members">
+                  <code><a href="run-result.js.html">run-result.js</a></code
+                  >,
+                  <code><a href="run-result.js.html#line179">line 179</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>Assert that a file doesn't exist</p>
+              </div>
+
+              <div class="container-params">
+                <h5>Parameters:</h5>
+
+                <table class="params">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+
+                      <th>Type</th>
+
+                      <th class="last">Description</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td class="name"><code>file</code></td>
+
+                      <td class="type">
+                        <span class="param-type">String</span>
+                      </td>
+
+                      <td class="description last"><p>path to a file</p></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <dl class="details"></dl>
+
+              <h5>Example</h5>
+
+              <pre
+                class="prettyprint"
+              ><code>result.assertNoFile('templates/user.hbs');</code></pre>
+            </dd>
+
+            <dt>
+              <h4 class="name" id="assertNoFile">
+                <span class="type-signature"></span>assertNoFile<span
+                  class="signature"
+                  >(pairs)</span
+                ><span class="type-signature"></span>
+
+                <div class="container-source members">
+                  <code><a href="run-result.js.html">run-result.js</a></code
+                  >,
+                  <code><a href="run-result.js.html#line179">line 179</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>Assert that each of an array of files doesn't exist</p>
+              </div>
+
+              <div class="container-params">
+                <h5>Parameters:</h5>
+
+                <table class="params">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+
+                      <th>Type</th>
+
+                      <th class="last">Description</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td class="name"><code>pairs</code></td>
+
+                      <td class="type">
+                        <span class="param-type">Array</span>
+                      </td>
+
+                      <td class="description last">
+                        <p>an array of paths to files</p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <dl class="details"></dl>
+
+              <h5>Example</h5>
+
+              <pre
+                class="prettyprint"
+              ><code>result.assertNoFile(['templates/user.hbs', 'templates/user/edit.hbs']);</code></pre>
+            </dd>
+
+            <dt>
+              <h4 class="name" id="assertNoFileContent">
+                <span class="type-signature"></span>assertNoFileContent<span
+                  class="signature"
+                  >(file, reg)</span
+                ><span class="type-signature"></span>
+
+                <div class="container-source members">
+                  <code><a href="run-result.js.html">run-result.js</a></code
+                  >,
+                  <code><a href="run-result.js.html#line273">line 273</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>
+                  Assert that a file's content does not match a regex / string
+                </p>
+              </div>
+
+              <div class="container-params">
+                <h5>Parameters:</h5>
+
+                <table class="params">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+
+                      <th>Type</th>
+
+                      <th class="last">Description</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td class="name"><code>file</code></td>
+
+                      <td class="type">
+                        <span class="param-type">String</span>
+                      </td>
+
+                      <td class="description last"><p>path to a file</p></td>
+                    </tr>
+
+                    <tr>
+                      <td class="name"><code>reg</code></td>
+
+                      <td class="type">
+                        <span class="param-type">Regex</span>
+                        |
+
+                        <span class="param-type">String</span>
+                      </td>
+
+                      <td class="description last">
+                        <p>
+                          regex / string that will be used to search the file
+                        </p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <dl class="details"></dl>
+
+              <h5>Example</h5>
+
+              <pre
+                class="prettyprint"
+              ><code>result.assertNoFileContent('models/user.js', /App\.User = DS\.Model\.extend/);
+result.assertNoFileContent('models/user.js', 'App.User = DS.Model.extend');</code></pre>
+            </dd>
+
+            <dt>
+              <h4 class="name" id="assertNoFileContent">
+                <span class="type-signature"></span>assertNoFileContent<span
+                  class="signature"
+                  >(pairs)</span
+                ><span class="type-signature"></span>
+
+                <div class="container-source members">
+                  <code><a href="run-result.js.html">run-result.js</a></code
+                  >,
+                  <code><a href="run-result.js.html#line273">line 273</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>
+                  Assert that each file in an array of file-regex pairs does not
+                  match its corresponding regex
+                </p>
+              </div>
+
+              <div class="container-params">
+                <h5>Parameters:</h5>
+
+                <table class="params">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+
+                      <th>Type</th>
+
+                      <th class="last">Description</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td class="name"><code>pairs</code></td>
+
+                      <td class="type">
+                        <span class="param-type">Array</span>
+                      </td>
+
+                      <td class="description last">
+                        <p>
+                          an array of arrays, where each subarray is a [String,
+                          RegExp] pair var arg = [ [ 'models/user.js', /App.User
+                          \ DS.Model.extend/ ], [ 'controllers/user.js',
+                          /App.UserController = Ember.ObjectController.extend/ ]
+                          ] result.assertNoFileContent(arg);
+                        </p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <dl class="details"></dl>
+            </dd>
+
+            <dt>
+              <h4 class="name" id="assertNoJsonFileContent">
+                <span class="type-signature"></span>assertNoJsonFileContent<span
+                  class="signature"
+                  >(filename, content)</span
+                ><span class="type-signature"></span>
+
+                <div class="container-source members">
+                  <code><a href="run-result.js.html">run-result.js</a></code
+                  >,
+                  <code><a href="run-result.js.html#line353">line 353</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>Assert a JSON file does not contain the provided keys</p>
+              </div>
+
+              <div class="container-params">
+                <h5>Parameters:</h5>
+
+                <table class="params">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+
+                      <th>Type</th>
+
+                      <th class="last">Description</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td class="name"><code>filename</code></td>
+
+                      <td class="type">
+                        <span class="param-type">String</span>
+                      </td>
+
+                      <td class="description last"></td>
+                    </tr>
+
+                    <tr>
+                      <td class="name"><code>content</code></td>
+
+                      <td class="type">
+                        <span class="param-type">Object</span>
+                      </td>
+
+                      <td class="description last">
+                        <p>
+                          An object of key/values the file should not contain
+                        </p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <dl class="details"></dl>
+            </dd>
+
+            <dt>
+              <h4 class="name" id="assertNoObjectContent">
+                <span class="type-signature"></span>assertNoObjectContent<span
+                  class="signature"
+                  >(obj, content)</span
+                ><span class="type-signature"></span>
+
+                <div class="container-source members">
+                  <code><a href="run-result.js.html">run-result.js</a></code
+                  >,
+                  <code><a href="run-result.js.html#line326">line 326</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>Assert an object does not contain the provided keys</p>
+              </div>
+
+              <div class="container-params">
+                <h5>Parameters:</h5>
+
+                <table class="params">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+
+                      <th>Type</th>
+
+                      <th class="last">Description</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td class="name"><code>obj</code></td>
+
+                      <td class="type">
+                        <span class="param-type">Object</span>
+                      </td>
+
+                      <td class="description last">
+                        <p>Object that should not match the given pattern</p>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td class="name"><code>content</code></td>
+
+                      <td class="type">
+                        <span class="param-type">Object</span>
+                      </td>
+
+                      <td class="description last">
+                        <p>
+                          An object of key/values the object should not contain
+                        </p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <dl class="details"></dl>
+            </dd>
+
+            <dt>
+              <h4 class="name" id="assertObjectContent">
+                <span class="type-signature"></span>assertObjectContent<span
+                  class="signature"
+                  >(obj, content)</span
+                ><span class="type-signature"></span>
+
+                <div class="container-source members">
+                  <code><a href="run-result.js.html">run-result.js</a></code
+                  >,
+                  <code><a href="run-result.js.html#line309">line 309</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>Assert an object contains the provided keys</p>
+              </div>
+
+              <div class="container-params">
+                <h5>Parameters:</h5>
+
+                <table class="params">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+
+                      <th>Type</th>
+
+                      <th class="last">Description</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td class="name"><code>obj</code></td>
+
+                      <td class="type">
+                        <span class="param-type">Object</span>
+                      </td>
+
+                      <td class="description last">
+                        <p>Object that should match the given pattern</p>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td class="name"><code>content</code></td>
+
+                      <td class="type">
+                        <span class="param-type">Object</span>
+                      </td>
+
+                      <td class="description last">
+                        <p>
+                          An object of key/values the object should contains
+                        </p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <dl class="details"></dl>
+            </dd>
+
+            <dt>
+              <h4 class="name" id="assertTextEqual">
+                <span class="type-signature"></span>assertTextEqual<span
+                  class="signature"
+                  >(value, expected)</span
+                ><span class="type-signature"></span>
+
+                <div class="container-source members">
+                  <code><a href="run-result.js.html">run-result.js</a></code
+                  >,
+                  <code><a href="run-result.js.html#line297">line 297</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>
+                  Assert that two strings are equal after standardization of
+                  newlines
+                </p>
+              </div>
+
+              <div class="container-params">
+                <h5>Parameters:</h5>
+
+                <table class="params">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+
+                      <th>Type</th>
+
+                      <th class="last">Description</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td class="name"><code>value</code></td>
+
+                      <td class="type">
+                        <span class="param-type">String</span>
+                      </td>
+
+                      <td class="description last"><p>a string</p></td>
+                    </tr>
+
+                    <tr>
+                      <td class="name"><code>expected</code></td>
+
+                      <td class="type">
+                        <span class="param-type">String</span>
+                      </td>
+
+                      <td class="description last">
+                        <p>the expected value of the string</p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <dl class="details"></dl>
+
+              <h5>Example</h5>
+
+              <pre
+                class="prettyprint"
+              ><code>result.assertTextEqual('I have a yellow cat', 'I have a yellow cat');</code></pre>
+            </dd>
+
+            <dt>
+              <h4 class="name" id="cleanup">
+                <span class="type-signature"></span>cleanup<span
+                  class="signature"
+                  >()</span
+                ><span class="type-signature">
+                  &rarr; {<a href="RunResult.html">RunResult</a>}</span
+                >
+
+                <div class="container-source members">
+                  <code><a href="run-result.js.html">run-result.js</a></code
+                  >,
+                  <code><a href="run-result.js.html#line111">line 111</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>Deletes the test directory recursively.</p>
+              </div>
+
+              <div class="container-returns">
+                <h5>Returns:</h5>
+
+                <span class="param-type"
+                  ><a href="RunResult.html">RunResult</a></span
+                >
+
+                -
+                <p>this</p>
+              </div>
+
+              <dl class="details"></dl>
+            </dd>
+
+            <dt>
+              <h4 class="name" id="create">
+                <span class="type-signature"></span>create<span
                   class="signature"
                   >()</span
                 ><span class="type-signature"></span>
 
                 <div class="container-source members">
-                  <code><a href="index.js.html">index.js</a></code
+                  <code><a href="run-result.js.html">run-result.js</a></code
                   >,
-                  <code><a href="index.js.html#line172">line 172</a></code>
+                  <code><a href="run-result.js.html#line43">line 43</a></code>
                 </div>
               </h4>
             </dt>
             <dd>
               <div class="description">
-                <p>Create a simple, dummy generator</p>
+                <p>
+                  Create another RunContext reusing the settings. See
+                  helpers.create api
+                </p>
               </div>
 
               <dl class="details"></dl>
             </dd>
 
             <dt>
-              <h4 class="name" id="createEnv">
-                <span class="type-signature"></span>createEnv<span
+              <h4 class="name" id="dumpFilenames">
+                <span class="type-signature"></span>dumpFilenames<span
                   class="signature"
-                  >(&hellip;args)</span
-                ><span class="type-signature"> &rarr; {Object}</span>
+                  >()</span
+                ><span class="type-signature">
+                  &rarr; {<a href="RunResult.html">RunResult</a>}</span
+                >
 
                 <div class="container-source members">
-                  <code><a href="index.js.html">index.js</a></code
+                  <code><a href="run-result.js.html">run-result.js</a></code
                   >,
-                  <code><a href="index.js.html#line247">line 247</a></code>
+                  <code><a href="run-result.js.html#line91">line 91</a></code>
                 </div>
               </h4>
             </dt>
             <dd>
               <div class="description">
-                <p>Shortcut to the Environment's createEnv.</p>
+                <p>Prints every file from mem-fs</p>
+              </div>
+
+              <div class="container-returns">
+                <h5>Returns:</h5>
+
+                <span class="param-type"
+                  ><a href="RunResult.html">RunResult</a></span
+                >
+
+                -
+                <p>this</p>
+              </div>
+
+              <dl class="details"></dl>
+            </dd>
+
+            <dt>
+              <h4 class="name" id="dumpFiles">
+                <span class="type-signature"></span>dumpFiles<span
+                  class="signature"
+                  >(&hellip;files)</span
+                ><span class="type-signature">
+                  &rarr; {<a href="RunResult.html">RunResult</a>}</span
+                >
+
+                <div class="container-source members">
+                  <code><a href="run-result.js.html">run-result.js</a></code
+                  >,
+                  <code><a href="run-result.js.html#line70">line 70</a></code>
+                </div>
+              </h4>
+            </dt>
+            <dd>
+              <div class="description">
+                <p>Prints files names and contents from mem-fs</p>
               </div>
 
               <div class="container-params">
@@ -385,682 +1362,16 @@
 
                   <tbody>
                     <tr>
-                      <td class="name"><code>args</code></td>
+                      <td class="name"><code>files</code></td>
 
                       <td class="type">
-                        <span class="param-type">any</span>
+                        <span class="param-type">string</span>
                       </td>
 
                       <td class="attributes">&lt;repeatable><br /></td>
 
                       <td class="description last">
-                        <p>environment constructor arguments.</p>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div class="container-returns">
-                <h5>Returns:</h5>
-
-                <span class="param-type">Object</span>
-
-                -
-                <p>environment instance</p>
-                <p>
-                  Use to test with specific Environment version: let createEnv;
-                  before(() =&gt; { createEnv = stub(helper,
-                  'createEnv').callsFake(Environment.creatEnv); }); after(()
-                  =&gt; { createEnv.restore(); });
-                </p>
-              </div>
-
-              <dl class="details"></dl>
-            </dd>
-
-            <dt>
-              <h4 class="name" id="createGenerator">
-                <span class="type-signature"></span>createGenerator<span
-                  class="signature"
-                  >(name, dependencies, args, options, localConfigOnly<span
-                    class="signature-attributes"
-                    >opt</span
-                  >)</span
-                ><span class="type-signature"></span>
-
-                <div class="container-source members">
-                  <code><a href="index.js.html">index.js</a></code
-                  >,
-                  <code><a href="index.js.html#line201">line 201</a></code>
-                </div>
-              </h4>
-            </dt>
-            <dd>
-              <div class="description">
-                <p>
-                  Create a generator, using the given dependencies and
-                  controller arguments Dependecies can be path (autodiscovery)
-                  or an array [{generator}, {name}]
-                </p>
-              </div>
-
-              <div class="container-params">
-                <h5>Parameters:</h5>
-
-                <table class="params">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-
-                      <th>Type</th>
-
-                      <th>Attributes</th>
-
-                      <th>Default</th>
-
-                      <th class="last">Description</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    <tr>
-                      <td class="name"><code>name</code></td>
-
-                      <td class="type">
-                        <span class="param-type">String</span>
-                      </td>
-
-                      <td class="attributes"></td>
-
-                      <td class="default"></td>
-
-                      <td class="description last">
-                        <p>the name of the generator</p>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td class="name"><code>dependencies</code></td>
-
-                      <td class="type">
-                        <span class="param-type">Array</span>
-                      </td>
-
-                      <td class="attributes"></td>
-
-                      <td class="default"></td>
-
-                      <td class="description last">
-                        <p>paths to the generators dependencies</p>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td class="name"><code>args</code></td>
-
-                      <td class="type">
-                        <span class="param-type">Array</span>
-                        |
-
-                        <span class="param-type">String</span>
-                      </td>
-
-                      <td class="attributes"></td>
-
-                      <td class="default"></td>
-
-                      <td class="description last">
-                        <p>
-                          arguments to the generator; if String, will be split
-                          on spaces to create an Array
-                        </p>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td class="name"><code>options</code></td>
-
-                      <td class="type">
-                        <span class="param-type">Object</span>
-                      </td>
-
-                      <td class="attributes"></td>
-
-                      <td class="default"></td>
-
-                      <td class="description last">
-                        <p>configuration for the generator</p>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td class="name"><code>localConfigOnly</code></td>
-
-                      <td class="type">
-                        <span class="param-type">Boolean</span>
-                      </td>
-
-                      <td class="attributes">&lt;optional><br /></td>
-
-                      <td class="default">true</td>
-
-                      <td class="description last">
-                        <p>passes localConfigOnly to the generators</p>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <dl class="details"></dl>
-
-              <h5>Example</h5>
-
-              <pre class="prettyprint"><code>var deps = ['../../app',
-             '../../common',
-             '../../controller',
-             '../../main',
-             [createDummyGenerator(), 'testacular:app']
-           ];
-var angular = createGenerator('angular:app', deps);</code></pre>
-            </dd>
-
-            <dt>
-              <h4 class="name" id="createMockedGenerator">
-                <span class="type-signature"></span>createMockedGenerator<span
-                  class="signature"
-                  >()</span
-                ><span class="type-signature"></span>
-
-                <div class="container-source members">
-                  <code><a href="index.js.html">index.js</a></code
-                  >,
-                  <code><a href="index.js.html#line154">line 154</a></code>
-                </div>
-              </h4>
-            </dt>
-            <dd>
-              <div class="description">
-                <p>Create a mocked generator</p>
-              </div>
-
-              <dl class="details"></dl>
-            </dd>
-
-            <dt>
-              <h4 class="name" id="createTestEnv">
-                <span class="type-signature"></span>createTestEnv<span
-                  class="signature"
-                  >(envContructor, options<span class="signature-attributes"
-                    >opt</span
-                  >)</span
-                ><span class="type-signature"> &rarr; {Object}</span>
-
-                <div class="container-source members">
-                  <code><a href="index.js.html">index.js</a></code
-                  >,
-                  <code><a href="index.js.html#line260">line 260</a></code>
-                </div>
-              </h4>
-            </dt>
-            <dd>
-              <div class="description">
-                <p>Creates a test environment.</p>
-              </div>
-
-              <div class="container-params">
-                <h5>Parameters:</h5>
-
-                <table class="params">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-
-                      <th>Type</th>
-
-                      <th>Attributes</th>
-
-                      <th class="last">Description</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    <tr>
-                      <td class="name"><code>envContructor</code></td>
-
-                      <td class="type">
-                        <span class="param-type">function</span>
-                      </td>
-
-                      <td class="attributes"></td>
-
-                      <td class="description last">
-                        <p>environment constructor method.</p>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td class="name"><code>options</code></td>
-
-                      <td class="type">
-                        <span class="param-type">Object</span>
-                      </td>
-
-                      <td class="attributes">&lt;optional><br /></td>
-
-                      <td class="description last">
-                        <p>Options to be passed to the environment</p>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div class="container-returns">
-                <h5>Returns:</h5>
-
-                <span class="param-type">Object</span>
-
-                -
-                <p>
-                  environment instance const env =
-                  createTestEnv(require('yeoman-environment').createEnv);
-                </p>
-              </div>
-
-              <dl class="details"></dl>
-            </dd>
-
-            <dt>
-              <h4 class="name" id="gruntfile">
-                <span class="type-signature"></span>gruntfile<span
-                  class="signature"
-                  >(options, done)</span
-                ><span class="type-signature"></span>
-
-                <div class="container-source members">
-                  <code><a href="index.js.html">index.js</a></code
-                  >,
-                  <code><a href="index.js.html#line50">line 50</a></code>
-                </div>
-              </h4>
-            </dt>
-            <dd>
-              <div class="description">
-                <p>
-                  Generates a new Gruntfile.js in the current working directory
-                  based on options hash passed in.
-                </p>
-              </div>
-
-              <div class="container-params">
-                <h5>Parameters:</h5>
-
-                <table class="params">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-
-                      <th>Type</th>
-
-                      <th class="last">Description</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    <tr>
-                      <td class="name"><code>options</code></td>
-
-                      <td class="type">
-                        <span class="param-type">Object</span>
-                      </td>
-
-                      <td class="description last">
-                        <p>Grunt configuration</p>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td class="name"><code>done</code></td>
-
-                      <td class="type">
-                        <span class="param-type">function</span>
-                      </td>
-
-                      <td class="description last">
-                        <p>callback to call on completion</p>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <dl class="details"></dl>
-
-              <h5>Example</h5>
-
-              <pre class="prettyprint"><code>before(helpers.gruntfile({
-  foo: {
-    bar: '&lt;config.baz>'
-  }
-}));</code></pre>
-            </dd>
-
-            <dt>
-              <h4 class="name" id="mockLocalConfig">
-                <span class="type-signature"></span>mockLocalConfig<span
-                  class="signature"
-                  >(generator, localConfig)</span
-                ><span class="type-signature"></span>
-
-                <div class="container-source members">
-                  <code><a href="index.js.html">index.js</a></code
-                  >,
-                  <code><a href="index.js.html#line146">line 146</a></code>
-                </div>
-              </h4>
-            </dt>
-            <dd>
-              <div class="description">
-                <p>Provide mocked values to the config</p>
-              </div>
-
-              <div class="container-params">
-                <h5>Parameters:</h5>
-
-                <table class="params">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-
-                      <th>Type</th>
-
-                      <th class="last">Description</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    <tr>
-                      <td class="name"><code>generator</code></td>
-
-                      <td class="type">
-                        <span class="param-type">Generator</span>
-                      </td>
-
-                      <td class="description last">
-                        <p>a Yeoman generator</p>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td class="name"><code>localConfig</code></td>
-
-                      <td class="type">
-                        <span class="param-type">Object</span>
-                      </td>
-
-                      <td class="description last">
-                        <p>
-                          localConfig - should look just like if called
-                          config.getAll()
-                        </p>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <dl class="details"></dl>
-            </dd>
-
-            <dt>
-              <h4 class="name" id="mockPrompt">
-                <span class="type-signature"></span>mockPrompt<span
-                  class="signature"
-                  >(generator, answers, options)</span
-                ><span class="type-signature"></span>
-
-                <div class="container-source members">
-                  <code><a href="index.js.html">index.js</a></code
-                  >,
-                  <code><a href="index.js.html#line111">line 111</a></code>
-                </div>
-              </h4>
-            </dt>
-            <dd>
-              <div class="description">
-                <p>Answer prompt questions for the passed-in generator</p>
-              </div>
-
-              <div class="container-params">
-                <h5>Parameters:</h5>
-
-                <table class="params">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-
-                      <th>Type</th>
-
-                      <th class="last">Description</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    <tr>
-                      <td class="name"><code>generator</code></td>
-
-                      <td class="type">
-                        <span class="param-type">Generator</span>
-                        |
-
-                        <span class="param-type">Environment</span>
-                      </td>
-
-                      <td class="description last">
-                        <p>a Yeoman generator or environment</p>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td class="name"><code>answers</code></td>
-
-                      <td class="type">
-                        <span class="param-type">Object</span>
-                      </td>
-
-                      <td class="description last">
-                        <p>
-                          an object where keys are the generators prompt names
-                          and values are the answers to the prompt questions
-                        </p>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td class="name"><code>options</code></td>
-
-                      <td class="type">
-                        <span class="param-type">function</span>
-                        |
-
-                        <span class="param-type">Object</span>
-                      </td>
-
-                      <td class="description last">
-                        <p>Options or callback</p>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <dl class="details"></dl>
-
-              <h5>Example</h5>
-
-              <pre
-                class="prettyprint"
-              ><code>mockPrompt(angular, {'bootstrap': 'Y', 'compassBoostrap': 'Y'});</code></pre>
-            </dd>
-
-            <dt>
-              <h4 class="name" id="registerDependencies">
-                <span class="type-signature"></span>registerDependencies<span
-                  class="signature"
-                  >(dependencies)</span
-                ><span class="type-signature"></span>
-
-                <div class="container-source members">
-                  <code><a href="index.js.html">index.js</a></code
-                  >,
-                  <code><a href="index.js.html#line221">line 221</a></code>
-                </div>
-              </h4>
-            </dt>
-            <dd>
-              <div class="description">
-                <p>
-                  Register a list of dependent generators into the provided env.
-                  Dependecies can be path (autodiscovery) or an array
-                  [{generator}, {name}]
-                </p>
-              </div>
-
-              <div class="container-params">
-                <h5>Parameters:</h5>
-
-                <table class="params">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-
-                      <th>Type</th>
-
-                      <th class="last">Description</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    <tr>
-                      <td class="name"><code>dependencies</code></td>
-
-                      <td class="type">
-                        <span class="param-type">Array</span>
-                      </td>
-
-                      <td class="description last">
-                        <p>paths to the generators dependencies</p>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <dl class="details"></dl>
-            </dd>
-
-            <dt>
-              <h4 class="name" id="restorePrompt">
-                <span class="type-signature"></span>restorePrompt<span
-                  class="signature"
-                  >(generator)</span
-                ><span class="type-signature"></span>
-
-                <div class="container-source members">
-                  <code><a href="index.js.html">index.js</a></code
-                  >,
-                  <code><a href="index.js.html#line136">line 136</a></code>
-                </div>
-              </h4>
-            </dt>
-            <dd>
-              <div class="description">
-                <p>Restore defaults prompts on a generator.</p>
-              </div>
-
-              <div class="container-params">
-                <h5>Parameters:</h5>
-
-                <table class="params">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-
-                      <th>Type</th>
-
-                      <th class="last">Description</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    <tr>
-                      <td class="name"><code>generator</code></td>
-
-                      <td class="type">
-                        <span class="param-type">Generator</span>
-                        |
-
-                        <span class="param-type">Environment</span>
-                      </td>
-
-                      <td class="description last"><p>or environment</p></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <dl class="details"></dl>
-            </dd>
-
-            <dt>
-              <h4 class="name" id="run">
-                <span class="type-signature"></span>run<span class="signature"
-                  >(GeneratorOrNamespace)</span
-                ><span class="type-signature">
-                  &rarr; {<a href="RunContext.html">RunContext</a>}</span
-                >
-
-                <div class="container-source members">
-                  <code><a href="index.js.html">index.js</a></code
-                  >,
-                  <code><a href="index.js.html#line296">line 296</a></code>
-                </div>
-              </h4>
-            </dt>
-            <dd>
-              <div class="description">
-                <p>Run the provided Generator</p>
-              </div>
-
-              <div class="container-params">
-                <h5>Parameters:</h5>
-
-                <table class="params">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-
-                      <th>Type</th>
-
-                      <th class="last">Description</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    <tr>
-                      <td class="name"><code>GeneratorOrNamespace</code></td>
-
-                      <td class="type">
-                        <span class="param-type">String</span>
-                        |
-
-                        <span class="param-type">function</span>
-                      </td>
-
-                      <td class="description last">
-                        <p>Generator constructor or namespace</p>
+                        <p>Files to print or empty for entire mem-fs</p>
                       </td>
                     </tr>
                   </tbody>
@@ -1071,34 +1382,33 @@ var angular = createGenerator('angular:app', deps);</code></pre>
                 <h5>Returns:</h5>
 
                 <span class="param-type"
-                  ><a href="RunContext.html">RunContext</a></span
+                  ><a href="RunResult.html">RunResult</a></span
                 >
+
+                -
+                <p>this</p>
               </div>
 
               <dl class="details"></dl>
             </dd>
 
             <dt>
-              <h4 class="name" id="setUpTestDirectory">
-                <span class="type-signature"></span>setUpTestDirectory<span
+              <h4 class="name" id="getSnapshot">
+                <span class="type-signature"></span>getSnapshot<span
                   class="signature"
-                  >(dir)</span
-                ><span class="type-signature"> &rarr; {function}</span>
+                  >(filter)</span
+                ><span class="type-signature"> &rarr; {Object}</span>
 
                 <div class="container-source members">
-                  <code><a href="index.js.html">index.js</a></code
+                  <code><a href="run-result.js.html">run-result.js</a></code
                   >,
-                  <code><a href="index.js.html#line26">line 26</a></code>
+                  <code><a href="run-result.js.html#line61">line 61</a></code>
                 </div>
               </h4>
             </dt>
             <dd>
               <div class="description">
-                <p>
-                  Create a function that will clean up the test directory, cd
-                  into it, and create a dummy gruntfile inside. Intended for use
-                  as a callback for the mocha <code>before</code> hook.
-                </p>
+                <p>Return an object with fs changes.</p>
               </div>
 
               <div class="container-params">
@@ -1117,14 +1427,14 @@ var angular = createGenerator('angular:app', deps);</code></pre>
 
                   <tbody>
                     <tr>
-                      <td class="name"><code>dir</code></td>
+                      <td class="name"><code>filter</code></td>
 
                       <td class="type">
-                        <span class="param-type">String</span>
+                        <span class="param-type">function</span>
                       </td>
 
                       <td class="description last">
-                        <p>path to the test directory</p>
+                        <p>parameter forwarded to mem-fs-editor#dump</p>
                       </td>
                     </tr>
                   </tbody>
@@ -1134,91 +1444,45 @@ var angular = createGenerator('angular:app', deps);</code></pre>
               <div class="container-returns">
                 <h5>Returns:</h5>
 
-                <span class="param-type">function</span>
-
-                -
-                <p>mocha callback</p>
+                <span class="param-type">Object</span>
               </div>
 
               <dl class="details"></dl>
             </dd>
 
             <dt>
-              <h4 class="name" id="testDirectory">
-                <span class="type-signature"></span>testDirectory<span
+              <h4 class="name" id="restore">
+                <span class="type-signature"></span>restore<span
                   class="signature"
-                  >(dir, cb)</span
-                ><span class="type-signature"></span>
+                  >()</span
+                ><span class="type-signature">
+                  &rarr; {<a href="RunResult.html">RunResult</a>}</span
+                >
 
                 <div class="container-source members">
-                  <code><a href="index.js.html">index.js</a></code
+                  <code><a href="run-result.js.html">run-result.js</a></code
                   >,
-                  <code><a href="index.js.html#line76">line 76</a></code>
+                  <code><a href="run-result.js.html#line102">line 102</a></code>
                 </div>
               </h4>
             </dt>
             <dd>
               <div class="description">
-                <p>
-                  Clean-up the test directory and cd into it. Call given
-                  callback after entering the test directory.
-                </p>
+                <p>Reverts to old cwd.</p>
               </div>
 
-              <div class="container-params">
-                <h5>Parameters:</h5>
+              <div class="container-returns">
+                <h5>Returns:</h5>
 
-                <table class="params">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
+                <span class="param-type"
+                  ><a href="RunResult.html">RunResult</a></span
+                >
 
-                      <th>Type</th>
-
-                      <th class="last">Description</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    <tr>
-                      <td class="name"><code>dir</code></td>
-
-                      <td class="type">
-                        <span class="param-type">String</span>
-                      </td>
-
-                      <td class="description last">
-                        <p>path to the test directory</p>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td class="name"><code>cb</code></td>
-
-                      <td class="type">
-                        <span class="param-type">function</span>
-                      </td>
-
-                      <td class="description last">
-                        <p>
-                          callback executed after setting working directory to
-                          dir
-                        </p>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                -
+                <p>this</p>
               </div>
 
               <dl class="details"></dl>
-
-              <h5>Example</h5>
-
-              <pre
-                class="prettyprint"
-              ><code>testDirectory(path.join(__dirname, './temp'), function () {
-  fs.writeFileSync('testfile', 'Roses are red.');
-});</code></pre>
             </dd>
           </dl>
         </article>
@@ -1241,7 +1505,7 @@ var angular = createGenerator('angular:app', deps);</code></pre>
     <script src="scripts/linenumber.js"></script>
 
     <script>
-      var id = "YeomanTest_sub".replace(/"/g, "_");
+      var id = "RunResult_sub".replace(/"/g, "_");
       var selectedApi = document.getElementById(id); // do not use jquery selector
       var $selectedApi = $(selectedApi);
 
