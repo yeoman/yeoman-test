@@ -129,9 +129,40 @@ describe('run-result', () => {
       runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
     });
     it('should return every changed file', () => {
-      assert.equal(Object.keys(runResult.getSnapshot()).length, 2);
-      assert(runResult.getSnapshot()['test.txt']);
-      assert(runResult.getSnapshot()['test2.txt']);
+      assert.deepEqual(runResult.getSnapshot(), {
+        'test.txt': {
+          contents: 'test content',
+          state: 'modified'
+        },
+        'test2.txt': {
+          contents: 'test2 content',
+          state: 'modified'
+        }
+      });
+    });
+  });
+  describe('#getSnapshotState', () => {
+    let runResult;
+    beforeEach(() => {
+      const memFs = MemFs.create();
+      const memFsEditor = MemFsEditor.create(memFs);
+      runResult = new RunResult({
+        memFs,
+        fs: memFsEditor,
+        cwd: process.cwd()
+      });
+      runResult.fs.write(path.resolve('test.txt'), 'test content');
+      runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
+    });
+    it('should return every changed file', () => {
+      assert.deepEqual(runResult.getStateSnapshot(), {
+        'test.txt': {
+          state: 'modified'
+        },
+        'test2.txt': {
+          state: 'modified'
+        }
+      });
     });
   });
   describe('#cleanup', () => {
