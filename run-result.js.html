@@ -30,7 +30,7 @@
       <div class="title">
         <h1><a href="index.html" class="link">yeoman-test</a></h1>
 
-        <span class="version">v6.1.0</span>
+        <span class="version">v6.2.0</span>
       </div>
       <div class="search-container" id="search-container">
         <input type="text" placeholder="Search" />
@@ -253,6 +253,7 @@ function convertArgs(args) {
 class RunResult {
   constructor(options = {cwd: process.cwd()}) {
     this.env = options.env;
+    this.generator = options.generator;
     this.cwd = options.cwd;
     this.oldCwd = options.oldCwd;
     this.memFs = options.memFs;
