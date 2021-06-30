@@ -37,23 +37,25 @@ describe('run-result', () => {
         assert.equal(runResult.cwd, cwd);
       });
     });
-    ['env', 'oldCwd', 'cwd', 'mockedGenerators'].forEach((optionName) => {
-      describe(`with ${optionName} option`, () => {
-        const optionValue = {};
-        const options = {};
-        let runResult;
-        before(() => {
-          options[optionName] = optionValue;
-          runResult = new RunResult(options);
+    ['env', 'generator', 'oldCwd', 'cwd', 'mockedGenerators'].forEach(
+      (optionName) => {
+        describe(`with ${optionName} option`, () => {
+          const optionValue = {};
+          const options = {};
+          let runResult;
+          before(() => {
+            options[optionName] = optionValue;
+            runResult = new RunResult(options);
+          });
+          it('loads it', () => {
+            assert.equal(runResult[optionName], optionValue);
+          });
+          it('loads options option', () => {
+            assert.equal(runResult.options, options);
+          });
         });
-        it('loads it', () => {
-          assert.equal(runResult[optionName], optionValue);
-        });
-        it('loads options option', () => {
-          assert.equal(runResult.options, options);
-        });
-      });
-    });
+      }
+    );
   });
   describe('#dumpFiles', () => {
     let runResult;
