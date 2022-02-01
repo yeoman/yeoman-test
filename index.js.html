@@ -30,7 +30,7 @@
       <div class="title">
         <h1><a href="index.html" class="link">yeoman-test</a></h1>
 
-        <span class="version">v6.2.0</span>
+        <span class="version">v6.3.0</span>
       </div>
       <div class="search-container" id="search-container">
         <input type="text" placeholder="Search" />
@@ -231,7 +231,13 @@
           ><code>/* eslint-disable max-params */
 
 'use strict';
-const fs = require('fs');
+const {
+  writeFile,
+  mkdirSync,
+  existsSync,
+  rmdirSync,
+  rmSync = rmdirSync
+} = require('fs');
 const _ = require('lodash');
 const path = require('path');
 const sinon = require('sinon');
@@ -289,7 +295,7 @@ YeomanTest.prototype.gruntfile = function (options, done) {
 
   const out = ['module.exports = function (grunt) {', config, '};'];
 
-  fs.writeFile('Gruntfile.js', out.join('\n'), done);
+  writeFile('Gruntfile.js', out.join('\n'), done);
 };
 
 /**
@@ -315,11 +321,11 @@ YeomanTest.prototype.testDirectory = function (dir, cb) {
   process.chdir('/');
 
   try {
-    if (fs.existsSync(dir)) {
-      fs.rmdirSync(dir, {recursive: true});
+    if (existsSync(dir)) {
+      rmSync(dir, {recursive: true});
     }
 
-    fs.mkdirSync(dir, {recursive: true});
+    mkdirSync(dir, {recursive: true});
     process.chdir(dir);
     cb();
   } catch (error) {
