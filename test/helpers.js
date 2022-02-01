@@ -1,10 +1,15 @@
 'use strict';
 const assert = require('assert');
+const crypto = require('crypto');
 const path = require('path');
 const sinon = require('sinon');
 const util = require('util');
 const yeoman = require('yeoman-environment');
 const Generator = require('yeoman-generator');
+const {existsSync, rmdirSync, rmSync = rmdirSync} = require('fs');
+const tempDirectory = require('temp-dir');
+
+const {resolve, join} = path;
 
 const helpers = require('../lib');
 const {TestAdapter} = require('../lib/adapter');
@@ -35,6 +40,65 @@ describe('yeoman-test', function () {
     it('accepts dependency as array of [<generator>, <name>]', function () {
       helpers.registerDependencies(env, [[this.StubGenerator, 'stub:app']]);
       assert(env.get('stub:app'));
+    });
+  });
+
+  describe('.prepareTempDirectory()', function () {
+    it('should return a function', function () {
+      const cleanup = helpers.prepareTempDirectory();
+      assert(typeof cleanup === 'function');
+      cleanup();
+    });
+
+    it('should return temporaryDir property', function () {
+      const cleanup = helpers.prepareTempDirectory();
+      assert(typeof cleanup.temporaryDir === 'string');
+      cleanup();
+    });
+
+    it('should change cwd to the temporary diretory and revert', function () {
+      const cwd = process.cwd();
+      const cleanup = helpers.prepareTempDirectory();
+      assert(cwd !== process.cwd());
+      cleanup();
+      assert(cwd === process.cwd());
+    });
+
+    it('should cleanup default temporaryDir', function () {
+      const cleanup = helpers.prepareTempDirectory();
+      cleanup();
+      assert(!existsSync(cleanup.temporaryDir));
+    });
+
+    it('should not cleanup if cleanupTemporaryDir is false', function () {
+      const cleanup = helpers.prepareTempDirectory({
+        cleanupTemporaryDir: false
+      });
+      cleanup();
+      assert(existsSync(cleanup.temporaryDir));
+      rmSync(cleanup.temporaryDir, {recursive: true});
+    });
+
+    it('should accept custom temporaryDir', function () {
+      const temporaryDir = resolve(
+        join(tempDirectory, crypto.randomBytes(20).toString('hex'))
+      );
+      const cleanup = helpers.prepareTempDirectory({
+        temporaryDir,
+        cleanupTemporaryDir: true
+      });
+      assert(process.cwd() === temporaryDir);
+      cleanup();
+    });
+
+    it('should not cleanup custom temporaryDir by default', function () {
+      const temporaryDir = resolve(
+        join(tempDirectory, crypto.randomBytes(20).toString('hex'))
+      );
+      const cleanup = helpers.prepareTempDirectory({temporaryDir});
+      cleanup();
+      assert(existsSync(cleanup.temporaryDir));
+      rmSync(cleanup.temporaryDir, {recursive: true});
     });
   });
 
