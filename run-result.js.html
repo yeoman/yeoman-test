@@ -30,7 +30,7 @@
       <div class="title">
         <h1><a href="index.html" class="link">yeoman-test</a></h1>
 
-        <span class="version">v6.2.0</span>
+        <span class="version">v6.3.0</span>
       </div>
       <div class="search-container" id="search-container">
         <input type="text" placeholder="Search" />
@@ -228,7 +228,7 @@
         <article>
           <pre class="prettyprint source linenums"><code>'use strict';
 const assert = require('assert');
-const fs = require('fs');
+const {existsSync, readFileSync, rmdirSync, rmSync = rmdirSync} = require('fs');
 const MemFsEditor = require('mem-fs-editor');
 const path = require('path');
 
@@ -352,7 +352,7 @@ class RunResult {
    */
   cleanup() {
     process.chdir(this.oldCwd);
-    fs.rmdirSync(this.cwd, {recursive: true});
+    rmSync(this.cwd, {recursive: true});
     return this;
   }
 
@@ -370,7 +370,7 @@ class RunResult {
     if (this.fs) {
       file = this.fs.read(filename, 'utf8');
     } else {
-      file = fs.readFileSync(filename, 'utf8');
+      file = readFileSync(filename, 'utf8');
     }
 
     return json ? JSON.parse(file) : file;
@@ -382,7 +382,7 @@ class RunResult {
       return this.fs.exists(filename);
     }
 
-    return fs.existsSync(filename);
+    return existsSync(filename);
   }
 
   /**

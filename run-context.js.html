@@ -30,7 +30,7 @@
       <div class="title">
         <h1><a href="index.html" class="link">yeoman-test</a></h1>
 
-        <span class="version">v6.2.0</span>
+        <span class="version">v6.3.0</span>
       </div>
       <div class="search-container" id="search-container">
         <input type="text" placeholder="Search" />
@@ -228,7 +228,7 @@
         <article>
           <pre class="prettyprint source linenums"><code>'use strict';
 const crypto = require('crypto');
-const fs = require('fs');
+const {existsSync, rmdirSync, rmSync = rmdirSync} = require('fs');
 const path = require('path');
 const assert = require('assert');
 const _ = require('lodash/string');
@@ -650,8 +650,8 @@ RunContext.prototype.cleanTestDirectory = function (force = false) {
     throw new Error('Cleanup test dir called with false tmpdir option.');
   }
 
-  if (this.targetDirectory &amp;&amp; fs.existsSync(this.targetDirectory)) {
-    fs.rmdirSync(this.targetDirectory, {recursive: true});
+  if (this.targetDirectory &amp;&amp; existsSync(this.targetDirectory)) {
+    rmSync(this.targetDirectory, {recursive: true});
   }
 };
 
