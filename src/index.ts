@@ -113,16 +113,20 @@ export class YeomanTest {
 
   /**
    * Answer prompt questions for the passed-in generator
-   * @param {Generator|Environment} generator - a Yeoman generator or environment
+   * @param generator - a Yeoman generator or environment
    * @param {Object} answers - an object where keys are the
    *   generators prompt names and values are the answers to
    *   the prompt questions
-   * @param {Function|Object} options - Options or callback
+   * @param options - Options or callback
    * @example
    * mockPrompt(angular, {'bootstrap': 'Y', 'compassBoostrap': 'Y'});
    */
 
-  mockPrompt(envOrGenerator, mockedAnswers, options) {
+  mockPrompt(
+    envOrGenerator: YeomanGenerator | Environment,
+    mockedAnswers: YeomanGenerator.Answers,
+    options,
+  ) {
     envOrGenerator = envOrGenerator.env ?? envOrGenerator;
     const {promptModule} = envOrGenerator.adapter;
 
@@ -214,17 +218,21 @@ export class YeomanTest {
    * var angular = createGenerator('angular:app', deps);
    */
 
-  createGenerator(
-    name,
+  createGenerator<GeneratorType extends YeomanGenerator = YeomanGenerator>(
+    name: string,
     dependencies: Dependency[],
-    args: string | string[],
-    options,
+    args?: string[],
+    options?: Environment.InstantiateOptions,
     localConfigOnly = true,
-  ) {
+  ): GeneratorType {
     const env = this.createEnv([], {sharedOptions: {localConfigOnly}});
     this.registerDependencies(env, dependencies);
 
-    return (env as any).create(name, {arguments: args, options});
+    return env.create<YeomanGenerator['options']>(
+      name,
+      args as any,
+      options,
+    ) as unknown as GeneratorType;
   }
 
   /**
@@ -277,7 +285,7 @@ export class YeomanTest {
 
   createTestEnv(
     envContructor = this.createEnv,
-    options: any = {localConfigOnly: true},
+    options: Environment.Options = {localConfigOnly: true},
   ) {
     const envOptions = _.cloneDeep(this.environmentOptions ?? {});
     if (typeof options === 'boolean') {
@@ -324,8 +332,8 @@ export class YeomanTest {
     GeneratorOrNamespace:
       | string
       | ConstructorParameters<typeof YeomanGenerator>,
-    settings: RunContextSettings,
-    envOptions: Options,
+    settings?: RunContextSettings,
+    envOptions?: Options,
   ) {
     const contextSettings = _.cloneDeep(this.settings ?? {});
     const generatorOptions = _.cloneDeep(this.generatorOptions ?? {});

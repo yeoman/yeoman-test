@@ -1,10 +1,17 @@
 /* eslint-disable max-params */
 import events from 'node:events';
 import {PassThrough} from 'node:stream';
-import inquirer from 'inquirer';
-import sinon from 'sinon';
+import inquirer, {type prompts} from 'inquirer';
+import {spy as sinonSpy, stub as sinonStub} from 'sinon';
+import type Generator from 'yeoman-generator';
+import type Logger from 'yeoman-environment/lib/util/log.js';
 
 export class DummyPrompt {
+  answers: Generator.Answers;
+  question: inquirer.Question;
+  callback!: (answers: Generator.Answers) => Generator.Answers;
+  throwOnMissingAnswer = false;
+
   constructor(mockedAnswers, options, question, _rl, answers) {
     this.answers = {...answers, ...mockedAnswers};
     this.question = question;
@@ -19,8 +26,8 @@ export class DummyPrompt {
     this.callback = this.callback || ((answers) => answers);
   }
 
-  run() {
-    let answer = this.answers[this.question.name];
+  async run() {
+    let answer = this.answers[this.question.name!];
     let isSet;
 
     switch (this.question.type) {
@@ -47,7 +54,7 @@ export class DummyPrompt {
         const missingAnswerMessage = `yeoman-test: question ${this.question.name} was asked but answer was not provided`;
         console.warn(missingAnswerMessage);
         if (this.throwOnMissingAnswer) {
-          return Promise.reject(new Error(missingAnswerMessage));
+          throw new Error(missingAnswerMessage);
         }
       }
 
@@ -58,15 +65,19 @@ export class DummyPrompt {
       }
     }
 
-    return Promise.resolve(this.callback(answer));
+    return this.callback(answer);
   }
 }
 
 export class TestAdapter {
-  constructor(mockedAnswers) {
+  promptModule: inquirer.PromptModule;
+  diff: any;
+  log: typeof Logger;
+
+  constructor(mockedAnswers?) {
     this.promptModule = inquirer.createPromptModule({
-      input: new PassThrough(),
-      output: new PassThrough(),
+      input: new PassThrough() as any,
+      output: new PassThrough() as any,
       skipTTYChecks: true,
     });
 
@@ -77,12 +88,12 @@ export class TestAdapter {
           constructor(question, rl, answers) {
             super(mockedAnswers, undefined, question, rl, answers);
           }
-        },
+        } as any,
       );
     }
 
-    this.diff = sinon.spy();
-    this.log = sinon.spy();
+    this.diff = sinonSpy();
+    this.log = sinonSpy();
     Object.assign(this.log, events.EventEmitter.prototype);
 
     // Make sure all log methods are defined
@@ -101,7 +112,7 @@ export class TestAdapter {
       'table',
     ];
     for (const methodName of adapterMethods) {
-      this.log[methodName] = sinon.stub().returns(this.log);
+      this.log[methodName] = sinonStub().returns(this.log);
     }
   }
 
