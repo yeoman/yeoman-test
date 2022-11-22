@@ -8,7 +8,7 @@ import MemFsEditor from 'mem-fs-editor';
 import {stub} from 'sinon';
 
 import RunContext from '../src/run-context.js';
-import RunResult, {RunResultOptions} from '../src/run-result.js';
+import RunResult from '../src/run-result.js';
 
 describe('run-result', () => {
   describe('constructor', () => {
@@ -19,7 +19,7 @@ describe('run-result', () => {
     });
     describe('with fs option', () => {
       it('throws error without cwd', () => {
-        assert.throws(() => new RunResult({memFs: {}}));
+        assert.throws(() => new RunResult({memFs: {}} as any));
       });
     });
     describe('with fs and cwd options', () => {

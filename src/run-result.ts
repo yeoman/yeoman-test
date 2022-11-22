@@ -9,7 +9,7 @@ import type Environment from 'yeoman-environment';
 import type Generator from 'yeoman-generator';
 
 import {type RunContextSettings} from './run-context.js';
-import helpers from './index.js';
+import helpers from './helpers.js';
 
 const isObject = (object) =>
   typeof object === 'object' && object !== null && object !== undefined;

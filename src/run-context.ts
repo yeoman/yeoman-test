@@ -15,7 +15,7 @@ import defaultHelpers, {
   type GeneratorConstructor,
   type Dependency,
   type YeomanTest,
-} from './index.js';
+} from './helpers.js';
 
 /**
  * Provides settings for creating a `RunContext`.

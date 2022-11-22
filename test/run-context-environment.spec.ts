@@ -7,7 +7,7 @@ import {createRequire} from 'node:module';
 import {fake as sinonFake, replace as sinonReplace} from 'sinon';
 
 import {type LookupOptions} from 'yeoman-environment';
-import helpers from '../src/index.js';
+import helpers from '../src/helpers.js';
 import RunContext from '../src/run-context.js';
 import RunResult from '../src/run-result.js';
 import SimpleApp from './fixtures/generator-simple/app/index.js';

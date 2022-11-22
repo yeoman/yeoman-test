@@ -11,7 +11,7 @@ import Generator from 'yeoman-generator';
 import tempDirectory from 'temp-dir';
 
 import type Environment from 'yeoman-environment';
-import helpers from '../src/index.js';
+import helpers from '../src/helpers.js';
 import {TestAdapter} from '../src/adapter.js';
 import RunContext from '../src/run-context.js';
 

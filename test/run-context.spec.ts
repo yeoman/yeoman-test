@@ -15,7 +15,7 @@ import Generator from 'yeoman-generator';
 import tempDirectory from 'temp-dir';
 
 import {RunContextBase as RunContext} from '../src/run-context.js';
-import helpers from '../src/index.js';
+import helpers from '../src/helpers.js';
 import {DummyPrompt} from '../src/adapter.js';
 
 const require = createRequire(import.meta.url);
