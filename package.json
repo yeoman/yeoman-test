@@ -56,6 +56,8 @@
   },
   "scripts": {
     "test": "nyc mocha",
+    "build": "tsc",
+    "prepare": "npm run build",
     "pretest": "xo",
     "precommit": "lint-staged",
     "doc": "npm run doc:generate && npm run doc:fix && npm run doc:prettier",
