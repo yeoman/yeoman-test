@@ -19,7 +19,7 @@ import type {RunContextSettings} from './run-context.js';
 /**
  * Dependencies can be path (autodiscovery) or an array [<generator>, <name>]
  */
-export type Dependency = string | [Generator, string];
+export type Dependency = string | [GeneratorConstructor, string];
 
 type GeneratorNew<GenParameter extends YeomanGenerator = YeomanGenerator> =
   new (
@@ -262,10 +262,10 @@ export class YeomanTest {
    * @param {Array} dependencies - paths to the generators dependencies
    */
 
-  registerDependencies(env, dependencies: Dependency[]) {
+  registerDependencies(env: Environment, dependencies: Dependency[]) {
     for (const dependency of dependencies) {
       if (Array.isArray(dependency)) {
-        env.registerStub(...dependency);
+        env.registerStub(dependency[0] as any, dependency[1]);
       } else {
         env.register(dependency);
       }
@@ -371,8 +371,8 @@ export class YeomanTest {
 
   create(
     GeneratorOrNamespace: string | GeneratorConstructor,
-    settings: RunContextSettings,
-    envOptions: Options,
+    settings?: RunContextSettings,
+    envOptions?: Options,
   ) {
     return this.run(
       GeneratorOrNamespace,
