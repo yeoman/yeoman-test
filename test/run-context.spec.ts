@@ -4,14 +4,19 @@ import assert from 'node:assert';
 import {fileURLToPath} from 'node:url';
 import process from 'node:process';
 import {createRequire} from 'node:module';
-import sinon from 'sinon';
+import {
+  assert as sinonAssert,
+  spy as sinonSpy,
+  stub as sinonStub,
+  fake as sinonFake,
+} from 'sinon';
 import inquirer from 'inquirer';
 import Generator from 'yeoman-generator';
 import tempDirectory from 'temp-dir';
 
-import RunContext from '../lib/run-context.js';
-import helpers from '../lib/index.js';
-import {DummyPrompt} from '../lib/adapter.js';
+import RunContext from '../src/run-context.js';
+import helpers from '../src/index.js';
+import {DummyPrompt} from '../src/adapter.js';
 
 const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -25,7 +30,7 @@ describe('RunContext', function () {
     process.chdir(__dirname);
 
     this.defaultInput = inquirer.prompts.input;
-    this.execSpy = sinon.spy();
+    this.execSpy = sinonSpy();
     const {execSpy} = this;
     this.Dummy = class extends Generator {
       exec(...args) {
@@ -74,16 +79,16 @@ describe('RunContext', function () {
     it('propagate generator error events', function (done) {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
-      const execSpy = sinon.stub().throws(error);
-      const endSpy = sinon.spy();
+      const execSpy = sinonStub().throws(error);
+      const endSpy = sinonSpy();
       Dummy.prototype.exec = execSpy;
       Dummy.prototype.end = execSpy;
       const ctx = new RunContext(Dummy);
 
       ctx.on('error', function (error_) {
-        sinon.assert.calledOnce(execSpy);
+        sinonAssert.calledOnce(execSpy);
         assert.equal(error_, error);
-        sinon.assert.notCalled(endSpy);
+        sinonAssert.notCalled(endSpy);
         done();
       });
     });
@@ -115,7 +120,7 @@ describe('RunContext', function () {
       this.ctx.on(
         'end',
         function () {
-          sinon.assert.calledOnce(this.execSpy);
+          sinonAssert.calledOnce(this.execSpy);
           done();
         }.bind(this),
       );
@@ -176,7 +181,7 @@ describe('RunContext', function () {
 
     it('only run a generator once', function (done) {
       this.ctx.on('end', () => {
-        sinon.assert.calledOnce(this.execSpy);
+        sinonAssert.calledOnce(this.execSpy);
         done();
       });
 
@@ -228,9 +233,9 @@ describe('RunContext', function () {
 
     it('throw an unhandledRejection when no listener is present', function (done) {
       const error = new Error('dummy exception');
-      const execSpy = sinon.stub().throws(error);
+      const execSpy = sinonStub().throws(error);
       const errorHandler = function (error_) {
-        sinon.assert.calledOnce(execSpy);
+        sinonAssert.calledOnce(execSpy);
         assert.equal(error_, error);
         done();
       };
@@ -255,10 +260,10 @@ describe('RunContext', function () {
       );
     });
 
-    it('returns a reject promise on error', function () {
+    it('returns a reject promise on error', async function () {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
-      const execSpy = sinon.stub().throws(error);
+      const execSpy = sinonStub().throws(error);
       Dummy.prototype.exec = execSpy;
       const ctx = new RunContext(Dummy);
 
@@ -277,10 +282,10 @@ describe('RunContext', function () {
       );
     });
 
-    it('handles errors', function () {
+    it('handles errors', async function () {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
-      const execSpy = sinon.stub().throws(error);
+      const execSpy = sinonStub().throws(error);
       Dummy.prototype.exec = execSpy;
       const ctx = new RunContext(Dummy);
 
@@ -294,10 +299,10 @@ describe('RunContext', function () {
   });
 
   describe('#catch()', function () {
-    it('handles errors', function () {
+    it('handles errors', async function () {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
-      const execSpy = sinon.stub().throws(error);
+      const execSpy = sinonStub().throws(error);
       Dummy.prototype.exec = execSpy;
       const ctx = new RunContext(Dummy);
 
@@ -314,7 +319,7 @@ describe('RunContext', function () {
     });
 
     it('call helpers.testDirectory()', function () {
-      sinon.spy(helpers, 'testDirectory');
+      sinonSpy(helpers, 'testDirectory');
       this.ctx.inDir(this.tmp);
       assert(helpers.testDirectory.withArgs(this.tmp).calledOnce);
       helpers.testDirectory.restore();
@@ -326,11 +331,11 @@ describe('RunContext', function () {
 
     it('accepts optional `cb` to be invoked with resolved `dir`', function (done) {
       const ctx = new RunContext(this.Dummy);
-      const cb = sinon.spy(
+      const cb = sinonSpy(
         function () {
-          sinon.assert.calledOnce(cb);
-          sinon.assert.calledOn(cb, ctx);
-          sinon.assert.calledWith(cb, path.resolve(this.tmp));
+          sinonAssert.calledOnce(cb);
+          sinonAssert.calledOn(cb, ctx);
+          sinonAssert.calledWith(cb, path.resolve(this.tmp));
         }.bind(this),
       );
 
@@ -417,7 +422,7 @@ describe('RunContext', function () {
     });
 
     it('do not call helpers.testDirectory()', function () {
-      sinon.spy(helpers, 'testDirectory');
+      sinonSpy(helpers, 'testDirectory');
       this.ctx.cd(this.tmp);
       assert(!helpers.testDirectory.calledOnce);
       helpers.testDirectory.restore();
@@ -436,7 +441,7 @@ describe('RunContext', function () {
     });
 
     it('should cd into created directory', function () {
-      sinon.spy(process, 'chdir');
+      sinonSpy(process, 'chdir');
       this.ctx.cd(this.tmp);
       assert(process.chdir.calledWith(this.tmp));
       process.chdir.restore();
@@ -454,9 +459,9 @@ describe('RunContext', function () {
 
   describe('#inTmpDir', function () {
     it('call helpers.testDirectory()', function () {
-      sinon.spy(helpers, 'testDirectory');
+      sinonSpy(helpers, 'testDirectory');
       this.ctx.inTmpDir();
-      sinon.assert.calledOnce(helpers.testDirectory);
+      sinonAssert.calledOnce(helpers.testDirectory);
       helpers.testDirectory.restore();
     });
 
@@ -466,7 +471,7 @@ describe('RunContext', function () {
 
     it('accepts optional `cb` to be invoked with resolved `dir`', function (done) {
       const {ctx} = this;
-      const cb = sinon.spy(function (dir) {
+      const cb = sinonSpy(function (dir) {
         assert.equal(this, ctx);
         assert(dir.includes(tempDirectory));
       });
@@ -599,8 +604,8 @@ describe('RunContext', function () {
 
   describe('#withPrompts()', function () {
     it('is call automatically', function () {
-      const askFor = sinon.spy();
-      const prompt = sinon.spy();
+      const askFor = sinonSpy();
+      const prompt = sinonSpy();
       this.Dummy.prototype.askFor = function () {
         askFor();
         return this.prompt({
@@ -615,13 +620,13 @@ describe('RunContext', function () {
       };
 
       return this.ctx.toPromise().then(function () {
-        sinon.assert.calledOnce(askFor);
-        sinon.assert.calledOnce(prompt);
+        sinonAssert.calledOnce(askFor);
+        sinonAssert.calledOnce(prompt);
       });
     });
 
     it('mock the prompt', function () {
-      const execSpy = sinon.spy();
+      const execSpy = sinonSpy();
       this.Dummy.prototype.askFor = function () {
         return this.prompt({
           name: 'yeoman',
@@ -637,12 +642,12 @@ describe('RunContext', function () {
         .withPrompts({yeoman: 'yes please'})
         .toPromise()
         .then(function () {
-          sinon.assert.calledOnce(execSpy);
+          sinonAssert.calledOnce(execSpy);
         });
     });
 
     it('is chainable', function () {
-      const execSpy = sinon.spy();
+      const execSpy = sinonSpy();
       this.Dummy.prototype.askFor = function () {
         return this.prompt([
           {
@@ -667,13 +672,13 @@ describe('RunContext', function () {
         .withPrompts({yo: 'yo man'})
         .toPromise()
         .then(function () {
-          sinon.assert.calledOnce(execSpy);
+          sinonAssert.calledOnce(execSpy);
         });
     });
 
     it('calls the callback', function () {
-      const execSpy = sinon.spy();
-      const promptSpy = sinon.fake.returns('yes please');
+      const execSpy = sinonSpy();
+      const promptSpy = sinonFake.returns('yes please');
       this.Dummy.prototype.askFor = function () {
         return this.prompt({
           name: 'yeoman',
@@ -689,8 +694,8 @@ describe('RunContext', function () {
         .withPrompts({yeoman: 'no please'}, promptSpy)
         .toPromise()
         .then(function () {
-          sinon.assert.calledOnce(execSpy);
-          sinon.assert.calledOnce(promptSpy);
+          sinonAssert.calledOnce(execSpy);
+          sinonAssert.calledOnce(promptSpy);
           assert.equal(promptSpy.getCall(0).args[0], 'no please');
           assert.ok(promptSpy.getCall(0).thisValue instanceof DummyPrompt);
         });

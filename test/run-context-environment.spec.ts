@@ -4,11 +4,11 @@ import path, {dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import process from 'node:process';
 import {createRequire} from 'node:module';
-import sinon from 'sinon';
+import {fake as sinonFake, replace as sinonReplace} from 'sinon';
 
-import helpers from '../lib/index.js';
-import RunContext from '../lib/run-context.js';
-import RunResult from '../lib/run-result.js';
+import helpers from '../src/index.js';
+import RunContext from '../src/run-context.js';
+import RunResult from '../src/run-result.js';
 import SimpleApp from './fixtures/generator-simple/app/index.js';
 
 const require = createRequire(import.meta.url);
@@ -107,10 +107,10 @@ describe('RunContext running environment', function () {
     beforeEach(() => {
       ctx.withEnvironment((env) => {
         const FakeGenerator = helpers.createDummyGenerator();
-        const fake = sinon.fake.returns(
+        const fake = sinonFake.returns(
           Promise.resolve(new FakeGenerator({env})),
         );
-        sinon.replace(env, 'create', fake);
+        sinonReplace(env, 'create', fake);
       });
     });
     after(() => {
@@ -209,7 +209,9 @@ describe('RunContext running environment', function () {
       it('rejects with the error', () => {
         return ctx.run().then(
           () => assert.fail(),
-          (error) => assert(/throwing error/.test(error.message)),
+          (error) => {
+            assert(/throwing error/.test(error.message));
+          },
         );
       });
     });
@@ -239,7 +241,9 @@ describe('RunContext running environment', function () {
           .run()
           .then(
             () => assert.fail(),
-            (error) => assert(/throwing error/.test(error.message)),
+            (error) => {
+              assert(/throwing error/.test(error.message));
+            },
           );
       });
     });

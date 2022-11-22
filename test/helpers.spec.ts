@@ -5,14 +5,14 @@ import {existsSync, rmSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import process from 'node:process';
 import {createRequire} from 'node:module';
-import sinon from 'sinon';
+import {assert as sinonAssert, spy as sinonSpy, stub as sinonStub} from 'sinon';
 import yeoman from 'yeoman-environment';
 import Generator from 'yeoman-generator';
 import tempDirectory from 'temp-dir';
 
-import helpers from '../lib/index.js';
-import {TestAdapter} from '../lib/adapter.js';
-import RunContext from '../lib/run-context.js';
+import helpers from '../src/index.js';
+import {TestAdapter} from '../src/adapter.js';
+import RunContext from '../src/run-context.js';
 
 const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -145,7 +145,7 @@ describe('yeoman-test', function () {
         });
     });
 
-    it('uses default values when no answer is passed', function () {
+    it('uses default values when no answer is passed', async function () {
       const generator = env.instantiate(helpers.createDummyGenerator());
       helpers.mockPrompt(generator);
       return generator
@@ -157,7 +157,7 @@ describe('yeoman-test', function () {
         });
     });
 
-    it('supports `null` answer for `list` type', function () {
+    it('supports `null` answer for `list` type', async function () {
       const generator = env.instantiate(helpers.createDummyGenerator());
 
       helpers.mockPrompt(generator, {
@@ -173,7 +173,7 @@ describe('yeoman-test', function () {
         });
     });
 
-    it('treats `null` as no answer for `input` type', function () {
+    it('treats `null` as no answer for `input` type', async function () {
       const generator = env.instantiate(helpers.createDummyGenerator());
 
       helpers.mockPrompt(generator, {
@@ -189,7 +189,7 @@ describe('yeoman-test', function () {
         });
     });
 
-    it('uses `true` as the default value for `confirm` type', function () {
+    it('uses `true` as the default value for `confirm` type', async function () {
       const generator = env.instantiate(helpers.createDummyGenerator());
       helpers.mockPrompt(generator, {});
 
@@ -200,7 +200,7 @@ describe('yeoman-test', function () {
         });
     });
 
-    it('supports `false` answer for `confirm` type', function () {
+    it('supports `false` answer for `confirm` type', async function () {
       const generator = env.instantiate(helpers.createDummyGenerator());
       helpers.mockPrompt(generator, {respuesta: false});
 
@@ -219,7 +219,7 @@ describe('yeoman-test', function () {
         });
     });
 
-    it('can be call multiple time on the same generator', function () {
+    it('can be call multiple time on the same generator', async function () {
       const generator = env.instantiate(helpers.createDummyGenerator());
       helpers.mockPrompt(generator, {foo: 1});
       helpers.mockPrompt(generator, {foo: 2});
@@ -245,12 +245,12 @@ describe('yeoman-test', function () {
     });
 
     it('keep prompt method asynchronous', function () {
-      const spy = sinon.spy();
+      const spy = sinonSpy();
 
       const promise = this.generator
         .prompt({name: 'answer', type: 'input'})
         .then(function () {
-          sinon.assert.called(spy);
+          sinonAssert.called(spy);
         });
 
       spy();
@@ -351,8 +351,7 @@ describe('yeoman-test', function () {
     let mockedCreateEnv;
     const createEnvReturn = {};
     beforeEach(() => {
-      mockedCreateEnv = sinon
-        .stub(helpers, 'createEnv')
+      mockedCreateEnv = sinonStub(helpers, 'createEnv')
         .returns(createEnvReturn);
     });
     afterEach(() => {

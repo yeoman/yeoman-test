@@ -5,10 +5,10 @@ import path from 'node:path';
 import process from 'node:process';
 import MemFs from 'mem-fs';
 import MemFsEditor from 'mem-fs-editor';
-import sinon from 'sinon';
+import {stub} from 'sinon';
 
-import RunContext from '../lib/run-context.js';
-import RunResult from '../lib/run-result.js';
+import RunContext from '../src/run-context.js';
+import RunResult from '../src/run-result.js';
 
 describe('run-result', () => {
   describe('constructor', () => {
@@ -72,7 +72,7 @@ describe('run-result', () => {
         fs: memFsEditor,
         cwd: process.cwd(),
       });
-      consoleMock = sinon.stub(console, 'log');
+      consoleMock = stub(console, 'log');
       runResult.fs.write(path.resolve('test.txt'), 'test content');
       runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
     });
@@ -107,7 +107,7 @@ describe('run-result', () => {
         fs: memFsEditor,
         cwd: process.cwd(),
       });
-      consoleMock = sinon.stub(console, 'log');
+      consoleMock = stub(console, 'log');
       runResult.fs.write(path.resolve('test.txt'), 'test content');
       runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
     });

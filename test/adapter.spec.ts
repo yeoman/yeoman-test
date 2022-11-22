@@ -1,9 +1,9 @@
 import assert from 'node:assert';
-import {TestAdapter} from '../lib/adapter.js';
+import {TestAdapter} from '../src/adapter.js';
 
 describe('TestAdapter', function () {
   describe('#prompt()', function () {
-    it('allows pre-filled answers', function () {
+    it('allows pre-filled answers', async function () {
       const adapter = new TestAdapter();
       return adapter
         .prompt(

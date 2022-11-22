@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import {fileURLToPath} from 'node:url';
 import MemFs from 'mem-fs';
 
-import RunResult from '../lib/run-result.js';
+import RunResult from '../src/run-result.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
