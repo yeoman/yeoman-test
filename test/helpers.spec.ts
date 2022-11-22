@@ -351,8 +351,9 @@ describe('yeoman-test', function () {
     let mockedCreateEnv;
     const createEnvReturn = {};
     beforeEach(() => {
-      mockedCreateEnv = sinonStub(helpers, 'createEnv')
-        .returns(createEnvReturn);
+      mockedCreateEnv = sinonStub(helpers, 'createEnv').returns(
+        createEnvReturn,
+      );
     });
     afterEach(() => {
       mockedCreateEnv.restore();

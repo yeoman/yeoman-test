@@ -8,9 +8,38 @@ import _ from 'lodash';
 import tempDirectory from 'temp-dir';
 
 import RunResult from './run-result.js';
-import defaultHelpers from './index.js';
+import defaultHelpers, {type YeomanTest} from './index.js';
 
 export default class RunContext extends EventEmitter {
+  _asyncHolds = 0;
+  ran = false;
+  inDirSet = false;
+  args: string[] = [];
+  options: any = {};
+  answers: any = {};
+
+  localConfig: any = null;
+  dependencies: any[] = [];
+  inDirCallbacks: any[] = [];
+  lookups: any[] = [];
+  mockedGenerators: any = {};
+
+  Generator: any;
+  settings: any;
+  envOptions: any;
+  oldCwd: string;
+  helpers: YeomanTest;
+  buildAsync: any;
+  targetDirectory?: string;
+  env: any;
+  errored = false;
+  completed = false;
+  generator: any;
+  envCB: any;
+  promptOptions: any;
+
+  private _generatorPromise: any;
+
   /**
    * This class provide a run context object to façade the complexity involved in setting
    * up a generator for testing
@@ -29,18 +58,7 @@ export default class RunContext extends EventEmitter {
 
   constructor(Generator, settings, envOptions = {}, helpers = defaultHelpers) {
     super();
-    this._asyncHolds = 0;
-    this.ran = false;
-    this.inDirSet = false;
-    this.args = [];
-    this.options = {};
-    this.answers = {};
-    this.localConfig = null;
-    this.dependencies = [];
     this.Generator = Generator;
-    this.inDirCallbacks = [];
-    this.lookups = [];
-    this.mockedGenerators = {};
     this.settings = {
       namespace: 'gen:test',
       runEnvironment: false,
@@ -73,17 +91,17 @@ export default class RunContext extends EventEmitter {
   async() {
     this._asyncHolds++;
 
-    return function () {
+    return () => {
       this._asyncHolds--;
       this._run();
-    }.bind(this);
+    };
   }
 
   /**
    * Build the generator and the environment.
    * @return {RunContext|false} this
    */
-  build(callback = () => {}) {
+  build(callback?: (context: any) => any) {
     if (!this.inDirSet && this.settings.tmpdir !== false) {
       this.inTmpDir();
     }
@@ -98,11 +116,11 @@ export default class RunContext extends EventEmitter {
 
     this.ran = true;
     if (this.inDirCallbacks.length > 0) {
-      const targetDirectory = path.resolve(this.targetDirectory);
+      const targetDirectory = path.resolve(this.targetDirectory!);
       for (const cb of this.inDirCallbacks) cb(targetDirectory);
     }
 
-    this.targetDirectory = this.targetDirectory || process.cwd();
+    this.targetDirectory = this.targetDirectory ?? process.cwd();
 
     const testEnv = this.helpers.createTestEnv(this.envOptions.createEnv, {
       cwd: this.settings.forwardCwd ? this.targetDirectory : undefined,
@@ -154,7 +172,7 @@ export default class RunContext extends EventEmitter {
       });
     }
 
-    callback(this);
+    callback?.(this);
     return this;
   }
 
@@ -176,8 +194,9 @@ export default class RunContext extends EventEmitter {
           this.listenerCount('error') === 0
         ) {
           // When there is no listeners throw a unhandled rejection.
-          setImmediate(function () {
-            return Promise.reject(error);
+          setImmediate(async function () {
+            // eslint-disable-next-line @typescript-eslint/no-throw-literal
+            throw error;
           });
         } else {
           this.errored = true;
@@ -234,24 +253,19 @@ export default class RunContext extends EventEmitter {
    * Return a promise representing the generator run process
    * @return {Promise} Promise resolved on end or rejected on error
    */
-  toPromise() {
+  async toPromise() {
     if (this.settings.runEnvironment) {
       throw new Error(
         'RunContext with runEnvironment uses promises by default',
       );
     }
 
-    return new Promise(
-      function (resolve, reject) {
-        this.on(
-          'end',
-          function () {
-            resolve(new RunResult(this._createRunResultOptions()));
-          }.bind(this),
-        );
-        this.on('error', reject);
-      }.bind(this),
-    );
+    return new Promise((resolve, reject) => {
+      this.on('end', () => {
+        resolve(new RunResult(this._createRunResultOptions()));
+      });
+      this.on('error', reject);
+    });
   }
 
   /**
@@ -259,7 +273,7 @@ export default class RunContext extends EventEmitter {
    * @return {Promise}
    */
   // eslint-disable-next-line unicorn/no-thenable
-  then(...args) {
+  async then(...args) {
     const promise = this.toPromise();
     return promise.then(...args);
   }
@@ -268,7 +282,7 @@ export default class RunContext extends EventEmitter {
    * Promise `.catch()` duck typing
    * @return {Promise}
    */
-  catch(...args) {
+  async catch(...args) {
     const promise = this.toPromise();
     return promise.catch(...args);
   }
@@ -308,9 +322,8 @@ export default class RunContext extends EventEmitter {
 
   inDir(dirPath, cb) {
     this.setDir(dirPath, true);
-    this.helpers.testDirectory(
-      dirPath,
-      (cb || (() => {})).bind(this, path.resolve(dirPath)),
+    this.helpers.testDirectory(dirPath, () =>
+      cb?.call(this, path.resolve(dirPath)),
     );
     return this;
   }
@@ -332,14 +345,14 @@ export default class RunContext extends EventEmitter {
    *                            file path for predictable results
    * @return {this} run context instance
    */
-  cd(dirPath) {
+  cd(dirPath: string) {
     dirPath = path.resolve(dirPath);
     this.setDir(dirPath, false);
     try {
       process.chdir(dirPath);
-    } catch (error) {
+    } catch (error: any) {
       this.completed = true;
-      throw new Error(error.message + ' ' + dirPath);
+      throw new Error(`${error.message} ${dirPath}`);
     }
 
     return this;
@@ -354,7 +367,7 @@ export default class RunContext extends EventEmitter {
    * @param {Function} [cb] - callback who'll receive the folder path as argument
    * @return {this} run context instance
    */
-  inTmpDir(cb) {
+  inTmpDir(cb?) {
     return this.inDir(
       path.join(tempDirectory, crypto.randomBytes(20).toString('hex')),
       cb,
@@ -426,11 +439,10 @@ export default class RunContext extends EventEmitter {
 
   /**
    * Provide arguments to the run context
-   * @param  {String|Array} args - command line arguments as Array or space separated string
-   * @return {this}
+   * @param  args - command line arguments as Array or space separated string
    */
 
-  withArguments(args) {
+  withArguments(args: string | string[]) {
     const argsArray = typeof args === 'string' ? args.split(' ') : args;
     assert(
       Array.isArray(argsArray),

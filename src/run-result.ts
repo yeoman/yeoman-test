@@ -2,8 +2,9 @@ import assert from 'node:assert';
 import {existsSync, readFileSync, rmSync} from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import MemFsEditor from 'mem-fs-editor';
+import MemFsEditor, {type Editor} from 'mem-fs-editor';
 
+import type {Store} from 'mem-fs';
 import helpers from './index.js';
 
 const isObject = (object) =>
@@ -23,7 +24,16 @@ function convertArgs(args) {
  */
 
 export default class RunResult {
-  constructor(options = {cwd: process.cwd()}) {
+  env: any;
+  generator: any;
+  cwd: string;
+  oldCwd: string;
+  memFs: Store;
+  fs: Editor;
+  mockedGenerators: any;
+  options: any;
+
+  constructor(options: any = {cwd: process.cwd()}) {
     this.env = options.env;
     this.generator = options.generator;
     this.cwd = options.cwd;
@@ -57,10 +67,11 @@ export default class RunResult {
   /**
    * Return an object with fs changes.
    * @param {Function} filter - parameter forwarded to mem-fs-editor#dump
-   * @returns {Object}
    */
-  getSnapshot(filter) {
-    return this.fs.dump(this.cwd, filter);
+  getSnapshot(
+    filter,
+  ): Record<string, {contents: string; stateCleared: string}> {
+    return (this.fs as any).dump(this.cwd, filter);
   }
 
   /**
@@ -68,10 +79,10 @@ export default class RunResult {
    * @param {Function} filter - parameter forwarded to mem-fs-editor#dump
    * @returns {Object}
    */
-  getStateSnapshot(filter) {
+  getStateSnapshot(filter): Record<string, {stateCleared: string}> {
     const snapshot = this.getSnapshot(filter);
     for (const dump of Object.values(snapshot)) {
-      delete dump.contents;
+      delete (dump as any).contents;
     }
 
     return snapshot;
@@ -87,6 +98,7 @@ export default class RunResult {
       this.memFs.each((file) => {
         console.log(file.path);
         if (file.contents) {
+          // eslint-disable-next-line @typescript-eslint/no-base-to-string
           console.log(file.contents.toString('utf8'));
         }
       });
@@ -138,10 +150,10 @@ export default class RunResult {
     return path.join(this.cwd, filename);
   }
 
-  _readFile(filename, json) {
+  _readFile(filename, json?: boolean) {
     filename = this._fileName(filename);
     const file = this.fs
-      ? this.fs.read(filename, 'utf8')
+      ? this.fs.read(filename)
       : readFileSync(filename, 'utf8');
 
     return json ? JSON.parse(file) : file;
@@ -169,7 +181,7 @@ export default class RunResult {
    * @example
    * result.assertFile(['templates/user.hbs', 'templates/user/edit.hbs']);
    */
-  assertFile(...args) {
+  assertFile(...args: string[]) {
     for (const file of convertArgs(args)) {
       const here = this._exists(file);
       assert.ok(here, `${file}, no such file or directory`);
@@ -189,7 +201,7 @@ export default class RunResult {
    * @example
    * result.assertNoFile(['templates/user.hbs', 'templates/user/edit.hbs']);
    */
-  assertNoFile(...args) {
+  assertNoFile(...args: string[]) {
     for (const file of convertArgs(args)) {
       const here = this._exists(file);
       assert.ok(!here, `${file} exists`);

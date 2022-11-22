@@ -4,10 +4,12 @@ import crypto from 'node:crypto';
 import {join, resolve} from 'node:path';
 import process from 'node:process';
 import _ from 'lodash';
-import sinon from 'sinon';
+import {spy as sinonSpy, stub as sinonStub} from 'sinon';
 import tempDirectory from 'temp-dir';
 import YeomanGenerator from 'yeoman-generator';
 import Environment from 'yeoman-environment';
+import type {GeneratorOptions} from 'yeoman-generator';
+import type {SinonSpiedInstance} from 'sinon';
 
 import {DummyPrompt, TestAdapter} from './adapter.js';
 import RunContext from './run-context.js';
@@ -18,6 +20,11 @@ import RunContext from './run-context.js';
  */
 
 export class YeomanTest {
+  settings: any;
+  shouldRun: any;
+  environmentOptions: any;
+  generatorOptions: any;
+
   /**
    * Clean-up the test directory and cd into it.
    * Call given callback after entering the test directory.
@@ -67,7 +74,7 @@ export class YeomanTest {
   prepareTempDirectory({
     temporaryDir,
     cleanupTemporaryDir = !temporaryDir,
-  } = {}) {
+  }: {temporaryDir?: string; cleanupTemporaryDir?: boolean} = {}) {
     const cwd = process.cwd();
     if (typeof temporaryDir !== 'string') {
       temporaryDir = resolve(
@@ -148,17 +155,17 @@ export class YeomanTest {
    */
 
   createMockedGenerator(
-    Generator = class MockedGenerator extends YeomanGenerator {},
-  ) {
-    const generator = sinon.spy(Generator);
+    GeneratorClass: typeof YeomanGenerator<GeneratorOptions> = class MockedGenerator extends YeomanGenerator {},
+  ): SinonSpiedInstance<typeof YeomanGenerator<GeneratorOptions>> {
+    const generator = sinonSpy(GeneratorClass);
     for (const methodName of [
       'run',
       'queueTasks',
       'runWithOptions',
       'queueOwnTasks',
     ]) {
-      if (Generator.prototype[methodName]) {
-        generator.prototype[methodName] = sinon.stub();
+      if (GeneratorClass.prototype[methodName]) {
+        generator.prototype[methodName] = sinonStub();
       }
     }
 
@@ -169,10 +176,12 @@ export class YeomanTest {
    * Create a simple, dummy generator
    */
 
-  createDummyGenerator(Generator = YeomanGenerator) {
+  createDummyGenerator(
+    Generator = YeomanGenerator,
+  ): typeof YeomanGenerator<GeneratorOptions> {
     return class extends Generator {
       test() {
-        this.shouldRun = true;
+        (this as any).shouldRun = true;
       }
     };
   }
@@ -197,11 +206,17 @@ export class YeomanTest {
    * var angular = createGenerator('angular:app', deps);
    */
 
-  createGenerator(name, dependencies, args, options, localConfigOnly = true) {
+  createGenerator(
+    name,
+    dependencies,
+    args: string | string[],
+    options,
+    localConfigOnly = true,
+  ) {
     const env = this.createEnv([], {sharedOptions: {localConfigOnly}});
     this.registerDependencies(env, dependencies);
 
-    return env.create(name, {arguments: args, options});
+    return (env as any).create(name, {arguments: args, options});
   }
 
   /**
@@ -252,7 +267,7 @@ export class YeomanTest {
 
   createTestEnv(
     envContructor = this.createEnv,
-    options = {localConfigOnly: true},
+    options: any = {localConfigOnly: true},
   ) {
     const envOptions = _.cloneDeep(this.environmentOptions || {});
     if (typeof options === 'boolean') {

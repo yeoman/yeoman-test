@@ -40,6 +40,7 @@
     "yeoman-generator": "^5.7.0"
   },
   "dependencies": {
+    "@types/mem-fs-editor": "^7.0.2",
     "@types/yeoman-environment": "^2.10.8",
     "@types/yeoman-generator": "^5.2.11",
     "inquirer": "^8.0.0",
