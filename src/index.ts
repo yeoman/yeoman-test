@@ -125,10 +125,11 @@ export class YeomanTest {
   mockPrompt(
     envOrGenerator: YeomanGenerator | Environment,
     mockedAnswers: YeomanGenerator.Answers,
-    options,
+    options?,
   ) {
-    envOrGenerator = envOrGenerator.env ?? envOrGenerator;
-    const {promptModule} = envOrGenerator.adapter;
+    const environment =
+      'env' in envOrGenerator ? envOrGenerator.env : envOrGenerator;
+    const {promptModule} = environment.adapter;
 
     for (const name of Object.keys(promptModule.prompts)) {
       promptModule.registerPrompt(
@@ -137,7 +138,7 @@ export class YeomanTest {
           constructor(question, rl, answers) {
             super(mockedAnswers, options, question, rl, answers);
           }
-        },
+        } as any,
       );
     }
   }
