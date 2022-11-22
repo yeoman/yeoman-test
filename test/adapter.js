@@ -1,6 +1,5 @@
-'use strict';
-const assert = require('assert');
-const {TestAdapter} = require('../lib/adapter');
+import assert from 'node:assert';
+import {TestAdapter} from '../lib/adapter.js';
 
 describe('TestAdapter', function () {
   describe('#prompt()', function () {
@@ -10,8 +9,8 @@ describe('TestAdapter', function () {
         .prompt(
           [{name: 'respuesta', message: 'foo', type: 'input', default: 'bar'}],
           {
-            respuesta: 'foo'
-          }
+            respuesta: 'foo',
+          },
         )
         .then(function (answers) {
           assert.equal(answers.respuesta, 'foo');

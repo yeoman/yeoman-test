@@ -4,6 +4,7 @@
   "description": "Test utilities for Yeoman generators",
   "homepage": "http://yeoman.io/authoring/testing.html",
   "author": "The Yeoman Team",
+  "type": "module",
   "files": [
     "lib"
   ],
@@ -30,7 +31,7 @@
     "nyc": "^15.1.0",
     "prettier": "^2.2.1",
     "tui-jsdoc-template": "^1.2.2",
-    "xo": "^0.32.1",
+    "xo": "^0.53.1",
     "yeoman-environment": "^3.3.0",
     "yeoman-generator": "^5.0.0"
   },

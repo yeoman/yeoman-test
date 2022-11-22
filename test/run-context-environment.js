@@ -1,13 +1,18 @@
 /* eslint-disable max-nested-callbacks */
-'use strict';
-const assert = require('assert');
-const path = require('path');
-const sinon = require('sinon');
+import assert from 'node:assert';
+import path, {dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import process from 'node:process';
+import {createRequire} from 'node:module';
+import sinon from 'sinon';
 
-const helpers = require('../lib');
-const RunContext = require('../lib/run-context');
-const RunResult = require('../lib/run-result');
-const SimpleApp = require('./fixtures/generator-simple/app');
+import helpers from '../lib/index.js';
+import RunContext from '../lib/run-context.js';
+import RunResult from '../lib/run-result.js';
+import SimpleApp from './fixtures/generator-simple/app/index.js';
+
+const require = createRequire(import.meta.url);
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 describe('RunContext running environment', function () {
   const defaultEnvOptions = {foo: 'bar'};
@@ -31,7 +36,7 @@ describe('RunContext running environment', function () {
       .create(
         gen,
         {...defaultRunContextOptions, ...ctxOptions},
-        {...defaultEnvOptions, envOptions}
+        {...defaultEnvOptions, envOptions},
       )
       .withLookups(lookups);
     if (build) {
@@ -103,7 +108,7 @@ describe('RunContext running environment', function () {
       ctx.withEnvironment((env) => {
         const FakeGenerator = helpers.createDummyGenerator();
         const fake = sinon.fake.returns(
-          Promise.resolve(new FakeGenerator({env}))
+          Promise.resolve(new FakeGenerator({env})),
         );
         sinon.replace(env, 'create', fake);
       });
@@ -204,7 +209,7 @@ describe('RunContext running environment', function () {
       it('rejects with the error', () => {
         return ctx.run().then(
           () => assert.fail(),
-          (error) => assert(/throwing error/.test(error.message))
+          (error) => assert(/throwing error/.test(error.message)),
         );
       });
     });
@@ -234,7 +239,7 @@ describe('RunContext running environment', function () {
           .run()
           .then(
             () => assert.fail(),
-            (error) => assert(/throwing error/.test(error.message))
+            (error) => assert(/throwing error/.test(error.message)),
           );
       });
     });

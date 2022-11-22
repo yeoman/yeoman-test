@@ -1,38 +1,36 @@
-'use strict';
-const assert = require('assert');
-const crypto = require('crypto');
-const path = require('path');
-const sinon = require('sinon');
-const util = require('util');
-const yeoman = require('yeoman-environment');
-const Generator = require('yeoman-generator');
-const {existsSync, rmdirSync, rmSync = rmdirSync} = require('fs');
-const tempDirectory = require('temp-dir');
+import assert from 'node:assert';
+import crypto from 'node:crypto';
+import path, {dirname} from 'node:path';
+import {existsSync, rmSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import process from 'node:process';
+import {createRequire} from 'node:module';
+import sinon from 'sinon';
+import yeoman from 'yeoman-environment';
+import Generator from 'yeoman-generator';
+import tempDirectory from 'temp-dir';
+
+import helpers from '../lib/index.js';
+import {TestAdapter} from '../lib/adapter.js';
+import RunContext from '../lib/run-context.js';
+
+const require = createRequire(import.meta.url);
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const {resolve, join} = path;
-
-const helpers = require('../lib');
-const {TestAdapter} = require('../lib/adapter');
-const RunContext = require('../lib/run-context');
 const env = yeoman.createEnv(undefined, undefined, new TestAdapter());
 
 describe('yeoman-test', function () {
   beforeEach(function () {
     process.chdir(path.join(__dirname, './fixtures'));
-    const self = this;
 
-    this.StubGenerator = function (args, options) {
-      self.args = args;
-      self.options = options;
-    };
-
-    util.inherits(this.StubGenerator, Generator);
+    this.StubGenerator = class extends Generator {};
   });
 
   describe('.registerDependencies()', function () {
     it('accepts dependency as a path', function () {
       helpers.registerDependencies(env, [
-        require.resolve('./fixtures/generator-simple/app')
+        require.resolve('./fixtures/generator-simple/app'),
       ]);
       assert(env.get('simple:app'));
     });
@@ -72,7 +70,7 @@ describe('yeoman-test', function () {
 
     it('should not cleanup if cleanupTemporaryDir is false', function () {
       const cleanup = helpers.prepareTempDirectory({
-        cleanupTemporaryDir: false
+        cleanupTemporaryDir: false,
       });
       cleanup();
       assert(existsSync(cleanup.temporaryDir));
@@ -81,11 +79,11 @@ describe('yeoman-test', function () {
 
     it('should accept custom temporaryDir', function () {
       const temporaryDir = resolve(
-        join(tempDirectory, crypto.randomBytes(20).toString('hex'))
+        join(tempDirectory, crypto.randomBytes(20).toString('hex')),
       );
       const cleanup = helpers.prepareTempDirectory({
         temporaryDir,
-        cleanupTemporaryDir: true
+        cleanupTemporaryDir: true,
       });
       assert(process.cwd() === temporaryDir);
       cleanup();
@@ -93,7 +91,7 @@ describe('yeoman-test', function () {
 
     it('should not cleanup custom temporaryDir by default', function () {
       const temporaryDir = resolve(
-        join(tempDirectory, crypto.randomBytes(20).toString('hex'))
+        join(tempDirectory, crypto.randomBytes(20).toString('hex')),
       );
       const cleanup = helpers.prepareTempDirectory({temporaryDir});
       cleanup();
@@ -105,31 +103,31 @@ describe('yeoman-test', function () {
   describe('.createGenerator()', function () {
     it('create a new generator', function () {
       const generator = helpers.createGenerator('unicorn:app', [
-        [this.StubGenerator, 'unicorn:app']
+        [this.StubGenerator, 'unicorn:app'],
       ]);
 
       assert.ok(generator instanceof this.StubGenerator);
     });
 
     it('pass args params to the generator', function () {
-      helpers.createGenerator(
-        'unicorn:app',
-        [[this.StubGenerator, 'unicorn:app']],
-        ['temp']
-      );
-
-      assert.deepEqual(this.args, ['temp']);
-    });
-
-    it('pass options param to the generator', function () {
-      helpers.createGenerator(
+      const generator = helpers.createGenerator(
         'unicorn:app',
         [[this.StubGenerator, 'unicorn:app']],
         ['temp'],
-        {ui: 'tdd'}
       );
 
-      assert.equal(this.options.ui, 'tdd');
+      assert.deepEqual(generator.args, ['temp']);
+    });
+
+    it('pass options param to the generator', function () {
+      const generator = helpers.createGenerator(
+        'unicorn:app',
+        [[this.StubGenerator, 'unicorn:app']],
+        ['temp'],
+        {ui: 'tdd'},
+      );
+
+      assert.equal(generator.options.ui, 'tdd');
     });
   });
 
@@ -152,7 +150,7 @@ describe('yeoman-test', function () {
       helpers.mockPrompt(generator);
       return generator
         .prompt([
-          {name: 'respuesta', message: 'foo', type: 'input', default: 'bar'}
+          {name: 'respuesta', message: 'foo', type: 'input', default: 'bar'},
         ])
         .then(function (answers) {
           assert.equal(answers.respuesta, 'bar');
@@ -163,12 +161,12 @@ describe('yeoman-test', function () {
       const generator = env.instantiate(helpers.createDummyGenerator());
 
       helpers.mockPrompt(generator, {
-        respuesta: null
+        respuesta: null,
       });
 
       return generator
         .prompt([
-          {name: 'respuesta', message: 'foo', type: 'list', default: 'bar'}
+          {name: 'respuesta', message: 'foo', type: 'list', default: 'bar'},
         ])
         .then(function (answers) {
           assert.equal(answers.respuesta, null);
@@ -179,12 +177,12 @@ describe('yeoman-test', function () {
       const generator = env.instantiate(helpers.createDummyGenerator());
 
       helpers.mockPrompt(generator, {
-        respuesta: null
+        respuesta: null,
       });
 
       return generator
         .prompt([
-          {name: 'respuesta', message: 'foo', type: 'input', default: 'bar'}
+          {name: 'respuesta', message: 'foo', type: 'input', default: 'bar'},
         ])
         .then(function (answers) {
           assert.equal(answers.respuesta, 'bar');
@@ -240,9 +238,9 @@ describe('yeoman-test', function () {
         (error) => {
           assert.equal(
             error.message,
-            'yeoman-test: question notFound was asked but answer was not provided'
+            'yeoman-test: question notFound was asked but answer was not provided',
           );
-        }
+        },
       );
     });
 
@@ -273,7 +271,7 @@ describe('yeoman-test', function () {
       it('return a RunContext object', function (done) {
         const context = helpers.run('simple:app').withEnvironment((env) => {
           helpers.registerDependencies(env, [
-            require.resolve('./fixtures/generator-simple/app')
+            require.resolve('./fixtures/generator-simple/app'),
           ]);
         });
         assert(context instanceof RunContext);
@@ -291,7 +289,7 @@ describe('yeoman-test', function () {
       const runContext = helpers.run(
         helpers.createDummyGenerator(),
         undefined,
-        envOptions
+        envOptions,
       );
       assert.equal(runContext.envOptions, envOptions);
     });
@@ -301,9 +299,9 @@ describe('yeoman-test', function () {
         .run(
           class extends helpers.createDummyGenerator() {
             throws() {
-              this.env.emit('error', new Error());
+              this.env.emit('error', new Error('an error'));
             }
-          }
+          },
         )
         .on('error', (_) => {
           done();
@@ -315,9 +313,9 @@ describe('yeoman-test', function () {
         .run(
           class extends helpers.createDummyGenerator() {
             throws() {
-              this.emit('error', new Error());
+              this.emit('error', new Error('an error'));
             }
-          }
+          },
         )
         .on('error', (_) => {
           done();
@@ -331,7 +329,7 @@ describe('yeoman-test', function () {
             throws() {
               throw new Error('Some error.');
             }
-          }
+          },
         )
         .on('error', (_) => {
           done();
@@ -372,7 +370,7 @@ describe('yeoman-test', function () {
       assert.equal(helpers.createTestEnv(), createEnvReturn);
       assert.equal(
         mockedCreateEnv.getCall(0).args[1].sharedOptions.localConfigOnly,
-        true
+        true,
       );
     });
   });

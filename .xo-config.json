@@ -2,10 +2,12 @@
   "space": true,
   "envs": ["es2020", "node", "mocha"],
   "prettier": true,
+  "ignores": [
+ 		"test/fixtures"
+ 	],
   "rules": {
-    "promise/prefer-await-to-then": "off",
-    "prefer-rest-params": "off",
-    "node/prefer-promises/fs": "off"
+    "unicorn/prefer-spread": "off",
+    "unicorn/no-object-as-default-parameter": "off"
   }
 }
 

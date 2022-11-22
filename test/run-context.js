@@ -1,15 +1,20 @@
-'use strict';
-const fs = require('fs');
-const path = require('path');
-const assert = require('assert');
-const sinon = require('sinon');
-const inquirer = require('inquirer');
-const Generator = require('yeoman-generator');
-const tempDirectory = require('temp-dir');
+import fs from 'node:fs';
+import path, {dirname} from 'node:path';
+import assert from 'node:assert';
+import {fileURLToPath} from 'node:url';
+import process from 'node:process';
+import {createRequire} from 'node:module';
+import sinon from 'sinon';
+import inquirer from 'inquirer';
+import Generator from 'yeoman-generator';
+import tempDirectory from 'temp-dir';
 
-const RunContext = require('../lib/run-context');
-const helpers = require('../lib');
-const {DummyPrompt} = require('../lib/adapter');
+import RunContext from '../lib/run-context.js';
+import helpers from '../lib/index.js';
+import {DummyPrompt} from '../lib/adapter.js';
+
+const require = createRequire(import.meta.url);
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const tmpdir = path.join(tempDirectory, 'yeoman-run-context');
 
@@ -56,7 +61,7 @@ describe('RunContext', function () {
 
     it('accept path parameter', function (done) {
       const ctx = new RunContext(
-        require.resolve('./fixtures/generator-simple/app')
+        require.resolve('./fixtures/generator-simple/app'),
       );
 
       ctx
@@ -67,7 +72,7 @@ describe('RunContext', function () {
     });
 
     it('propagate generator error events', function (done) {
-      const error = new Error();
+      const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
       const execSpy = sinon.stub().throws(error);
       const endSpy = sinon.spy();
@@ -75,9 +80,9 @@ describe('RunContext', function () {
       Dummy.prototype.end = execSpy;
       const ctx = new RunContext(Dummy);
 
-      ctx.on('error', function (err) {
+      ctx.on('error', function (error_) {
         sinon.assert.calledOnce(execSpy);
-        assert.equal(err, error);
+        assert.equal(error_, error);
         sinon.assert.notCalled(endSpy);
         done();
       });
@@ -89,14 +94,14 @@ describe('RunContext', function () {
         function () {
           assert(this.ctx.env.get('gen:test'));
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
     it('set namespace and resolved path in generator', function (done) {
       const ctx = new RunContext(this.Dummy, {
         resolved: 'path',
-        namespace: 'simple:app'
+        namespace: 'simple:app',
       });
 
       ctx.on('ready', function () {
@@ -112,7 +117,7 @@ describe('RunContext', function () {
         function () {
           sinon.assert.calledOnce(this.execSpy);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -122,7 +127,7 @@ describe('RunContext', function () {
         function () {
           assert.equal(this.defaultInput, inquirer.prompts.input);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -151,8 +156,8 @@ describe('RunContext', function () {
       } catch (error) {
         assert(
           error.message.includes(
-            'Cleanup test dir called with false tmpdir option.'
-          )
+            'Cleanup test dir called with false tmpdir option.',
+          ),
         );
       }
     });
@@ -162,7 +167,7 @@ describe('RunContext', function () {
       const ctx = new RunContext(Dummy, {
         tmpdir: false,
         resolved: 'path',
-        namespace: 'simple:app'
+        namespace: 'simple:app',
       });
       assert.equal(ctx.settings.tmpdir, false);
       assert.equal(ctx.settings.resolved, 'path');
@@ -185,7 +190,7 @@ describe('RunContext', function () {
         function () {
           assert.equal(this.execSpy.firstCall.thisValue.options.force, true);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -195,10 +200,10 @@ describe('RunContext', function () {
         function () {
           assert.equal(
             this.execSpy.firstCall.thisValue.options.skipInstall,
-            true
+            true,
           );
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -208,10 +213,10 @@ describe('RunContext', function () {
         function () {
           assert.equal(
             this.execSpy.firstCall.thisValue.options.skipCache,
-            true
+            true,
           );
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
   });
@@ -224,9 +229,9 @@ describe('RunContext', function () {
     it('throw an unhandledRejection when no listener is present', function (done) {
       const error = new Error('dummy exception');
       const execSpy = sinon.stub().throws(error);
-      const errorHandler = function (err) {
+      const errorHandler = function (error_) {
         sinon.assert.calledOnce(execSpy);
-        assert.equal(err, error);
+        assert.equal(error_, error);
         done();
       };
 
@@ -246,12 +251,12 @@ describe('RunContext', function () {
       return this.ctx.toPromise().then(
         function (runResult) {
           assert.equal(this.ctx.targetDirectory, runResult.cwd);
-        }.bind(this)
+        }.bind(this),
       );
     });
 
     it('returns a reject promise on error', function () {
-      const error = new Error();
+      const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
       const execSpy = sinon.stub().throws(error);
       Dummy.prototype.exec = execSpy;
@@ -268,12 +273,12 @@ describe('RunContext', function () {
       return this.ctx.then(
         function (runResult) {
           assert.equal(this.ctx.targetDirectory, runResult.cwd);
-        }.bind(this)
+        }.bind(this),
       );
     });
 
     it('handles errors', function () {
-      const error = new Error();
+      const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
       const execSpy = sinon.stub().throws(error);
       Dummy.prototype.exec = execSpy;
@@ -283,14 +288,14 @@ describe('RunContext', function () {
         function () {},
         function (error_) {
           assert.equal(error_, error);
-        }
+        },
       );
     });
   });
 
   describe('#catch()', function () {
     it('handles errors', function () {
-      const error = new Error();
+      const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
       const execSpy = sinon.stub().throws(error);
       Dummy.prototype.exec = execSpy;
@@ -326,7 +331,7 @@ describe('RunContext', function () {
           sinon.assert.calledOnce(cb);
           sinon.assert.calledOn(cb, ctx);
           sinon.assert.calledWith(cb, path.resolve(this.tmp));
-        }.bind(this)
+        }.bind(this),
       );
 
       ctx.inDir(this.tmp, cb).on('end', done);
@@ -478,10 +483,10 @@ describe('RunContext', function () {
         function () {
           assert.deepEqual(this.execSpy.firstCall.thisValue.arguments, [
             'one',
-            'two'
+            'two',
           ]);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -492,10 +497,10 @@ describe('RunContext', function () {
         function () {
           assert.deepEqual(this.execSpy.firstCall.thisValue.arguments, [
             'foo',
-            'bar'
+            'bar',
           ]);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -510,10 +515,10 @@ describe('RunContext', function () {
         function () {
           assert.deepEqual(this.execSpy.firstCall.thisValue.arguments, [
             'foo',
-            'bar'
+            'bar',
           ]);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
   });
@@ -526,25 +531,25 @@ describe('RunContext', function () {
         function () {
           assert.equal(this.execSpy.firstCall.thisValue.options.foo, 'bar');
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
     it('allow default settings to be overriden', function (done) {
       this.ctx.withOptions({
         'skip-install': false,
-        force: false
+        force: false,
       });
       this.ctx.on(
         'end',
         function () {
           assert.equal(
             this.execSpy.firstCall.thisValue.options.skipInstall,
-            false
+            false,
           );
           assert.equal(this.execSpy.firstCall.thisValue.options.force, false);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -555,11 +560,11 @@ describe('RunContext', function () {
         function () {
           assert.equal(
             this.execSpy.firstCall.thisValue.options['foo-bar'],
-            false
+            false,
           );
           assert.equal(this.execSpy.firstCall.thisValue.options.fooBar, false);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -570,11 +575,11 @@ describe('RunContext', function () {
         function () {
           assert.equal(
             this.execSpy.firstCall.thisValue.options['bar-foo'],
-            false
+            false,
           );
           assert.equal(this.execSpy.firstCall.thisValue.options.barFoo, false);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -587,7 +592,7 @@ describe('RunContext', function () {
           assert.equal(options.foo, 'bar');
           assert.equal(options.john, 'doe');
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
   });
@@ -602,7 +607,7 @@ describe('RunContext', function () {
           name: 'yeoman',
           type: 'input',
           message: 'Hey!',
-          default: 'pass'
+          default: 'pass',
         }).then(function (answers) {
           assert.equal(answers.yeoman, 'pass');
           prompt();
@@ -621,7 +626,7 @@ describe('RunContext', function () {
         return this.prompt({
           name: 'yeoman',
           type: 'input',
-          message: 'Hey!'
+          message: 'Hey!',
         }).then(function (answers) {
           assert.equal(answers.yeoman, 'yes please');
           execSpy();
@@ -643,13 +648,13 @@ describe('RunContext', function () {
           {
             name: 'yeoman',
             type: 'input',
-            message: 'Hey!'
+            message: 'Hey!',
           },
           {
             name: 'yo',
             type: 'input',
-            message: 'Yo!'
-          }
+            message: 'Yo!',
+          },
         ]).then(function (answers) {
           execSpy();
           assert.equal(answers.yeoman, 'yes please');
@@ -673,7 +678,7 @@ describe('RunContext', function () {
         return this.prompt({
           name: 'yeoman',
           type: 'input',
-          message: 'Hey!'
+          message: 'Hey!',
         }).then(function (answers) {
           execSpy();
           assert.equal(answers.yeoman, 'yes please');
@@ -700,7 +705,7 @@ describe('RunContext', function () {
           assert(this.ctx.env.get('foo:bar'));
           assert(this.ctx.mockedGenerators['foo:bar']);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
   });
@@ -714,7 +719,7 @@ describe('RunContext', function () {
           function () {
             assert(this.ctx.env.get('simple:app'));
             done();
-          }.bind(this)
+          }.bind(this),
         );
     });
 
@@ -726,7 +731,7 @@ describe('RunContext', function () {
           function () {
             assert(this.ctx.env.get('dummy:gen'));
             done();
-          }.bind(this)
+          }.bind(this),
         );
     });
 
@@ -740,7 +745,7 @@ describe('RunContext', function () {
             assert(this.ctx.env.get('dummy:gen'));
             assert(this.ctx.env.get('simple:app'));
             done();
-          }.bind(this)
+          }.bind(this),
         );
     });
   });
@@ -757,7 +762,7 @@ describe('RunContext', function () {
           function () {
             assert(this.ctx.env.get('simple:app'));
             done();
-          }.bind(this)
+          }.bind(this),
         );
     });
   });
@@ -767,7 +772,7 @@ describe('RunContext', function () {
       this.ctx
         .withLocalConfig({
           some: true,
-          data: 'here'
+          data: 'here',
         })
         .on(
           'ready',
@@ -775,7 +780,7 @@ describe('RunContext', function () {
             assert.equal(this.ctx.generator.config.get('some'), true);
             assert.equal(this.ctx.generator.config.get('data'), 'here');
             done();
-          }.bind(this)
+          }.bind(this),
         );
     });
   });
@@ -785,7 +790,7 @@ describe('RunContext', function () {
       this.ctx
         .withLocalConfig({
           some: true,
-          data: 'here'
+          data: 'here',
         })
         .on(
           'ready',
@@ -799,7 +804,7 @@ describe('RunContext', function () {
             assert.equal(options.mockedGenerators, this.ctx.mockedGenerators);
             assert.deepEqual(options.settings, this.ctx.settings);
             done();
-          }.bind(this)
+          }.bind(this),
         );
     });
   });
