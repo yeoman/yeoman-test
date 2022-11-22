@@ -6,9 +6,41 @@ import {EventEmitter} from 'node:events';
 import process from 'node:process';
 import _ from 'lodash';
 import tempDirectory from 'temp-dir';
+import type Generator from 'yeoman-generator';
+import {type Options} from 'yeoman-environment';
 
-import RunResult from './run-result.js';
+import RunResult, {type RunResultOptions} from './run-result.js';
 import defaultHelpers, {type YeomanTest} from './index.js';
+
+/**
+ * Provides settings for creating a `RunContext`.
+ */
+export type RunContextSettings = {
+  /**
+   * Automatically run this generator in a tmp dir
+   * @default true
+   */
+  tmpdir?: boolean;
+
+  /**
+   * File path to the generator (only used if Generator is a constructor)
+   */
+  resolved?: string;
+
+  cwd?: string;
+
+  oldCwd?: string;
+
+  forwardCwd?: boolean;
+
+  runEnvironment?: boolean;
+
+  /**
+   * Namespace (only used if Generator is a constructor)
+   * @default 'gen:test'
+   */
+  namespace?: string;
+};
 
 export default class RunContext extends EventEmitter {
   _asyncHolds = 0;
@@ -25,9 +57,9 @@ export default class RunContext extends EventEmitter {
   mockedGenerators: any = {};
 
   Generator: any;
-  settings: any;
+  settings: RunContextSettings;
   envOptions: any;
-  oldCwd: string;
+  oldCwd?: string;
   helpers: YeomanTest;
   buildAsync: any;
   targetDirectory?: string;
@@ -56,9 +88,14 @@ export default class RunContext extends EventEmitter {
    * @return {this}
    */
 
-  constructor(Generator, settings, envOptions = {}, helpers = defaultHelpers) {
+  constructor(
+    generatorClass: string | ConstructorParameters<typeof Generator>,
+    settings: RunContextSettings,
+    envOptions: Options = {},
+    helpers = defaultHelpers,
+  ) {
     super();
-    this.Generator = Generator;
+    this.Generator = generatorClass;
     this.settings = {
       namespace: 'gen:test',
       runEnvironment: false,
@@ -234,7 +271,7 @@ export default class RunContext extends EventEmitter {
     );
   }
 
-  _createRunResultOptions() {
+  _createRunResultOptions(): RunResultOptions {
     return {
       env: this.env,
       generator: this.generator,
@@ -242,8 +279,8 @@ export default class RunContext extends EventEmitter {
       settings: {
         ...this.settings,
       },
-      oldCwd: this.oldCwd,
-      cwd: this.targetDirectory,
+      oldCwd: this.oldCwd!,
+      cwd: this.targetDirectory!,
       envOptions: this.envOptions,
       mockedGenerators: this.mockedGenerators,
     };
@@ -305,7 +342,7 @@ export default class RunContext extends EventEmitter {
       this.settings.tmpdir = tmpdir;
     }
 
-    this.oldCwd = this.oldCwd || process.cwd();
+    this.oldCwd = this.oldCwd ?? process.cwd();
 
     this.inDirSet = true;
     this.targetDirectory = dirPath;

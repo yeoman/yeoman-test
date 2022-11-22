@@ -5,6 +5,10 @@ import process from 'node:process';
 import MemFsEditor, {type Editor} from 'mem-fs-editor';
 
 import type {Store} from 'mem-fs';
+import type Environment from 'yeoman-environment';
+import type Generator from 'yeoman-generator';
+
+import {type RunContextSettings} from './run-context.js';
 import helpers from './index.js';
 
 const isObject = (object) =>
@@ -20,6 +24,42 @@ function convertArgs(args) {
 }
 
 /**
+ * Provides options for `RunResult`s.
+ */
+export type RunResultOptions = {
+  /**
+   * The environment of the generator.
+   */
+  env: Environment;
+
+  envOptions: Environment.Options;
+
+  generator: Generator;
+
+  /**
+   * The working directory after running the generator.
+   */
+  cwd: string;
+
+  /**
+   * The working directory before on running the generator.
+   */
+  oldCwd: string;
+
+  /**
+   * The file-system of the generator.
+   */
+  memFs: Store;
+
+  /**
+   * The mocked generators of the context.
+   */
+  mockedGenerators: Record<string, Generator>;
+
+  settings: RunContextSettings;
+};
+
+/**
  * This class provides utilities for testing generated content.
  */
 
@@ -33,18 +73,19 @@ export default class RunResult {
   mockedGenerators: any;
   options: any;
 
-  constructor(options: any = {cwd: process.cwd()}) {
+  constructor(options: RunResultOptions) {
+    if (options.memFs && !options.cwd) {
+      throw new Error('CWD option is required for mem-fs tests');
+    }
+
     this.env = options.env;
     this.generator = options.generator;
-    this.cwd = options.cwd;
+    this.cwd = options.cwd ?? process.cwd();
     this.oldCwd = options.oldCwd;
     this.memFs = options.memFs;
     this.fs = this.memFs && MemFsEditor.create(this.memFs);
     this.mockedGenerators = options.mockedGenerators || {};
     this.options = options;
-    if (this.memFs && !this.cwd) {
-      throw new Error('CWD option is required for mem-fs tests');
-    }
   }
 
   /**
@@ -93,7 +134,7 @@ export default class RunResult {
    * @param {...string} files - Files to print or empty for entire mem-fs
    * @returns {RunResult} this
    */
-  dumpFiles(...files) {
+  dumpFiles(...files: string[]) {
     if (files.length === 0) {
       this.memFs.each((file) => {
         console.log(file.path);

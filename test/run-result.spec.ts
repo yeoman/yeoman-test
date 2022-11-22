@@ -14,7 +14,7 @@ describe('run-result', () => {
   describe('constructor', () => {
     describe('without options', () => {
       it('uses current cwd', () => {
-        assert.equal(new RunResult().cwd, process.cwd());
+        assert.equal(new RunResult({} as any).cwd, process.cwd());
       });
     });
     describe('with fs option', () => {
