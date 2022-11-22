@@ -7,6 +7,7 @@ import process from 'node:process';
 import _ from 'lodash';
 import tempDirectory from 'temp-dir';
 import type Generator from 'yeoman-generator';
+import type Environment from 'yeoman-environment';
 import {type Options} from 'yeoman-environment';
 
 import RunResult, {type RunResultOptions} from './run-result.js';
@@ -42,35 +43,40 @@ export type RunContextSettings = {
   namespace?: string;
 };
 
-export default class RunContext extends EventEmitter {
-  _asyncHolds = 0;
-  ran = false;
-  inDirSet = false;
-  args: string[] = [];
-  options: any = {};
-  answers: any = {};
+type PromiseRunResult = Promise<RunResult>;
 
-  localConfig: any = null;
-  dependencies: any[] = [];
-  inDirCallbacks: any[] = [];
-  lookups: any[] = [];
+export class RunContextBase extends EventEmitter {
   mockedGenerators: any = {};
-
-  Generator: any;
-  settings: RunContextSettings;
-  envOptions: any;
-  oldCwd?: string;
-  helpers: YeomanTest;
-  buildAsync: any;
-  targetDirectory?: string;
-  env: any;
-  errored = false;
-  completed = false;
+  env!: Environment;
   generator: any;
-  envCB: any;
-  promptOptions: any;
 
-  private _generatorPromise: any;
+  protected environmentPromise?: PromiseRunResult;
+
+  private args: string[] = [];
+  private options: any = {};
+  private answers: any = {};
+
+  private localConfig: any = null;
+  private dependencies: any[] = [];
+  private readonly inDirCallbacks: any[] = [];
+  private lookups: any[] = [];
+  private readonly Generator: any;
+  private settings: RunContextSettings;
+  private readonly envOptions: any;
+  private oldCwd?: string;
+  private readonly helpers: YeomanTest;
+  private buildAsync: any;
+  private targetDirectory?: string;
+  private envCB: any;
+  private promptOptions: any;
+
+  private _asyncHolds = 0;
+  private ran = false;
+  private inDirSet = false;
+  private errored = false;
+  private completed = false;
+
+  private _generatorPromise?: Promise<Generator>;
 
   /**
    * This class provide a run context object to façade the complexity involved in setting
@@ -90,7 +96,7 @@ export default class RunContext extends EventEmitter {
 
   constructor(
     generatorClass: string | ConstructorParameters<typeof Generator>,
-    settings: RunContextSettings,
+    settings?: RunContextSettings,
     envOptions: Options = {},
     helpers = defaultHelpers,
   ) {
@@ -189,12 +195,10 @@ export default class RunContext extends EventEmitter {
     }
 
     this._generatorPromise = Promise.resolve(
-      this.env.create(namespace, {
-        arguments: this.args,
-        options: this.options,
-      }),
+      this.env.create(namespace, this.args, this.options) as any,
     );
 
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this._generatorPromise.then((generator) => {
       this.generator = generator;
     });
@@ -222,7 +226,8 @@ export default class RunContext extends EventEmitter {
     this.buildAsync = true;
     if (this.build() === false) return false;
 
-    this._generatorPromise.then((generator) => this.emit('ready', generator));
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    this._generatorPromise!.then((generator) => this.emit('ready', generator));
 
     this.run()
       .catch((error) => {
@@ -250,9 +255,9 @@ export default class RunContext extends EventEmitter {
 
   /**
    * Run the generator on the environment and promises a RunResult instance.
-   * @return {Promise<RunResult>} Promise a RunResult instance.
+   * @return {PromiseRunResult} Promise a RunResult instance.
    */
-  run() {
+  async run(): PromiseRunResult {
     if (!this.settings.runEnvironment && this.buildAsync === undefined) {
       throw new Error('Should be called with runEnvironment option');
     }
@@ -261,14 +266,15 @@ export default class RunContext extends EventEmitter {
       this.build();
     }
 
-    return this._generatorPromise.then((generator) =>
+    this.environmentPromise = this._generatorPromise!.then(async (generator) =>
       this.env
-        .runGenerator(generator)
+        .runGenerator(generator as any)
         .then(() => new RunResult(this._createRunResultOptions()))
         .finally(() => {
           this.helpers.restorePrompt(this.env);
         }),
     );
+    return this.environmentPromise;
   }
 
   _createRunResultOptions(): RunResultOptions {
@@ -288,9 +294,9 @@ export default class RunContext extends EventEmitter {
 
   /**
    * Return a promise representing the generator run process
-   * @return {Promise} Promise resolved on end or rejected on error
+   * @return Promise resolved on end or rejected on error
    */
-  async toPromise() {
+  async toPromise(): PromiseRunResult {
     if (this.settings.runEnvironment) {
       throw new Error(
         'RunContext with runEnvironment uses promises by default',
@@ -303,25 +309,6 @@ export default class RunContext extends EventEmitter {
       });
       this.on('error', reject);
     });
-  }
-
-  /**
-   * Promise `.then()` duck typing
-   * @return {Promise}
-   */
-  // eslint-disable-next-line unicorn/no-thenable
-  async then(...args) {
-    const promise = this.toPromise();
-    return promise.then(...args);
-  }
-
-  /**
-   * Promise `.catch()` duck typing
-   * @return {Promise}
-   */
-  async catch(...args) {
-    const promise = this.toPromise();
-    return promise.catch(...args);
   }
 
   /**
@@ -593,5 +580,27 @@ export default class RunContext extends EventEmitter {
     assert(typeof localConfig === 'object', 'config should be an object');
     this.localConfig = localConfig;
     return this;
+  }
+}
+
+export default class RunContext extends RunContextBase {
+  // eslint-disable-next-line unicorn/no-thenable
+  async then(
+    onfulfilled?: Parameters<PromiseRunResult['then']>[0],
+    onrejected?: Parameters<PromiseRunResult['then']>[1],
+  ): ReturnType<PromiseRunResult['then']> {
+    return this.toPromise().then(onfulfilled, onrejected);
+  }
+
+  async catch(
+    onrejected?: Parameters<PromiseRunResult['catch']>[0],
+  ): ReturnType<PromiseRunResult['catch']> {
+    return this.toPromise().catch(onrejected);
+  }
+
+  async finally(
+    onfinally?: Parameters<PromiseRunResult['finally']>[0],
+  ): ReturnType<PromiseRunResult['finally']> {
+    return this.toPromise().finally(onfinally);
   }
 }

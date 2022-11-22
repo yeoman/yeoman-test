@@ -14,7 +14,7 @@ import inquirer from 'inquirer';
 import Generator from 'yeoman-generator';
 import tempDirectory from 'temp-dir';
 
-import RunContext from '../src/run-context.js';
+import {RunContextBase as RunContext} from '../src/run-context.js';
 import helpers from '../src/index.js';
 import {DummyPrompt} from '../src/adapter.js';
 
@@ -275,7 +275,7 @@ describe('RunContext', function () {
 
   describe('#then()', function () {
     it('handle success', function () {
-      return this.ctx.then(
+      return this.ctx.toPromise().then(
         function (runResult) {
           assert.equal(this.ctx.targetDirectory, runResult.cwd);
         }.bind(this),
@@ -289,7 +289,7 @@ describe('RunContext', function () {
       Dummy.prototype.exec = execSpy;
       const ctx = new RunContext(Dummy);
 
-      return ctx.then(
+      return ctx.toPromise().then(
         function () {},
         function (error_) {
           assert.equal(error_, error);
@@ -306,7 +306,7 @@ describe('RunContext', function () {
       Dummy.prototype.exec = execSpy;
       const ctx = new RunContext(Dummy);
 
-      return ctx.catch(function (error_) {
+      return ctx.toPromise().catch(function (error_) {
         assert.equal(error_, error);
       });
     });

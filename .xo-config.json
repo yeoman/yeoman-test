@@ -5,6 +5,7 @@
   "ignores": [
  		"test/fixtures"
  	],
+   "printWidth": 120,
   "rules": {
     "unicorn/prefer-spread": "off",
     "unicorn/no-object-as-default-parameter": "off"
@@ -29,6 +30,7 @@
         "@typescript-eslint/no-unsafe-assignment": "off",
         "@typescript-eslint/no-empty-function": "off",
         "@typescript-eslint/naming-convention": "off",
+        "@typescript-eslint/no-floating-promises": "off",
         "@typescript-eslint/no-implicit-any-catch": "off"
       }
     }
