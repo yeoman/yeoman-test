@@ -6,7 +6,7 @@
   "author": "The Yeoman Team",
   "type": "module",
   "files": [
-    "lib"
+    "dist"
   ],
   "exports": {
     ".": "./dist/index.js"
