@@ -6,6 +6,7 @@ import process from 'node:process';
 import {createRequire} from 'node:module';
 import {fake as sinonFake, replace as sinonReplace} from 'sinon';
 
+import {type LookupOptions} from 'yeoman-environment';
 import helpers from '../src/index.js';
 import RunContext from '../src/run-context.js';
 import RunResult from '../src/run-result.js';
@@ -23,7 +24,7 @@ describe('RunContext running environment', function () {
   let ctx;
   const envOptions = {};
   let build = true;
-  let lookups = [];
+  let lookups: LookupOptions[] = [];
 
   beforeEach(function () {
     process.chdir(__dirname);
@@ -108,7 +109,7 @@ describe('RunContext running environment', function () {
       ctx.withEnvironment((env) => {
         const FakeGenerator = helpers.createDummyGenerator();
         const fake = sinonFake.returns(
-          Promise.resolve(new FakeGenerator({env})),
+          Promise.resolve(new FakeGenerator([], {env})),
         );
         sinonReplace(env, 'create', fake);
       });
@@ -148,7 +149,7 @@ describe('RunContext running environment', function () {
 
   describe('with lookups with packagePaths', () => {
     before(() => {
-      lookups = {packagePaths: path.resolve('./fixtures/generator-simple')};
+      lookups = [{packagePaths: [path.resolve('./fixtures/generator-simple')]}];
       gen = 'simple:app';
     });
     after(() => {
@@ -171,7 +172,7 @@ describe('RunContext running environment', function () {
 
   describe('with lookups with npmPaths', () => {
     before(() => {
-      lookups = [{npmPaths: path.resolve('./fixtures/')}];
+      lookups = [{npmPaths: [path.resolve('./fixtures/')]}];
     });
     after(() => {
       lookups = [];

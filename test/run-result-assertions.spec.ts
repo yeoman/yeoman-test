@@ -28,7 +28,7 @@ describe('run-result-assertions', () => {
     const yoAssert = new RunResult({
       ...testFs.options,
       cwd: path.join(__dirname, 'fixtures/assert'),
-    });
+    } as any);
 
     describe(testFs.description, () => {
       it('fs is correct', () => {

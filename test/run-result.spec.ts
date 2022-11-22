@@ -8,7 +8,7 @@ import MemFsEditor from 'mem-fs-editor';
 import {stub} from 'sinon';
 
 import RunContext from '../src/run-context.js';
-import RunResult from '../src/run-result.js';
+import RunResult, {RunResultOptions} from '../src/run-result.js';
 
 describe('run-result', () => {
   describe('constructor', () => {
@@ -50,7 +50,7 @@ describe('run-result', () => {
         let runResult;
         before(() => {
           options[optionName] = optionValue;
-          runResult = new RunResult(options);
+          runResult = new RunResult(options as any);
         });
         it('loads it', () => {
           assert.equal(runResult[optionName], optionValue);
@@ -71,7 +71,7 @@ describe('run-result', () => {
         memFs,
         fs: memFsEditor,
         cwd: process.cwd(),
-      });
+      } as any);
       consoleMock = stub(console, 'log');
       runResult.fs.write(path.resolve('test.txt'), 'test content');
       runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
@@ -106,7 +106,7 @@ describe('run-result', () => {
         memFs,
         fs: memFsEditor,
         cwd: process.cwd(),
-      });
+      } as any);
       consoleMock = stub(console, 'log');
       runResult.fs.write(path.resolve('test.txt'), 'test content');
       runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
@@ -130,7 +130,7 @@ describe('run-result', () => {
         memFs,
         fs: memFsEditor,
         cwd: process.cwd(),
-      });
+      } as any);
       runResult.fs.write(path.resolve('test.txt'), 'test content');
       runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
     });
@@ -156,7 +156,7 @@ describe('run-result', () => {
         memFs,
         fs: memFsEditor,
         cwd: process.cwd(),
-      });
+      } as any);
       runResult.fs.write(path.resolve('test.txt'), 'test content');
       runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
     });
@@ -183,7 +183,7 @@ describe('run-result', () => {
       runResult = new RunResult({
         cwd,
         oldCwd: path.join(process.cwd(), 'fixtures'),
-      });
+      } as any);
     });
     afterEach(() => {});
     it('removes cwd', () => {
@@ -215,7 +215,7 @@ describe('run-result', () => {
         oldCwd,
         envOptions: originalEnvOptions,
         settings: originalSetting,
-      }).create('foo', newSettings, newEnvOptions);
+      } as any).create('foo', newSettings, newEnvOptions);
     });
     it('returns a RunContext instance', () => {
       assert.ok(runContext instanceof RunContext);

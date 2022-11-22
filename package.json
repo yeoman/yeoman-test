@@ -8,7 +8,9 @@
   "files": [
     "lib"
   ],
-  "main": "lib/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "keywords": [
     "yeoman",
     "unit test"
@@ -40,6 +42,7 @@
     "yeoman-generator": "^5.7.0"
   },
   "dependencies": {
+    "@types/inquirer": "^8.2.5",
     "@types/mem-fs-editor": "^7.0.2",
     "@types/yeoman-environment": "^2.10.8",
     "@types/yeoman-generator": "^5.2.11",

@@ -51,6 +51,8 @@ export type RunResultOptions = {
    */
   memFs: Store;
 
+  fs?: MemFsEditor.Editor;
+
   /**
    * The mocked generators of the context.
    */

@@ -81,8 +81,8 @@ describe('RunContext', function () {
       const Dummy = helpers.createDummyGenerator();
       const execSpy = sinonStub().throws(error);
       const endSpy = sinonSpy();
-      Dummy.prototype.exec = execSpy;
-      Dummy.prototype.end = execSpy;
+      (Dummy.prototype as any).test = execSpy;
+      (Dummy.prototype as any).end = execSpy;
       const ctx = new RunContext(Dummy);
 
       ctx.on('error', function (error_) {
@@ -110,7 +110,7 @@ describe('RunContext', function () {
       });
 
       ctx.on('ready', function () {
-        assert.equal(ctx.env.get('simple:app').resolved, 'path');
+        assert.equal((ctx.env.get('simple:app') as any).resolved, 'path');
         done();
       });
     });
@@ -243,7 +243,7 @@ describe('RunContext', function () {
       process.once('unhandledRejection', errorHandler);
 
       const Dummy = helpers.createDummyGenerator();
-      Dummy.prototype.exec = execSpy;
+      (Dummy.prototype as any).test = execSpy;
 
       setImmediate(function () {
         return new RunContext(Dummy);
@@ -264,7 +264,7 @@ describe('RunContext', function () {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
       const execSpy = sinonStub().throws(error);
-      Dummy.prototype.exec = execSpy;
+      (Dummy.prototype as any).test = execSpy;
       const ctx = new RunContext(Dummy);
 
       return ctx.toPromise().catch(function (error_) {
@@ -286,7 +286,7 @@ describe('RunContext', function () {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
       const execSpy = sinonStub().throws(error);
-      Dummy.prototype.exec = execSpy;
+      (Dummy.prototype as any).test = execSpy;
       const ctx = new RunContext(Dummy);
 
       return ctx.toPromise().then(
@@ -303,7 +303,7 @@ describe('RunContext', function () {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
       const execSpy = sinonStub().throws(error);
-      Dummy.prototype.exec = execSpy;
+      (Dummy.prototype as any).test = execSpy;
       const ctx = new RunContext(Dummy);
 
       return ctx.toPromise().catch(function (error_) {
@@ -319,10 +319,10 @@ describe('RunContext', function () {
     });
 
     it('call helpers.testDirectory()', function () {
-      sinonSpy(helpers, 'testDirectory');
+      const spy = sinonSpy(helpers, 'testDirectory');
       this.ctx.inDir(this.tmp);
-      assert(helpers.testDirectory.withArgs(this.tmp).calledOnce);
-      helpers.testDirectory.restore();
+      assert(spy.withArgs(this.tmp).calledOnce);
+      spy.restore();
     });
 
     it('is chainable', function () {
@@ -422,10 +422,10 @@ describe('RunContext', function () {
     });
 
     it('do not call helpers.testDirectory()', function () {
-      sinonSpy(helpers, 'testDirectory');
+      const spy = sinonSpy(helpers, 'testDirectory');
       this.ctx.cd(this.tmp);
-      assert(!helpers.testDirectory.calledOnce);
-      helpers.testDirectory.restore();
+      assert(!spy.calledOnce);
+      spy.restore();
     });
 
     it('is chainable', function () {
@@ -441,10 +441,10 @@ describe('RunContext', function () {
     });
 
     it('should cd into created directory', function () {
-      sinonSpy(process, 'chdir');
+      const spy = sinonSpy(process, 'chdir');
       this.ctx.cd(this.tmp);
-      assert(process.chdir.calledWith(this.tmp));
-      process.chdir.restore();
+      assert(spy.calledWith(this.tmp));
+      spy.restore();
     });
 
     it('should throw error if directory do not exist', function () {
@@ -459,10 +459,10 @@ describe('RunContext', function () {
 
   describe('#inTmpDir', function () {
     it('call helpers.testDirectory()', function () {
-      sinonSpy(helpers, 'testDirectory');
+      const spy = sinonSpy(helpers, 'testDirectory');
       this.ctx.inTmpDir();
-      sinonAssert.calledOnce(helpers.testDirectory);
-      helpers.testDirectory.restore();
+      sinonAssert.calledOnce(spy);
+      spy.restore();
     });
 
     it('is chainable', function () {

@@ -8,10 +8,14 @@ import _ from 'lodash';
 import tempDirectory from 'temp-dir';
 import type Generator from 'yeoman-generator';
 import type Environment from 'yeoman-environment';
-import {type Options} from 'yeoman-environment';
+import {type LookupOptions, type Options} from 'yeoman-environment';
 
 import RunResult, {type RunResultOptions} from './run-result.js';
-import defaultHelpers, {type Dependency, type YeomanTest} from './index.js';
+import defaultHelpers, {
+  type GeneratorConstructor,
+  type Dependency,
+  type YeomanTest,
+} from './index.js';
 
 /**
  * Provides settings for creating a `RunContext`.
@@ -46,9 +50,11 @@ export type RunContextSettings = {
 type PromiseRunResult = Promise<RunResult>;
 
 export class RunContextBase extends EventEmitter {
-  mockedGenerators: any = {};
+  mockedGenerators: Record<string, Generator> = {};
   env!: Environment;
-  generator: any;
+  generator?: Generator;
+  readonly settings: RunContextSettings;
+  readonly envOptions: Environment.Options;
 
   protected environmentPromise?: PromiseRunResult;
 
@@ -59,10 +65,8 @@ export class RunContextBase extends EventEmitter {
   private localConfig: any = null;
   private dependencies: any[] = [];
   private readonly inDirCallbacks: any[] = [];
-  private lookups: any[] = [];
-  private readonly Generator: any;
-  private settings: RunContextSettings;
-  private readonly envOptions: any;
+  private lookups: LookupOptions[] = [];
+  private readonly Generator: string | GeneratorConstructor | typeof Generator;
   private oldCwd?: string;
   private readonly helpers: YeomanTest;
   private buildAsync: any;
@@ -95,7 +99,7 @@ export class RunContextBase extends EventEmitter {
    */
 
   constructor(
-    generatorClass: string | ConstructorParameters<typeof Generator>,
+    generatorClass: string | GeneratorConstructor | typeof Generator,
     settings?: RunContextSettings,
     envOptions: Options = {},
     helpers = defaultHelpers,
@@ -191,7 +195,11 @@ export class RunContextBase extends EventEmitter {
       }
     } else {
       namespace = this.settings.namespace;
-      this.env.registerStub(this.Generator, namespace, this.settings.resolved);
+      this.env.registerStub(
+        this.Generator as any,
+        namespace,
+        this.settings.resolved,
+      );
     }
 
     this._generatorPromise = Promise.resolve(
@@ -386,10 +394,9 @@ export class RunContextBase extends EventEmitter {
   /**
    * Run lookup on the environment.
    *
-   * @param {Object|Array} [lookups] - lookup to run.
-   * @return {this} run context instance.
+   * @param lookups - lookup to run.
    */
-  withLookups(lookups) {
+  withLookups(lookups: LookupOptions | LookupOptions[]): this {
     this.lookups = this.lookups.concat(lookups);
     return this;
   }
@@ -565,7 +572,7 @@ export class RunContextBase extends EventEmitter {
   private _createRunResultOptions(): RunResultOptions {
     return {
       env: this.env,
-      generator: this.generator,
+      generator: this.generator!,
       memFs: this.env.sharedFs,
       settings: {
         ...this.settings,
