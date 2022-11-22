@@ -130,11 +130,9 @@ export default class RunResult {
   }
 
   /**
-   * Prints files names and contents from mem-fs
-   * @param {...string} files - Files to print or empty for entire mem-fs
-   * @returns {RunResult} this
+   * Either dumps the contents of the specified files or the name and the contents of each file to the console.
    */
-  dumpFiles(...files: string[]) {
+  dumpFiles(...files: string[]): this {
     if (files.length === 0) {
       this.memFs.each((file) => {
         console.log(file.path);
@@ -154,10 +152,9 @@ export default class RunResult {
   }
 
   /**
-   * Prints every file from mem-fs
-   * @returns {RunResult} this
+   * Dumps the name of each file to the console.
    */
-  dumpFilenames() {
+  dumpFilenames(): this {
     this.memFs.each((file) => {
       console.log(file.path);
     });
@@ -166,18 +163,17 @@ export default class RunResult {
 
   /**
    * Reverts to old cwd.
-   * @returns {RunResult} this
+   * @returns this
    */
-  restore() {
+  restore(): this {
     process.chdir(this.oldCwd);
     return this;
   }
 
   /**
    * Deletes the test directory recursively.
-   * @returns {RunResult} this
    */
-  cleanup() {
+  cleanup(): this {
     process.chdir(this.oldCwd);
     rmSync(this.cwd, {recursive: true});
     return this;
@@ -211,19 +207,19 @@ export default class RunResult {
 
   /**
    * Assert that a file exists
-   * @param {String}       path     - path to a file
+   * @param path     - path to a file
    * @example
    * result.assertFile('templates/user.hbs');
    *
    * @also
    *
    * Assert that each files in the array exists
-   * @param {Array}         paths    - an array of paths to files
+   * @param paths    - an array of paths to files
    * @example
    * result.assertFile(['templates/user.hbs', 'templates/user/edit.hbs']);
    */
-  assertFile(...args: string[]) {
-    for (const file of convertArgs(args)) {
+  assertFile(path: string | string[]): void {
+    for (const file of convertArgs([path])) {
       const here = this._exists(file);
       assert.ok(here, `${file}, no such file or directory`);
     }
@@ -231,19 +227,19 @@ export default class RunResult {
 
   /**
    * Assert that a file doesn't exist
-   * @param {String}       file     - path to a file
+   * @param file     - path to a file
    * @example
    * result.assertNoFile('templates/user.hbs');
    *
    * @also
    *
    * Assert that each of an array of files doesn't exist
-   * @param {Array}         pairs    - an array of paths to files
+   * @param pairs    - an array of paths to files
    * @example
    * result.assertNoFile(['templates/user.hbs', 'templates/user/edit.hbs']);
    */
-  assertNoFile(...args: string[]) {
-    for (const file of convertArgs(args)) {
+  assertNoFile(files: string | string[]): void {
+    for (const file of convertArgs([files])) {
       const here = this._exists(file);
       assert.ok(!here, `${file} exists`);
     }
@@ -251,8 +247,8 @@ export default class RunResult {
 
   /**
    * Assert that a file's content matches a regex or string
-   * @param {String}       file     - path to a file
-   * @param {Regex|String} reg      - regex / string that will be used to search the file
+   * @param file     - path to a file
+   * @param reg      - regex / string that will be used to search the file
    * @example
    * result.assertFileContent('models/user.js', /App\.User = DS\.Model\.extend/);
    * result.assertFileContent('models/user.js', 'App.User = DS.Model.extend');
@@ -260,7 +256,7 @@ export default class RunResult {
    * @also
    *
    * Assert that each file in an array of file-regex pairs matches its corresponding regex
-   * @param {Array}         pairs    - an array of arrays, where each subarray is a [String, RegExp] pair
+   * @param pairs    - an array of arrays, where each subarray is a [String, RegExp] pair
    * @example
    * var arg = [
    *   [ 'models/user.js', /App\.User = DS\.Model\.extend/ ],
@@ -268,7 +264,8 @@ export default class RunResult {
    * ]
    * result.assertFileContent(arg);
    */
-
+  assertFileContent(file: string, reg: string | RegExp): void;
+  assertFileContent(pairs: Array<[string, string | RegExp]>): void;
   assertFileContent(...args) {
     for (const pair of convertArgs(args)) {
       const file = pair[0];
@@ -286,8 +283,8 @@ export default class RunResult {
 
   /**
    * Assert that a file's content is the same as the given string
-   * @param {String}  file            - path to a file
-   * @param {String}  expectedContent - the expected content of the file
+   * @param file            - path to a file
+   * @param expectedContent - the expected content of the file
    * @example
    * result.assertEqualsFileContent(
    *   'data.js',
@@ -297,14 +294,15 @@ export default class RunResult {
    * @also
    *
    * Assert that each file in an array of file-string pairs equals its corresponding string
-   * @param {Array}   pairs           - an array of arrays, where each subarray is a [String, String] pair
+   * @param pairs           - an array of arrays, where each subarray is a [String, String] pair
    * @example
    * result.assertEqualsFileContent([
    *   ['data.js', 'const greeting = "Hello";\nexport default { greeting }'],
    *   ['user.js', 'export default {\n  name: 'Coleman',\n  age: 0\n}']
    * ]);
    */
-
+  assertEqualsFileContent(file: string, expectedContent: string): void;
+  assertEqualsFileContent(pairs: Array<[string, string]>): void;
   assertEqualsFileContent(...args) {
     for (const pair of convertArgs(args)) {
       const file = pair[0];
@@ -316,8 +314,8 @@ export default class RunResult {
 
   /**
    * Assert that a file's content does not match a regex / string
-   * @param {String}       file     - path to a file
-   * @param {Regex|String} reg      - regex / string that will be used to search the file
+   * @param file     - path to a file
+   * @param reg      - regex / string that will be used to search the file
    * @example
    * result.assertNoFileContent('models/user.js', /App\.User = DS\.Model\.extend/);
    * result.assertNoFileContent('models/user.js', 'App.User = DS.Model.extend');
@@ -325,14 +323,15 @@ export default class RunResult {
    * @also
    *
    * Assert that each file in an array of file-regex pairs does not match its corresponding regex
-   * @param {Array}         pairs    - an array of arrays, where each subarray is a [String, RegExp] pair
+   * @param pairs    - an array of arrays, where each subarray is a [String, RegExp] pair
    * var arg = [
    *   [ 'models/user.js', /App\.User \ DS\.Model\.extend/ ],
    *   [ 'controllers/user.js', /App\.UserController = Ember\.ObjectController\.extend/ ]
    * ]
    * result.assertNoFileContent(arg);
    */
-
+  assertNoFileContent(file: string, reg: RegExp | string): void;
+  assertNoFileContent(pairs: Array<[string, string | RegExp]>): void;
   assertNoFileContent(...args) {
     for (const pair of convertArgs(args)) {
       const file = pair[0];
@@ -351,13 +350,12 @@ export default class RunResult {
 
   /**
    * Assert that two strings are equal after standardization of newlines
-   * @param {String} value    - a string
-   * @param {String} expected - the expected value of the string
+   * @param value    - a string
+   * @param expected - the expected value of the string
    * @example
    * result.assertTextEqual('I have a yellow cat', 'I have a yellow cat');
    */
-
-  assertTextEqual(value, expected) {
+  assertTextEqual(value: string, expected: string): void {
     const eol = (string) => string.replace(/\r\n/g, '\n');
 
     assert.equal(eol(value), eol(expected));
@@ -365,14 +363,19 @@ export default class RunResult {
 
   /**
    * Assert an object contains the provided keys
-   * @param {Object} obj      Object that should match the given pattern
-   * @param {Object} content  An object of key/values the object should contains
+   * @param obj      Object that should match the given pattern
+   * @param content  An object of key/values the object should contains
    */
-
-  assertObjectContent(object, content) {
+  assertObjectContent(
+    object: Record<string, unknown>,
+    content: Record<string, any>,
+  ): void {
     for (const key of Object.keys(content)) {
       if (isObject(content[key])) {
-        this.assertObjectContent(object[key], content[key]);
+        this.assertObjectContent(
+          object[key] as Record<string, unknown>,
+          content[key],
+        );
         continue;
       }
 
@@ -382,14 +385,20 @@ export default class RunResult {
 
   /**
    * Assert an object does not contain the provided keys
-   * @param {Object} obj Object that should not match the given pattern
-   * @param {Object} content An object of key/values the object should not contain
+   * @param obj Object that should not match the given pattern
+   * @param content An object of key/values the object should not contain
    */
 
-  assertNoObjectContent(object, content) {
+  assertNoObjectContent(
+    object: Record<string, unknown>,
+    content: Record<string, any>,
+  ): void {
     for (const key of Object.keys(content)) {
       if (isObject(content[key])) {
-        this.assertNoObjectContent(object[key], content[key]);
+        this.assertNoObjectContent(
+          object[key] as Record<string, unknown>,
+          content[key],
+        );
         continue;
       }
 
@@ -399,21 +408,24 @@ export default class RunResult {
 
   /**
    * Assert a JSON file contains the provided keys
-   * @param {String} filename
-   * @param {Object} content An object of key/values the file should contains
+   * @param filename
+   * @param content An object of key/values the file should contains
    */
 
-  assertJsonFileContent(filename, content) {
+  assertJsonFileContent(filename: string, content: Record<string, any>): void {
     this.assertObjectContent(this._readFile(filename, true), content);
   }
 
   /**
    * Assert a JSON file does not contain the provided keys
-   * @param {String} filename
-   * @param {Object} content An object of key/values the file should not contain
+   * @param filename
+   * @param content An object of key/values the file should not contain
    */
 
-  assertNoJsonFileContent(filename, content) {
+  assertNoJsonFileContent(
+    filename: string,
+    content: Record<string, any>,
+  ): void {
     this.assertNoObjectContent(this._readFile(filename, true), content);
   }
 }

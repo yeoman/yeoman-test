@@ -11,7 +11,7 @@ import type Environment from 'yeoman-environment';
 import {type Options} from 'yeoman-environment';
 
 import RunResult, {type RunResultOptions} from './run-result.js';
-import defaultHelpers, {type YeomanTest} from './index.js';
+import defaultHelpers, {type Dependency, type YeomanTest} from './index.js';
 
 /**
  * Provides settings for creating a `RunContext`.
@@ -218,42 +218,6 @@ export class RunContextBase extends EventEmitter {
   }
 
   /**
-   * Method called when the context is ready to run the generator
-   * @private
-   */
-
-  _run() {
-    this.buildAsync = true;
-    if (this.build() === false) return false;
-
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this._generatorPromise!.then((generator) => this.emit('ready', generator));
-
-    this.run()
-      .catch((error) => {
-        if (
-          this.listenerCount('end') === 0 &&
-          this.listenerCount('error') === 0
-        ) {
-          // When there is no listeners throw a unhandled rejection.
-          setImmediate(async function () {
-            // eslint-disable-next-line @typescript-eslint/no-throw-literal
-            throw error;
-          });
-        } else {
-          this.errored = true;
-          this.emit('error', error);
-        }
-      })
-      .finally(() => {
-        this.emit('end');
-        this.completed = true;
-      });
-
-    return true;
-  }
-
-  /**
    * Run the generator on the environment and promises a RunResult instance.
    * @return {PromiseRunResult} Promise a RunResult instance.
    */
@@ -275,21 +239,6 @@ export class RunContextBase extends EventEmitter {
         }),
     );
     return this.environmentPromise;
-  }
-
-  _createRunResultOptions(): RunResultOptions {
-    return {
-      env: this.env,
-      generator: this.generator,
-      memFs: this.env.sharedFs,
-      settings: {
-        ...this.settings,
-      },
-      oldCwd: this.oldCwd!,
-      cwd: this.targetDirectory!,
-      envOptions: this.envOptions,
-      mockedGenerators: this.mockedGenerators,
-    };
   }
 
   /**
@@ -338,13 +287,12 @@ export class RunContextBase extends EventEmitter {
 
   /**
    * Clean the provided directory, then change directory into it
-   * @param  {String} dirPath - Directory path (relative to CWD). Prefer passing an absolute
+   * @param  dirPath - Directory path (relative to CWD). Prefer passing an absolute
    *                            file path for predictable results
-   * @param {Function} [cb] - callback who'll receive the folder path as argument
-   * @return {this} run context instance
+   * @param [cb] - callback who'll receive the folder path as argument
+   * @return run context instance
    */
-
-  inDir(dirPath, cb) {
+  inDir(dirPath: string, cb?: (folderPath: string) => void): this {
     this.setDir(dirPath, true);
     this.helpers.testDirectory(dirPath, () =>
       cb?.call(this, path.resolve(dirPath)),
@@ -354,22 +302,21 @@ export class RunContextBase extends EventEmitter {
 
   /**
    * Register an callback to prepare the destination folder.
-   * @param {Function} [cb] - callback who'll receive the folder path as argument
-   * @return {this} run context instance
+   * @param [cb]  - callback who'll receive the folder path as argument
+   * @return this - run context instance
    */
-
-  doInDir(cb) {
+  doInDir(cb: (folderPath: string) => void): this {
     this.inDirCallbacks.push(cb);
     return this;
   }
 
   /**
    * Change directory without deleting directory content.
-   * @param  {String} dirPath - Directory path (relative to CWD). Prefer passing an absolute
+   * @param  dirPath - Directory path (relative to CWD). Prefer passing an absolute
    *                            file path for predictable results
-   * @return {this} run context instance
+   * @return run context instance
    */
-  cd(dirPath: string) {
+  cd(dirPath: string): this {
     dirPath = path.resolve(dirPath);
     this.setDir(dirPath, false);
     try {
@@ -383,15 +330,15 @@ export class RunContextBase extends EventEmitter {
   }
 
   /**
-   * Creates a temporary directory and change the CWD into it
+   * Cleanup a temporary directory and change the CWD into it
    *
    * This method is called automatically when creating a RunContext. Only use it if you need
    * to use the callback.
    *
-   * @param {Function} [cb] - callback who'll receive the folder path as argument
-   * @return {this} run context instance
+   * @param [cb]  - callback who'll receive the folder path as argument
+   * @return this - run context instance
    */
-  inTmpDir(cb?) {
+  inTmpDir(cb?: (folderPath: string) => void): this {
     return this.inDir(
       path.join(tempDirectory, crypto.randomBytes(20).toString('hex')),
       cb,
@@ -449,7 +396,7 @@ export class RunContextBase extends EventEmitter {
 
   /**
    * Clean the directory used for tests inside inDir/inTmpDir
-   * @param  {Boolean} force - force directory cleanup for not tmpdir
+   * @param force - force directory cleanup for not tmpdir
    */
   cleanTestDirectory(force = false) {
     if (!force && this.settings.tmpdir === false) {
@@ -465,8 +412,7 @@ export class RunContextBase extends EventEmitter {
    * Provide arguments to the run context
    * @param  args - command line arguments as Array or space separated string
    */
-
-  withArguments(args: string | string[]) {
+  withArguments(args: string | string[]): this {
     const argsArray = typeof args === 'string' ? args.split(' ') : args;
     assert(
       Array.isArray(argsArray),
@@ -482,7 +428,7 @@ export class RunContextBase extends EventEmitter {
    * @return {this}
    */
 
-  withOptions(options) {
+  withOptions(options: any): this {
     if (!options) {
       return this;
     }
@@ -507,7 +453,7 @@ export class RunContextBase extends EventEmitter {
    * @return {this}
    */
 
-  withPrompts(answers, options) {
+  withPrompts(answers: Generator.Answers, options) {
     this.answers = {...this.answers, ...answers};
     this.promptOptions = options;
     return this;
@@ -530,7 +476,7 @@ export class RunContextBase extends EventEmitter {
    * });
    */
 
-  withGenerators(dependencies) {
+  withGenerators(dependencies: Dependency[]): this {
     assert(Array.isArray(dependencies), 'dependencies should be an array');
     this.dependencies = this.dependencies.concat(dependencies);
     return this;
@@ -538,8 +484,8 @@ export class RunContextBase extends EventEmitter {
 
   /**
  * Create mocked generators
- * @param {Array} namespaces - namespaces of mocked generators
- * @return {this}
+ * @param namespaces - namespaces of mocked generators
+ * @return this
  * @example
  * var angular = helpers
  *   .create('../../app')
@@ -553,7 +499,7 @@ export class RunContextBase extends EventEmitter {
  .calledOnce));
  */
 
-  withMockedGenerators(namespaces) {
+  withMockedGenerators(namespaces: string[]): this {
     assert(Array.isArray(namespaces), 'namespaces should be an array');
     const entries = namespaces.map((namespace) => [
       namespace,
@@ -573,13 +519,62 @@ export class RunContextBase extends EventEmitter {
 
   /**
    * Mock the local configuration with the provided config
-   * @param  {Object} localConfig - should look just like if called config.getAll()
-   * @return {this}
+   * @param localConfig - should look just like if called config.getAll()
    */
-  withLocalConfig(localConfig) {
+  withLocalConfig(localConfig: Record<string, unknown>): this {
     assert(typeof localConfig === 'object', 'config should be an object');
     this.localConfig = localConfig;
     return this;
+  }
+
+  /**
+   * Method called when the context is ready to run the generator
+   */
+
+  private _run() {
+    this.buildAsync = true;
+    if (this.build() === false) return false;
+
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    this._generatorPromise!.then((generator) => this.emit('ready', generator));
+
+    this.run()
+      .catch((error) => {
+        if (
+          this.listenerCount('end') === 0 &&
+          this.listenerCount('error') === 0
+        ) {
+          // When there is no listeners throw a unhandled rejection.
+          setImmediate(async function () {
+            // eslint-disable-next-line @typescript-eslint/no-throw-literal
+            throw error;
+          });
+        } else {
+          this.errored = true;
+          this.emit('error', error);
+        }
+      })
+      .finally(() => {
+        this.emit('end');
+        this.completed = true;
+      });
+
+    return true;
+  }
+
+  private _createRunResultOptions(): RunResultOptions {
+    return {
+      env: this.env,
+      generator: this.generator,
+      memFs: this.env.sharedFs,
+      settings: {
+        ...this.settings,
+      },
+      oldCwd: this.oldCwd!,
+      cwd: this.targetDirectory!,
+      envOptions: this.envOptions,
+      mockedGenerators: this.mockedGenerators,
+    };
   }
 }
 
