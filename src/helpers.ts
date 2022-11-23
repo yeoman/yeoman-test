@@ -49,6 +49,21 @@ export class YeomanTest {
   generatorOptions?: GeneratorOptions;
 
   /**
+   * Create a function that will clean up the test directory,
+   * cd into it. Intended for use
+   * as a callback for the mocha `before` hook.
+   *
+   * @param dir - path to the test directory
+   * @returns mocha callback
+   */
+
+  setUpTestDirectory(dir: string): () => void {
+    return () => {
+      this.testDirectory(dir);
+    };
+  }
+
+  /**
    * Clean-up the test directory and cd into it.
    * Call given callback after entering the test directory.
    * @param {String} dir - path to the test directory
