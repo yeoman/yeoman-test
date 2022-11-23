@@ -126,83 +126,6 @@ export class RunContextBase extends EventEmitter {
   }
 
   /**
-   * Build the generator and the environment.
-   * @return {RunContext|false} this
-   */
-  build(callback?: (context: any) => any): this {
-    if (this.ran || this.completed) {
-      throw new Error('The context is already built');
-    }
-
-    if (!this.inDirSet && this.settings.tmpdir !== false) {
-      this.inTmpDir();
-    }
-
-    this.ran = true;
-    if (this.inDirCallbacks.length > 0) {
-      const targetDirectory = path.resolve(this.targetDirectory!);
-      for (const cb of this.inDirCallbacks) cb(targetDirectory);
-    }
-
-    this.targetDirectory = this.targetDirectory ?? process.cwd();
-
-    const testEnv = this.helpers.createTestEnv(this.envOptions.createEnv, {
-      cwd: this.settings.forwardCwd ? this.targetDirectory : undefined,
-      ...this.options,
-      ...this.envOptions,
-    });
-    this.env = this.envCB ? this.envCB(testEnv) || testEnv : testEnv;
-
-    for (const lookup of this.lookups) {
-      this.env.lookup(lookup);
-    }
-
-    this.helpers.registerDependencies(this.env, this.dependencies);
-
-    let namespace;
-    if (typeof this.Generator === 'string') {
-      if (this.settings.runEnvironment) {
-        namespace = this.Generator;
-      } else {
-        namespace = this.env.namespace(this.Generator);
-        if (namespace !== this.Generator) {
-          // Generator is a file path, it should be registered.
-          this.env.register(this.Generator);
-        }
-      }
-    } else {
-      namespace = this.settings.namespace;
-      this.env.registerStub(
-        this.Generator as any,
-        namespace,
-        this.settings.resolved,
-      );
-    }
-
-    this.generatorPromise = Promise.resolve(
-      this.env.create(namespace, this.args, this.options) as any,
-    );
-
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.generatorPromise.then((generator) => {
-      this.generator = generator;
-    });
-
-    this.helpers.mockPrompt(this.env, this.answers, this.promptOptions);
-
-    if (this.localConfig) {
-      // Only mock local config when withLocalConfig was called
-      this.generatorPromise = this.generatorPromise.then((generator) => {
-        this.helpers.mockLocalConfig(generator, this.localConfig);
-        return generator;
-      });
-    }
-
-    callback?.(this);
-    return this;
-  }
-
-  /**
    * Run the generator on the environment and promises a RunResult instance.
    * @return {PromiseRunResult} Promise a RunResult instance.
    */
@@ -223,10 +146,15 @@ export class RunContextBase extends EventEmitter {
     return this.environmentPromise;
   }
 
+  // If any event listeners is added, setup event listeners emitters
   on(eventName: string | symbol, listener: (...args: any[]) => void): this {
     super.on(eventName, listener);
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.setupEventListeners();
+    // Don't setup emitters if on generator envent.
+    if (eventName !== 'generator') {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      this.setupEventListeners();
+    }
+
     return this;
   }
 
@@ -348,6 +276,20 @@ export class RunContextBase extends EventEmitter {
   }
 
   /**
+   * Clean the directory used for tests inside inDir/inTmpDir
+   * @param force - force directory cleanup for not tmpdir
+   */
+  cleanTestDirectory(force = false) {
+    if (!force && this.settings.tmpdir === false) {
+      throw new Error('Cleanup test dir called with false tmpdir option.');
+    }
+
+    if (this.targetDirectory && existsSync(this.targetDirectory)) {
+      rmSync(this.targetDirectory, {recursive: true});
+    }
+  }
+
+  /**
    * Create an environment
    *
    * This method is called automatically when creating a RunContext. Only use it if you need
@@ -369,20 +311,6 @@ export class RunContextBase extends EventEmitter {
   withLookups(lookups: LookupOptions | LookupOptions[]): this {
     this.lookups = this.lookups.concat(lookups);
     return this;
-  }
-
-  /**
-   * Clean the directory used for tests inside inDir/inTmpDir
-   * @param force - force directory cleanup for not tmpdir
-   */
-  cleanTestDirectory(force = false) {
-    if (!force && this.settings.tmpdir === false) {
-      throw new Error('Cleanup test dir called with false tmpdir option.');
-    }
-
-    if (this.targetDirectory && existsSync(this.targetDirectory)) {
-      rmSync(this.targetDirectory, {recursive: true});
-    }
   }
 
   /**
@@ -460,21 +388,21 @@ export class RunContextBase extends EventEmitter {
   }
 
   /**
- * Create mocked generators
- * @param namespaces - namespaces of mocked generators
- * @return this
- * @example
- * var angular = helpers
- *   .create('../../app')
- *   .withMockedGenerators([
- *     'foo:app',
- *     'foo:bar',
- *   ])
- *   .run()
- *   .then(runResult => assert(runResult
- *     .mockedGenerators['foo:app']
+   * Create mocked generators
+   * @param namespaces - namespaces of mocked generators
+   * @return this
+   * @example
+   * var angular = helpers
+   *   .create('../../app')
+   *   .withMockedGenerators([
+   *     'foo:app',
+   *     'foo:bar',
+   *   ])
+   *   .run()
+   *   .then(runResult => assert(runResult
+   *     .mockedGenerators['foo:app']
  .calledOnce));
- */
+   */
 
   withMockedGenerators(namespaces: string[]): this {
     assert(Array.isArray(namespaces), 'namespaces should be an array');
@@ -498,6 +426,84 @@ export class RunContextBase extends EventEmitter {
   withLocalConfig(localConfig: Record<string, unknown>): this {
     assert(typeof localConfig === 'object', 'config should be an object');
     this.localConfig = localConfig;
+    return this;
+  }
+
+  /**
+   * Build the generator and the environment.
+   * @return {RunContext|false} this
+   */
+  protected build(callback?: (context: any) => any): this {
+    if (this.ran || this.completed) {
+      throw new Error('The context is already built');
+    }
+
+    if (!this.inDirSet && this.settings.tmpdir !== false) {
+      this.inTmpDir();
+    }
+
+    this.ran = true;
+    if (this.inDirCallbacks.length > 0) {
+      const targetDirectory = path.resolve(this.targetDirectory!);
+      for (const cb of this.inDirCallbacks) cb(targetDirectory);
+    }
+
+    this.targetDirectory = this.targetDirectory ?? process.cwd();
+
+    const testEnv = this.helpers.createTestEnv(this.envOptions.createEnv, {
+      cwd: this.settings.forwardCwd ? this.targetDirectory : undefined,
+      ...this.options,
+      ...this.envOptions,
+    });
+    this.env = this.envCB ? this.envCB(testEnv) || testEnv : testEnv;
+
+    for (const lookup of this.lookups) {
+      this.env.lookup(lookup);
+    }
+
+    this.helpers.registerDependencies(this.env, this.dependencies);
+
+    let namespace;
+    if (typeof this.Generator === 'string') {
+      if (this.settings.runEnvironment) {
+        namespace = this.Generator;
+      } else {
+        namespace = this.env.namespace(this.Generator);
+        if (namespace !== this.Generator) {
+          // Generator is a file path, it should be registered.
+          this.env.register(this.Generator);
+        }
+      }
+    } else {
+      namespace = this.settings.namespace;
+      this.env.registerStub(
+        this.Generator as any,
+        namespace,
+        this.settings.resolved,
+      );
+    }
+
+    this.generatorPromise = Promise.resolve(
+      this.env.create(namespace, this.args, this.options) as any,
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    this.generatorPromise.then((generator) => {
+      this.generator = generator;
+      this.emit('generator', generator);
+    });
+
+    this.helpers.mockPrompt(this.env, this.answers, this.promptOptions);
+
+    if (this.localConfig) {
+      // Only mock local config when withLocalConfig was called
+      this.generatorPromise = this.generatorPromise.then((generator) => {
+        this.helpers.mockLocalConfig(generator, this.localConfig);
+        return generator;
+      });
+    }
+
+    callback?.(this);
     return this;
   }
 
