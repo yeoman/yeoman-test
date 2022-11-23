@@ -50,11 +50,12 @@ export type RunContextSettings = {
 type PromiseRunResult = Promise<RunResult>;
 
 export class RunContextBase extends EventEmitter {
-  mockedGenerators: Record<string, Generator> = {};
+  readonly mockedGenerators: Record<string, Generator> = {};
   env!: Environment;
-  generator?: Generator;
+  generator!: Generator;
   readonly settings: RunContextSettings;
   readonly envOptions: Environment.Options;
+  completed = false;
 
   protected environmentPromise?: PromiseRunResult;
 
@@ -69,7 +70,7 @@ export class RunContextBase extends EventEmitter {
   private readonly Generator: string | GeneratorConstructor | typeof Generator;
   private oldCwd?: string;
   private readonly helpers: YeomanTest;
-  private buildAsync: any;
+  private eventListenersSet = false;
   private targetDirectory?: string;
   private envCB: any;
   private promptOptions: any;
@@ -77,9 +78,8 @@ export class RunContextBase extends EventEmitter {
   private ran = false;
   private inDirSet = false;
   private errored = false;
-  private completed = false;
 
-  private _generatorPromise?: Promise<Generator>;
+  private generatorPromise?: Promise<Generator>;
 
   /**
    * This class provide a run context object to façade the complexity involved in setting
@@ -122,10 +122,6 @@ export class RunContextBase extends EventEmitter {
       this.cd(this.settings.cwd);
     }
 
-    if (!this.settings.runEnvironment) {
-      setTimeout(this._run.bind(this), 10);
-    }
-
     this.helpers = helpers;
   }
 
@@ -133,17 +129,13 @@ export class RunContextBase extends EventEmitter {
    * Build the generator and the environment.
    * @return {RunContext|false} this
    */
-  build(callback?: (context: any) => any) {
-    if (!this.inDirSet && this.settings.tmpdir !== false) {
-      this.inTmpDir();
+  build(callback?: (context: any) => any): this {
+    if (this.ran || this.completed) {
+      throw new Error('The context is already built');
     }
 
-    if (this.ran || this.completed) {
-      if (this.buildAsync) {
-        return false;
-      }
-
-      throw new Error('The context is not ready');
+    if (!this.inDirSet && this.settings.tmpdir !== false) {
+      this.inTmpDir();
     }
 
     this.ran = true;
@@ -187,12 +179,12 @@ export class RunContextBase extends EventEmitter {
       );
     }
 
-    this._generatorPromise = Promise.resolve(
+    this.generatorPromise = Promise.resolve(
       this.env.create(namespace, this.args, this.options) as any,
     );
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this._generatorPromise.then((generator) => {
+    this.generatorPromise.then((generator) => {
       this.generator = generator;
     });
 
@@ -200,7 +192,7 @@ export class RunContextBase extends EventEmitter {
 
     if (this.localConfig) {
       // Only mock local config when withLocalConfig was called
-      this._generatorPromise = this._generatorPromise.then((generator) => {
+      this.generatorPromise = this.generatorPromise.then((generator) => {
         this.helpers.mockLocalConfig(generator, this.localConfig);
         return generator;
       });
@@ -215,23 +207,27 @@ export class RunContextBase extends EventEmitter {
    * @return {PromiseRunResult} Promise a RunResult instance.
    */
   async run(): PromiseRunResult {
-    if (!this.settings.runEnvironment && this.buildAsync === undefined) {
-      throw new Error('Should be called with runEnvironment option');
-    }
-
     if (!this.ran) {
       this.build();
     }
 
-    this.environmentPromise = this._generatorPromise!.then(async (generator) =>
+    this.environmentPromise = this.generatorPromise!.then(async (generator) =>
       this.env
         .runGenerator(generator as any)
         .then(() => new RunResult(this._createRunResultOptions()))
         .finally(() => {
           this.helpers.restorePrompt(this.env);
+          this.completed = true;
         }),
     );
     return this.environmentPromise;
+  }
+
+  on(eventName: string | symbol, listener: (...args: any[]) => void): this {
+    super.on(eventName, listener);
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    this.setupEventListeners();
+    return this;
   }
 
   /**
@@ -239,18 +235,7 @@ export class RunContextBase extends EventEmitter {
    * @return Promise resolved on end or rejected on error
    */
   async toPromise(): PromiseRunResult {
-    if (this.settings.runEnvironment) {
-      throw new Error(
-        'RunContext with runEnvironment uses promises by default',
-      );
-    }
-
-    return new Promise((resolve, reject) => {
-      this.on('end', () => {
-        resolve(new RunResult(this._createRunResultOptions()));
-      });
-      this.on('error', reject);
-    });
+    return this.environmentPromise ?? this.run();
   }
 
   /**
@@ -497,10 +482,7 @@ export class RunContextBase extends EventEmitter {
       namespace,
       this.helpers.createMockedGenerator(),
     ]);
-    this.mockedGenerators = {
-      ...this.mockedGenerators,
-      ...Object.fromEntries(entries),
-    };
+    Object.assign(this.mockedGenerators, Object.fromEntries(entries));
     const dependencies = entries.map(([namespace, generator]) => [
       generator,
       namespace,
@@ -520,44 +502,44 @@ export class RunContextBase extends EventEmitter {
   }
 
   /**
-   * Method called when the context is ready to run the generator
+   * Keeps compatibility with events
    */
 
-  private _run() {
-    this.buildAsync = true;
-    if (this.build() === false) return false;
+  private setupEventListeners(): Promise<void | RunResult> | undefined {
+    if (this.eventListenersSet) {
+      return undefined;
+    }
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this._generatorPromise!.then((generator) => this.emit('ready', generator));
+    this.eventListenersSet = true;
 
-    this.run()
-      .catch((error) => {
-        if (
-          this.listenerCount('end') === 0 &&
-          this.listenerCount('error') === 0
-        ) {
-          // When there is no listeners throw a unhandled rejection.
-          setImmediate(async function () {
-            // eslint-disable-next-line @typescript-eslint/no-throw-literal
-            throw error;
-          });
-        } else {
-          this.errored = true;
-          this.emit('error', error);
-        }
-      })
-      .finally(() => {
-        this.emit('end');
-        this.completed = true;
-      });
-
-    return true;
+    return this.build().generatorPromise!.then((generator) => {
+      this.emit('ready', generator);
+      this.run()
+        .catch((error) => {
+          if (
+            this.listenerCount('end') === 0 &&
+            this.listenerCount('error') === 0
+          ) {
+            // When there is no listeners throw a unhandled rejection.
+            setImmediate(async function () {
+              // eslint-disable-next-line @typescript-eslint/no-throw-literal
+              throw error;
+            });
+          } else {
+            this.errored = true;
+            this.emit('error', error);
+          }
+        })
+        .finally(() => {
+          this.emit('end');
+        });
+    });
   }
 
   private _createRunResultOptions(): RunResultOptions {
     return {
       env: this.env,
-      generator: this.generator!,
+      generator: this.generator,
       memFs: this.env.sharedFs,
       settings: {
         ...this.settings,

@@ -185,8 +185,8 @@ describe('RunContext', function () {
         done();
       });
 
-      this.ctx._run();
-      this.ctx._run();
+      this.ctx.setupEventListeners();
+      this.ctx.setupEventListeners();
     });
 
     it('set --force by default', function (done) {
@@ -246,18 +246,15 @@ describe('RunContext', function () {
       (Dummy.prototype as any).test = execSpy;
 
       setImmediate(function () {
-        return new RunContext(Dummy);
+        return new RunContext(Dummy).on('end', () => {});
       });
     });
   });
 
   describe('#toPromise()', function () {
-    it('return a resolved promise with the target directory on success', function () {
-      return this.ctx.toPromise().then(
-        function (runResult) {
-          assert.equal(this.ctx.targetDirectory, runResult.cwd);
-        }.bind(this),
-      );
+    it('return a resolved promise with the target directory on success', async function () {
+      const runResult = await this.ctx.toPromise();
+      assert.equal(this.ctx.targetDirectory, runResult.cwd);
     });
 
     it('returns a reject promise on error', async function () {
