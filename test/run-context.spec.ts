@@ -342,25 +342,6 @@ describe('RunContext', function () {
       ctx.inDir(this.tmp, cb).on('end', done);
     });
 
-    it('optional `cb` can use `this.async()` to delay execution', function (done) {
-      const ctx = new RunContext(this.Dummy);
-      let delayed = false;
-
-      ctx
-        .inDir(this.tmp, function () {
-          const release = this.async();
-
-          setTimeout(function () {
-            delayed = true;
-            release();
-          }, 1);
-        })
-        .on('ready', function () {
-          assert(delayed);
-        })
-        .on('end', done);
-    });
-
     it('throws error at additional calls with dirPath', function () {
       assert(this.ctx.inDir(this.tmp));
       try {

@@ -74,7 +74,6 @@ export class RunContextBase extends EventEmitter {
   private envCB: any;
   private promptOptions: any;
 
-  private _asyncHolds = 0;
   private ran = false;
   private inDirSet = false;
   private errored = false;
@@ -131,20 +130,6 @@ export class RunContextBase extends EventEmitter {
   }
 
   /**
-   * Hold the execution until the returned callback is triggered
-   * @return {Function} Callback to notify the normal execution can resume
-   */
-
-  async() {
-    this._asyncHolds++;
-
-    return () => {
-      this._asyncHolds--;
-      this._run();
-    };
-  }
-
-  /**
    * Build the generator and the environment.
    * @return {RunContext|false} this
    */
@@ -153,7 +138,7 @@ export class RunContextBase extends EventEmitter {
       this.inTmpDir();
     }
 
-    if (this._asyncHolds !== 0 || this.ran || this.completed) {
+    if (this.ran || this.completed) {
       if (this.buildAsync) {
         return false;
       }
