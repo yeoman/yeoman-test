@@ -16,7 +16,7 @@ import defaultHelpers, {
   type Dependency,
   type YeomanTest,
 } from './helpers.js';
-import { DummyPromptOptions } from './adapter.js';
+import {type DummyPromptOptions} from './adapter.js';
 
 /**
  * Provides settings for creating a `RunContext`.
@@ -40,8 +40,6 @@ export type RunContextSettings = {
    * File path to the generator (only used if Generator is a constructor)
    */
   resolved?: string;
-
-  runEnvironment?: boolean;
 
   /**
    * Namespace (only used if Generator is a constructor)
@@ -108,7 +106,6 @@ export class RunContextBase extends EventEmitter {
     this.Generator = generatorType;
     this.settings = {
       namespace: 'gen:test',
-      runEnvironment: false,
       ...settings,
     };
     this.envOptions = envOptions;
@@ -449,14 +446,10 @@ export class RunContextBase extends EventEmitter {
 
     let namespace;
     if (typeof this.Generator === 'string') {
-      if (this.settings.runEnvironment) {
-        namespace = this.Generator;
-      } else {
-        namespace = this.env.namespace(this.Generator);
-        if (namespace !== this.Generator) {
-          // Generator is a file path, it should be registered.
-          this.env.register(this.Generator);
-        }
+      namespace = this.env.namespace(this.Generator);
+      if (namespace !== this.Generator) {
+        // Generator is a file path, it should be registered.
+        this.env.register(this.Generator);
       }
     } else {
       namespace = this.settings.namespace;

@@ -12,7 +12,7 @@ import type {GeneratorOptions} from 'yeoman-generator';
 import type {Options, createEnv} from 'yeoman-environment';
 import type {SinonSpiedInstance} from 'sinon';
 
-import {DummyPrompt, DummyPromptOptions, TestAdapter} from './adapter.js';
+import {DummyPrompt, type DummyPromptOptions, TestAdapter} from './adapter.js';
 import RunContext from './run-context.js';
 import testContext from './test-context.js';
 import type {RunContextSettings} from './run-context.js';
@@ -398,11 +398,7 @@ export class YeomanTest {
     settings?: RunContextSettings,
     envOptions?: Options,
   ) {
-    return this.run(
-      GeneratorOrNamespace,
-      {...settings, runEnvironment: true},
-      envOptions,
-    );
+    return this.run(GeneratorOrNamespace, settings, envOptions);
   }
 }
 

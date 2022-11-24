@@ -62,10 +62,6 @@ describe('RunContext running environment', function () {
       assert(ctx instanceof RunContext);
     });
 
-    it('passes runEnvironment to RunContext', () => {
-      assert.equal(ctx.settings.runEnvironment, true);
-    });
-
     it('promises a RunResult', () => {
       return ctx.run().then((runResult) => {
         assert(runResult instanceof RunResult);

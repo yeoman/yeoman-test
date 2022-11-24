@@ -9,7 +9,7 @@ import type Logger from 'yeoman-environment/lib/util/log.js';
 export type DummyPromptOptions = {
   callback?: (answers: Generator.Answers) => Generator.Answers;
   throwOnMissingAnswer?: boolean;
-}
+};
 
 export class DummyPrompt {
   answers: Generator.Answers;
@@ -17,7 +17,15 @@ export class DummyPrompt {
   callback!: (answers: Generator.Answers) => Generator.Answers;
   throwOnMissingAnswer = false;
 
-  constructor(question: inquirer.Question, _rl: any, answers: Generator.Answers, mockedAnswers?: Generator.Answers, options?: ((answers: Generator.Answers) => Generator.Answers) | DummyPromptOptions) {
+  constructor(
+    question: inquirer.Question,
+    _rl: any,
+    answers: Generator.Answers,
+    mockedAnswers?: Generator.Answers,
+    options?:
+      | ((answers: Generator.Answers) => Generator.Answers)
+      | DummyPromptOptions,
+  ) {
     this.answers = {...answers, ...mockedAnswers};
     this.question = question;
 
@@ -27,6 +35,7 @@ export class DummyPrompt {
       if (options.callback) {
         this.callback = options.callback;
       }
+
       if (options.throwOnMissingAnswer !== undefined) {
         this.throwOnMissingAnswer = options.throwOnMissingAnswer;
       }
