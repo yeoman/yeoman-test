@@ -6,9 +6,7 @@ class TestContext {
   private runContext?: RunContext;
 
   startNewContext(runContext: RunContext) {
-    if (this.autoCleanup) {
-      this.runContext?.cleanupTemporaryDir();
-    }
+    this.runContext?.cleanupTemporaryDir();
     this.runContext = runContext;
   }
 }

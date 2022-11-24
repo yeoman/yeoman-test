@@ -146,17 +146,18 @@ describe('RunContext', function () {
 
     it('allows an option to not automatically run in tmpdir', function (done) {
       const cwd = process.cwd();
-      this.ctx.settings.tmpdir = false;
-      this.ctx.on('end', function () {
+      const ctx = new RunContext(this.Dummy, {cwd, tmpdir: false});
+      ctx.on('end', function () {
         assert.equal(cwd, process.cwd());
         done();
       });
     });
 
     it('throws an error when calling cleanTestDirectory with not tmpdir settings', function () {
-      this.ctx.settings.tmpdir = false;
+      const cwd = process.cwd();
+      const ctx = new RunContext(this.Dummy, {cwd, tmpdir: false});
       try {
-        this.ctx.cleanTestDirectory();
+        ctx.cleanTestDirectory();
         assert.fail();
       } catch (error) {
         assert(
@@ -411,10 +412,8 @@ describe('RunContext', function () {
     });
 
     it('should set inDirSet & targetDirectory', function () {
-      assert(!this.ctx.inDirSet);
       assert(!this.ctx.targetDirectory);
       this.ctx.cd(this.tmp);
-      assert.equal(this.ctx.inDirSet, true);
       assert.equal(this.ctx.targetDirectory, this.tmp);
     });
 

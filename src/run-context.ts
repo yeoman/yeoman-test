@@ -27,16 +27,18 @@ export type RunContextSettings = {
    */
   tmpdir?: boolean;
 
-  /**
-   * File path to the generator (only used if Generator is a constructor)
-   */
-  resolved?: string;
-
   cwd?: string;
 
   oldCwd?: string;
 
   forwardCwd?: boolean;
+
+  autoCleanup?: boolean;
+
+  /**
+   * File path to the generator (only used if Generator is a constructor)
+   */
+  resolved?: string;
 
   runEnvironment?: boolean;
 
@@ -76,11 +78,13 @@ export class RunContextBase extends EventEmitter {
   private promptOptions: any;
 
   private ran = false;
-  private inDirSet = false;
   private errored = false;
 
   private generatorPromise?: Promise<Generator>;
-  private readonly temporaryDir = path.join(tempDirectory, crypto.randomBytes(20).toString('hex'));
+  private readonly temporaryDir = path.join(
+    tempDirectory,
+    crypto.randomBytes(20).toString('hex'),
+  );
 
   /**
    * This class provide a run context object to façade the complexity involved in setting
@@ -127,7 +131,7 @@ export class RunContextBase extends EventEmitter {
    */
   async run(): PromiseRunResult {
     if (!this.ran) {
-      this.build();
+      await this.build();
     }
 
     this.environmentPromise = this.generatorPromise!.then(async (generator) =>
@@ -155,39 +159,7 @@ export class RunContextBase extends EventEmitter {
   }
 
   /**
-   * Return a promise representing the generator run process
-   * @return Promise resolved on end or rejected on error
-   */
-  async toPromise(): PromiseRunResult {
-    return this.environmentPromise ?? this.run();
-  }
-
-  /**
-   * Set the target directory.
-   * @private
-   * @param  {String} dirPath - Directory path (relative to CWD). Prefer passing an absolute
-   *                            file path for predictable results
-   * @return {this} run context instance
-   */
-
-  setDir(dirPath, tmpdir) {
-    if (this.inDirSet) {
-      this.completed = true;
-      throw new Error('Test directory has already been set.');
-    }
-
-    if (tmpdir !== undefined) {
-      this.settings.tmpdir = tmpdir;
-    }
-
-    this.oldCwd = this.oldCwd ?? process.cwd();
-
-    this.inDirSet = true;
-    this.targetDirectory = dirPath;
-    return this;
-  }
-
-  /**
+   * @deprecated
    * Clean the provided directory, then change directory into it
    * @param  dirPath - Directory path (relative to CWD). Prefer passing an absolute
    *                            file path for predictable results
@@ -213,6 +185,7 @@ export class RunContextBase extends EventEmitter {
   }
 
   /**
+   * @deprecated
    * Change directory without deleting directory content.
    * @param  dirPath - Directory path (relative to CWD). Prefer passing an absolute
    *                            file path for predictable results
@@ -241,10 +214,7 @@ export class RunContextBase extends EventEmitter {
    * @return this - run context instance
    */
   inTmpDir(cb?: (folderPath: string) => void): this {
-    return this.inDir(
-      this.temporaryDir,
-      cb,
-    );
+    return this.inDir(this.temporaryDir, cb);
   }
 
   /**
@@ -277,8 +247,9 @@ export class RunContextBase extends EventEmitter {
    */
   cleanupTemporaryDir() {
     this.restore();
+    console.log(this.temporaryDir);
     if (this.temporaryDir && existsSync(this.temporaryDir)) {
-      rmSync(this.temporaryDir, {recursive: true});
+      // RmSync(this.temporaryDir, {recursive: true});
     }
   }
 
@@ -440,19 +411,25 @@ export class RunContextBase extends EventEmitter {
    * Build the generator and the environment.
    * @return {RunContext|false} this
    */
-  protected build(callback?: (context: any) => any): this {
+  protected async build(callback?: (context: any) => any): Promise<void> {
     if (this.ran || this.completed) {
       throw new Error('The context is already built');
     }
 
-    if (!this.inDirSet && this.settings.tmpdir !== false) {
+    this.ran = true;
+
+    if (!this.targetDirectory && this.settings.tmpdir !== false) {
       this.inTmpDir();
+    } else if (!this.targetDirectory) {
+      throw new Error('If not a temporary dir, pass the test cwd');
     }
 
-    this.ran = true;
     if (this.inDirCallbacks.length > 0) {
       const targetDirectory = path.resolve(this.targetDirectory!);
-      for (const cb of this.inDirCallbacks) cb(targetDirectory);
+      for (const cb of this.inDirCallbacks) {
+        // eslint-disable-next-line no-await-in-loop
+        await cb(targetDirectory);
+      }
     }
 
     this.targetDirectory = this.targetDirectory ?? process.cwd();
@@ -462,7 +439,7 @@ export class RunContextBase extends EventEmitter {
       ...this.options,
       ...this.envOptions,
     });
-    this.env = this.envCB ? this.envCB(testEnv) || testEnv : testEnv;
+    this.env = this.envCB ? (await this.envCB(testEnv)) ?? testEnv : testEnv;
 
     for (const lookup of this.lookups) {
       this.env.lookup(lookup);
@@ -511,7 +488,14 @@ export class RunContextBase extends EventEmitter {
     }
 
     callback?.(this);
-    return this;
+  }
+
+  /**
+   * Return a promise representing the generator run process
+   * @return Promise resolved on end or rejected on error
+   */
+  protected async toPromise(): PromiseRunResult {
+    return this.environmentPromise ?? this.run();
   }
 
   /**
@@ -525,28 +509,53 @@ export class RunContextBase extends EventEmitter {
 
     this.eventListenersSet = true;
 
-    return this.build().generatorPromise!.then((generator) => {
-      this.emit('ready', generator);
-      this.run()
-        .catch((error) => {
-          if (
-            this.listenerCount('end') === 0 &&
-            this.listenerCount('error') === 0
-          ) {
-            // When there is no listeners throw a unhandled rejection.
-            setImmediate(async function () {
-              // eslint-disable-next-line @typescript-eslint/no-throw-literal
-              throw error;
-            });
-          } else {
-            this.errored = true;
-            this.emit('error', error);
-          }
-        })
-        .finally(() => {
-          this.emit('end');
-        });
-    });
+    return this.build().then(async () =>
+      this.generatorPromise!.then((generator) => {
+        this.emit('ready', generator);
+        this.run()
+          .catch((error) => {
+            if (
+              this.listenerCount('end') === 0 &&
+              this.listenerCount('error') === 0
+            ) {
+              // When there is no listeners throw a unhandled rejection.
+              setImmediate(async function () {
+                // eslint-disable-next-line @typescript-eslint/no-throw-literal
+                throw error;
+              });
+            } else {
+              this.errored = true;
+              this.emit('error', error);
+            }
+          })
+          .finally(() => {
+            this.emit('end');
+          });
+      }),
+    );
+  }
+
+  /**
+   * Set the target directory.
+   * @private
+   * @param  {String} dirPath - Directory path (relative to CWD). Prefer passing an absolute
+   *                            file path for predictable results
+   * @return {this} run context instance
+   */
+  private setDir(dirPath, tmpdir) {
+    if (this.targetDirectory) {
+      this.completed = true;
+      throw new Error('Test directory has already been set.');
+    }
+
+    if (tmpdir !== undefined) {
+      this.settings.tmpdir = tmpdir;
+    }
+
+    this.oldCwd = this.oldCwd ?? process.cwd();
+
+    this.targetDirectory = dirPath;
+    return this;
   }
 
   private _createRunResultOptions(): RunResultOptions {
@@ -561,6 +570,7 @@ export class RunContextBase extends EventEmitter {
       cwd: this.targetDirectory!,
       envOptions: this.envOptions,
       mockedGenerators: this.mockedGenerators,
+      helpers: this.helpers,
     };
   }
 }

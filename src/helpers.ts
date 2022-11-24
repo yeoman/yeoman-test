@@ -50,6 +50,7 @@ export class YeomanTest {
   generatorOptions?: GeneratorOptions;
 
   /**
+   * @deprecated
    * Create a function that will clean up the test directory,
    * cd into it. Intended for use
    * as a callback for the mocha `before` hook.
@@ -65,17 +66,18 @@ export class YeomanTest {
   }
 
   /**
+   * @deprecated
    * Clean-up the test directory and cd into it.
    * Call given callback after entering the test directory.
-   * @param {String} dir - path to the test directory
-   * @param {Function} cb - callback executed after setting working directory to dir
+   * @param dir - path to the test directory
+   * @param cb - callback executed after setting working directory to dir
    * @example
    * testDirectory(path.join(__dirname, './temp'), function () {
    *   fs.writeFileSync('testfile', 'Roses are red.');
    * });
    */
 
-  testDirectory(dir, cb?: (error?) => unknown) {
+  testDirectory(dir: string, cb?: (error?) => unknown) {
     if (!dir) {
       throw new Error('Missing directory');
     }
@@ -100,9 +102,9 @@ export class YeomanTest {
   }
 
   /**
+   * @deprecated
    * Clean-up the test directory and cd into it.
-   * @param {string} [opts.temporaryDir] - Temporary dir to use
-   * @param {boolean} [opts.cleanupTmpDir=!Boolean(opts.temporaryDir)] - Cleanup the temporary dir
+   * @param options
    * @return Function cleanup callback
    * @example
    * testDirectory(path.join(__dirname, './temp'), function () {
@@ -145,9 +147,10 @@ export class YeomanTest {
   }
 
   /**
+   * @deprecated
    * Answer prompt questions for the passed-in generator
    * @param generator - a Yeoman generator or environment
-   * @param {Object} answers - an object where keys are the
+   * @param answers - an object where keys are the
    *   generators prompt names and values are the answers to
    *   the prompt questions
    * @param options - Options or callback
@@ -177,8 +180,9 @@ export class YeomanTest {
   }
 
   /**
+   * @deprecated
    * Restore defaults prompts on a generator.
-   * @param {Generator|Environment} generator or environment
+   * @param generator or environment
    */
   restorePrompt(envOrGenerator: YeomanGenerator | Environment) {
     const environment: Environment =
@@ -187,18 +191,18 @@ export class YeomanTest {
   }
 
   /**
+   * @deprecated
    * Provide mocked values to the config
-   * @param  {Generator} generator - a Yeoman generator
-   * @param  {Object} localConfig - localConfig - should look just like if called config.getAll()
+   * @param generator - a Yeoman generator
+   * @param localConfig - localConfig - should look just like if called config.getAll()
    */
-  mockLocalConfig(generator, localConfig) {
+  mockLocalConfig(generator: YeomanGenerator, localConfig) {
     generator.config.defaults(localConfig);
   }
 
   /**
    * Create a mocked generator
    */
-
   createMockedGenerator(
     GeneratorClass: typeof YeomanGenerator<GeneratorOptions> = class MockedGenerator extends YeomanGenerator {},
   ): SinonSpiedInstance<typeof YeomanGenerator<GeneratorOptions>> {
@@ -220,7 +224,6 @@ export class YeomanTest {
   /**
    * Create a simple, dummy generator
    */
-
   createDummyGenerator<GenParameter extends YeomanGenerator = YeomanGenerator>(
     Generator = YeomanGenerator,
   ): typeof YeomanGenerator<GenParameter['options']> {
@@ -238,12 +241,12 @@ export class YeomanTest {
    * Create a generator, using the given dependencies and controller arguments
    * Dependecies can be path (autodiscovery) or an array [{generator}, {name}]
    *
-   * @param {String} name - the name of the generator
-   * @param {Array} dependencies - paths to the generators dependencies
-   * @param {Array|String} args - arguments to the generator;
+   * @param name - the name of the generator
+   * @param dependencies - paths to the generators dependencies
+   * @param args - arguments to the generator;
    *   if String, will be split on spaces to create an Array
-   * @param {Object} options - configuration for the generator
-   * @param {Boolean} [localConfigOnly=true] - passes localConfigOnly to the generators
+   * @param options - configuration for the generator
+   * @param localConfigOnly - passes localConfigOnly to the generators
    * @example
    *  var deps = ['../../app',
    *              '../../common',
@@ -253,7 +256,6 @@ export class YeomanTest {
    *            ];
    * var angular = createGenerator('angular:app', deps);
    */
-
   createGenerator<GeneratorType extends YeomanGenerator = YeomanGenerator>(
     name: string,
     dependencies: Dependency[],
@@ -272,10 +274,11 @@ export class YeomanTest {
   }
 
   /**
+   * @deprecated
    * Register a list of dependent generators into the provided env.
    * Dependecies can be path (autodiscovery) or an array [{generator}, {name}]
    *
-   * @param {Array} dependencies - paths to the generators dependencies
+   * @param dependencies - paths to the generators dependencies
    */
 
   registerDependencies(env: Environment, dependencies: Dependency[]) {
@@ -377,7 +380,10 @@ export class YeomanTest {
       envOptions,
       this,
     ).withOptions(generatorOptions);
-    testContext.startNewContext(runContext);
+    if (settings?.autoCleanup !== false) {
+      testContext.startNewContext(runContext);
+    }
+
     return runContext;
   }
 

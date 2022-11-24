@@ -9,7 +9,7 @@ import type Environment from 'yeoman-environment';
 import type Generator from 'yeoman-generator';
 
 import {type RunContextSettings} from './run-context.js';
-import helpers from './helpers.js';
+import {type YeomanTest} from './helpers.js';
 
 const isObject = (object) =>
   typeof object === 'object' && object !== null && object !== undefined;
@@ -27,14 +27,14 @@ function convertArgs(args) {
  * Provides options for `RunResult`s.
  */
 export type RunResultOptions = {
+  generator: Generator;
+
   /**
    * The environment of the generator.
    */
   env: Environment;
 
   envOptions: Environment.Options;
-
-  generator: Generator;
 
   /**
    * The working directory after running the generator.
@@ -59,6 +59,8 @@ export type RunResultOptions = {
   mockedGenerators: Record<string, Generator>;
 
   settings: RunContextSettings;
+
+  helpers: YeomanTest;
 };
 
 /**
@@ -73,7 +75,7 @@ export default class RunResult {
   memFs: Store;
   fs: Editor;
   mockedGenerators: any;
-  options: any;
+  options: RunResultOptions;
 
   constructor(options: RunResultOptions) {
     if (options.memFs && !options.cwd) {
@@ -95,13 +97,14 @@ export default class RunResult {
    * See helpers.create api
    */
   create(GeneratorOrNamespace, settings, envOptions) {
-    return helpers.create(
+    return this.options.helpers.create(
       GeneratorOrNamespace,
       {
         ...this.options.settings,
         cwd: this.cwd,
         oldCwd: this.oldCwd,
         ...settings,
+        autoCleanup: false,
       },
       {...this.options.envOptions, memFs: this.memFs, ...envOptions},
     );

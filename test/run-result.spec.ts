@@ -9,6 +9,7 @@ import {stub} from 'sinon';
 
 import RunContext from '../src/run-context.js';
 import RunResult from '../src/run-result.js';
+import helpers from '../src/helpers.js';
 
 describe('run-result', () => {
   describe('constructor', () => {
@@ -215,6 +216,7 @@ describe('run-result', () => {
         oldCwd,
         envOptions: originalEnvOptions,
         settings: originalSetting,
+        helpers,
       } as any).create('foo', newSettings, newEnvOptions);
     });
     it('returns a RunContext instance', () => {
