@@ -12,7 +12,7 @@ import type {GeneratorOptions} from 'yeoman-generator';
 import type {Options, createEnv} from 'yeoman-environment';
 import type {SinonSpiedInstance} from 'sinon';
 
-import {DummyPrompt, TestAdapter} from './adapter.js';
+import {DummyPrompt, DummyPromptOptions, TestAdapter} from './adapter.js';
 import RunContext from './run-context.js';
 import testContext from './test-context.js';
 import type {RunContextSettings} from './run-context.js';
@@ -161,7 +161,7 @@ export class YeomanTest {
   mockPrompt(
     envOrGenerator: YeomanGenerator | Environment,
     mockedAnswers?: YeomanGenerator.Answers,
-    options?,
+    options?: DummyPromptOptions,
   ) {
     const environment =
       'env' in envOrGenerator ? envOrGenerator.env : envOrGenerator;
@@ -172,7 +172,7 @@ export class YeomanTest {
         name,
         class CustomDummyPrompt extends DummyPrompt {
           constructor(question, rl, answers) {
-            super(mockedAnswers, options, question, rl, answers);
+            super(question, rl, answers, mockedAnswers, options);
           }
         } as any,
       );

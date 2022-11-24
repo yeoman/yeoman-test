@@ -16,6 +16,7 @@ import defaultHelpers, {
   type Dependency,
   type YeomanTest,
 } from './helpers.js';
+import { DummyPromptOptions } from './adapter.js';
 
 /**
  * Provides settings for creating a `RunContext`.
@@ -75,7 +76,7 @@ export class RunContextBase extends EventEmitter {
   private eventListenersSet = false;
   private targetDirectory?: string;
   private envCB: any;
-  private promptOptions: any;
+  private promptOptions?: DummyPromptOptions;
 
   private ran = false;
   private errored = false;
@@ -247,9 +248,8 @@ export class RunContextBase extends EventEmitter {
    */
   cleanupTemporaryDir() {
     this.restore();
-    console.log(this.temporaryDir);
     if (this.temporaryDir && existsSync(this.temporaryDir)) {
-      // RmSync(this.temporaryDir, {recursive: true});
+      rmSync(this.temporaryDir, {recursive: true});
     }
   }
 
@@ -329,14 +329,14 @@ export class RunContextBase extends EventEmitter {
 
   /**
    * Mock the prompt with dummy answers
-   * @param  {Object} answers - Answers to the prompt questions
-   * @param  {Object|Function}   [options] - Options or callback.
+   * @param  answers - Answers to the prompt questions
+   * @param  options - Options or callback.
    * @param  {Function} [options.callback] - Callback.
    * @param  {Boolean} [options.throwOnMissingAnswer] - Throw if a answer is missing.
    * @return {this}
    */
 
-  withPrompts(answers: Generator.Answers, options) {
+  withPrompts(answers: Generator.Answers, options?: DummyPromptOptions) {
     this.answers = {...this.answers, ...answers};
     this.promptOptions = options;
     return this;

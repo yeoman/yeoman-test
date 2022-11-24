@@ -6,21 +6,30 @@ import {spy as sinonSpy, stub as sinonStub} from 'sinon';
 import type Generator from 'yeoman-generator';
 import type Logger from 'yeoman-environment/lib/util/log.js';
 
+export type DummyPromptOptions = {
+  callback?: (answers: Generator.Answers) => Generator.Answers;
+  throwOnMissingAnswer?: boolean;
+}
+
 export class DummyPrompt {
   answers: Generator.Answers;
   question: inquirer.Question;
   callback!: (answers: Generator.Answers) => Generator.Answers;
   throwOnMissingAnswer = false;
 
-  constructor(mockedAnswers, options, question, _rl, answers) {
+  constructor(question: inquirer.Question, _rl: any, answers: Generator.Answers, mockedAnswers?: Generator.Answers, options?: ((answers: Generator.Answers) => Generator.Answers) | DummyPromptOptions) {
     this.answers = {...answers, ...mockedAnswers};
     this.question = question;
 
     if (typeof options === 'function') {
       this.callback = options;
     } else if (options) {
-      this.callback = options.callback;
-      this.throwOnMissingAnswer = options.throwOnMissingAnswer;
+      if (options.callback) {
+        this.callback = options.callback;
+      }
+      if (options.throwOnMissingAnswer !== undefined) {
+        this.throwOnMissingAnswer = options.throwOnMissingAnswer;
+      }
     }
 
     this.callback = this.callback || ((answers) => answers);
@@ -86,7 +95,7 @@ export class TestAdapter {
         promptName,
         class CustomDummyPrompt extends DummyPrompt {
           constructor(question, rl, answers) {
-            super(mockedAnswers, undefined, question, rl, answers);
+            super(question, rl, answers, mockedAnswers);
           }
         } as any,
       );
