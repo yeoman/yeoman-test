@@ -66,7 +66,7 @@ describe('yeoman-test', function () {
     it('should cleanup default temporaryDir', function () {
       const cleanup = helpers.prepareTempDirectory();
       cleanup();
-      assert(!existsSync(cleanup.temporaryDir));
+      assert(!existsSync(cleanup.temporaryDir), `${cleanup.temporaryDir} exists`);
     });
 
     it('should not cleanup if cleanupTemporaryDir is false', function () {
