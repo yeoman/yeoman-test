@@ -60,7 +60,7 @@
     "yeoman-generator": "*"
   },
   "scripts": {
-    "test": "nyc mocha",
+    "test": "mocha",
     "build": "tsc",
     "prepare": "npm run build",
     "pretest": "xo",
