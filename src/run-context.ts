@@ -80,31 +80,27 @@ export class RunContextBase extends EventEmitter {
   private errored = false;
 
   private generatorPromise?: Promise<Generator>;
+  private readonly temporaryDir = path.join(tempDirectory, crypto.randomBytes(20).toString('hex'));
 
   /**
    * This class provide a run context object to façade the complexity involved in setting
    * up a generator for testing
    * @constructor
-   * @param {String|Function} Generator - Namespace or generator constructor. If the later
+   * @param Generator - Namespace or generator constructor. If the later
    *                                       is provided, then namespace is assumed to be
    *                                       'gen:test' in all cases
-   * @param {Object} [settings]
-   * @param {Boolean} [settings.tmpdir] - Automatically run this generator in a tmp dir
-   * @param {String} [settings.resolved] - File path to the generator (only used if Generator is a constructor)
-   * @param {String} [settings.namespace='gen:test'] - Namespace (only used if Generator is a constructor)
-   * @param {String} [settings.runEnvironment=false] - Require the run context to call run.
-   * @param {Object} [envOptions] - Options to be passed to environment.
+   * @param settings
    * @return {this}
    */
 
   constructor(
-    generatorClass: string | GeneratorConstructor | typeof Generator,
+    generatorType: string | GeneratorConstructor | typeof Generator,
     settings?: RunContextSettings,
     envOptions: Options = {},
     helpers = defaultHelpers,
   ) {
     super();
-    this.Generator = generatorClass;
+    this.Generator = generatorType;
     this.settings = {
       namespace: 'gen:test',
       runEnvironment: false,
@@ -246,7 +242,7 @@ export class RunContextBase extends EventEmitter {
    */
   inTmpDir(cb?: (folderPath: string) => void): this {
     return this.inDir(
-      path.join(tempDirectory, crypto.randomBytes(20).toString('hex')),
+      this.temporaryDir,
       cb,
     );
   }
@@ -272,6 +268,17 @@ export class RunContextBase extends EventEmitter {
     this.restore();
     if (this.settings.tmpdir !== false) {
       this.cleanTestDirectory();
+    }
+  }
+
+  /**
+   * Clean the directory used for tests inside inDir/inTmpDir
+   * @param  {Boolean} force - force directory cleanup for not tmpdir
+   */
+  cleanupTemporaryDir() {
+    this.restore();
+    if (this.temporaryDir && existsSync(this.temporaryDir)) {
+      rmSync(this.temporaryDir, {recursive: true});
     }
   }
 

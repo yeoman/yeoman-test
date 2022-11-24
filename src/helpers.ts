@@ -14,6 +14,7 @@ import type {SinonSpiedInstance} from 'sinon';
 
 import {DummyPrompt, TestAdapter} from './adapter.js';
 import RunContext from './run-context.js';
+import testContext from './test-context.js';
 import type {RunContextSettings} from './run-context.js';
 
 /**
@@ -370,12 +371,14 @@ export class YeomanTest {
     const contextSettings = _.cloneDeep(this.settings ?? {});
     const generatorOptions = _.cloneDeep(this.generatorOptions ?? {});
     const RunContext = this.getRunContextType();
-    return new RunContext(
+    const runContext = new RunContext(
       GeneratorOrNamespace,
       {...contextSettings, ...settings},
       envOptions,
       this,
     ).withOptions(generatorOptions);
+    testContext.startNewContext(runContext);
+    return runContext;
   }
 
   /**
