@@ -1,11 +1,9 @@
 /* eslint-disable max-params */
 import {mkdirSync, existsSync, rmSync} from 'node:fs';
-import crypto from 'node:crypto';
-import {join, resolve} from 'node:path';
+import {resolve} from 'node:path';
 import process from 'node:process';
 import _ from 'lodash';
 import {spy as sinonSpy, stub as sinonStub} from 'sinon';
-import tempDirectory from 'temp-dir';
 import YeomanGenerator from 'yeoman-generator';
 import Environment from 'yeoman-environment';
 import type {GeneratorOptions} from 'yeoman-generator';
@@ -99,51 +97,6 @@ export class YeomanTest {
     } catch (error) {
       return cb?.(error);
     }
-  }
-
-  /**
-   * @deprecated
-   * Clean-up the test directory and cd into it.
-   * @param options
-   * @return Function cleanup callback
-   * @example
-   * testDirectory(path.join(__dirname, './temp'), function () {
-   *   fs.writeFileSync('testfile', 'Roses are red.');
-   * });
-   */
-
-  prepareTempDirectory({
-    temporaryDir,
-    cleanupTemporaryDir = !temporaryDir,
-  }: {temporaryDir?: string; cleanupTemporaryDir?: boolean} = {}) {
-    const cwd = process.cwd();
-    if (typeof temporaryDir !== 'string') {
-      temporaryDir = resolve(
-        join(tempDirectory, crypto.randomBytes(20).toString('hex')),
-      );
-    }
-
-    // Make sure we're not deleting CWD by moving to top level folder. As we `cd` in the
-    // test dir after cleaning up, this shouldn't be perceivable.
-    process.chdir('/');
-
-    if (existsSync(temporaryDir)) {
-      rmSync(temporaryDir, {recursive: true});
-    }
-
-    mkdirSync(temporaryDir, {recursive: true});
-    process.chdir(temporaryDir);
-
-    const cleanup = () => {
-      if (temporaryDir && cwd !== temporaryDir && cleanupTemporaryDir) {
-        rmSync(temporaryDir, {recursive: true});
-      }
-
-      process.chdir(cwd);
-    };
-
-    cleanup.temporaryDir = temporaryDir;
-    return cleanup;
   }
 
   /**
