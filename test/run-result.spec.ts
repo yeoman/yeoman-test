@@ -1,25 +1,26 @@
 /* eslint-disable max-nested-callbacks */
-'use strict';
-const assert = require('assert');
-const fs = require('fs');
-const MemFs = require('mem-fs');
-const MemFsEditor = require('mem-fs-editor');
-const path = require('path');
-const sinon = require('sinon');
+import assert from 'node:assert';
+import fs from 'node:fs';
+import path from 'node:path';
+import process from 'node:process';
+import MemFs from 'mem-fs';
+import MemFsEditor from 'mem-fs-editor';
+import {stub} from 'sinon';
 
-const RunContext = require('../lib/run-context');
-const RunResult = require('../lib/run-result');
+import RunContext from '../src/run-context.js';
+import RunResult from '../src/run-result.js';
+import helpers from '../src/helpers.js';
 
 describe('run-result', () => {
   describe('constructor', () => {
     describe('without options', () => {
       it('uses current cwd', () => {
-        assert.equal(new RunResult().cwd, process.cwd());
+        assert.equal(new RunResult({} as any).cwd, process.cwd());
       });
     });
     describe('with fs option', () => {
       it('throws error without cwd', () => {
-        assert.throws(() => new RunResult({memFs: {}}));
+        assert.throws(() => new RunResult({memFs: {}} as any));
       });
     });
     describe('with fs and cwd options', () => {
@@ -37,25 +38,29 @@ describe('run-result', () => {
         assert.equal(runResult.cwd, cwd);
       });
     });
-    ['env', 'generator', 'oldCwd', 'cwd', 'mockedGenerators'].forEach(
-      (optionName) => {
-        describe(`with ${optionName} option`, () => {
-          const optionValue = {};
-          const options = {};
-          let runResult;
-          before(() => {
-            options[optionName] = optionValue;
-            runResult = new RunResult(options);
-          });
-          it('loads it', () => {
-            assert.equal(runResult[optionName], optionValue);
-          });
-          it('loads options option', () => {
-            assert.equal(runResult.options, options);
-          });
+    for (const optionName of [
+      'env',
+      'generator',
+      'oldCwd',
+      'cwd',
+      'mockedGenerators',
+    ]) {
+      describe(`with ${optionName} option`, () => {
+        const optionValue = {};
+        const options = {};
+        let runResult;
+        before(() => {
+          options[optionName] = optionValue;
+          runResult = new RunResult(options as any);
         });
-      }
-    );
+        it('loads it', () => {
+          assert.equal(runResult[optionName], optionValue);
+        });
+        it('loads options option', () => {
+          assert.equal(runResult.options, options);
+        });
+      });
+    }
   });
   describe('#dumpFiles', () => {
     let runResult;
@@ -66,9 +71,9 @@ describe('run-result', () => {
       runResult = new RunResult({
         memFs,
         fs: memFsEditor,
-        cwd: process.cwd()
-      });
-      consoleMock = sinon.stub(console, 'log');
+        cwd: process.cwd(),
+      } as any);
+      consoleMock = stub(console, 'log');
       runResult.fs.write(path.resolve('test.txt'), 'test content');
       runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
     });
@@ -101,9 +106,9 @@ describe('run-result', () => {
       runResult = new RunResult({
         memFs,
         fs: memFsEditor,
-        cwd: process.cwd()
-      });
-      consoleMock = sinon.stub(console, 'log');
+        cwd: process.cwd(),
+      } as any);
+      consoleMock = stub(console, 'log');
       runResult.fs.write(path.resolve('test.txt'), 'test content');
       runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
     });
@@ -125,8 +130,8 @@ describe('run-result', () => {
       runResult = new RunResult({
         memFs,
         fs: memFsEditor,
-        cwd: process.cwd()
-      });
+        cwd: process.cwd(),
+      } as any);
       runResult.fs.write(path.resolve('test.txt'), 'test content');
       runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
     });
@@ -134,12 +139,12 @@ describe('run-result', () => {
       assert.deepEqual(runResult.getSnapshot(), {
         'test.txt': {
           contents: 'test content',
-          state: 'modified'
+          state: 'modified',
         },
         'test2.txt': {
           contents: 'test2 content',
-          state: 'modified'
-        }
+          state: 'modified',
+        },
       });
     });
   });
@@ -151,19 +156,19 @@ describe('run-result', () => {
       runResult = new RunResult({
         memFs,
         fs: memFsEditor,
-        cwd: process.cwd()
-      });
+        cwd: process.cwd(),
+      } as any);
       runResult.fs.write(path.resolve('test.txt'), 'test content');
       runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
     });
     it('should return every changed file', () => {
       assert.deepEqual(runResult.getStateSnapshot(), {
         'test.txt': {
-          state: 'modified'
+          state: 'modified',
         },
         'test2.txt': {
-          state: 'modified'
-        }
+          state: 'modified',
+        },
       });
     });
   });
@@ -178,8 +183,8 @@ describe('run-result', () => {
 
       runResult = new RunResult({
         cwd,
-        oldCwd: path.join(process.cwd(), 'fixtures')
-      });
+        oldCwd: path.join(process.cwd(), 'fixtures'),
+      } as any);
     });
     afterEach(() => {});
     it('removes cwd', () => {
@@ -193,11 +198,11 @@ describe('run-result', () => {
     const newEnvOptions = {newOnlyEnv: 'bar', overridedEnv: 'newOverridedEnv'};
     const originalEnvOptions = {
       originalOnlyEnv: 'originalOnlyEnv',
-      overridedEnv: 'originalOverridedEnv'
+      overridedEnv: 'originalOverridedEnv',
     };
     const originalSetting = {
       originalOnly: 'originalOnly',
-      overrided: 'originalOverrided'
+      overrided: 'originalOverrided',
     };
     const memFs = {};
     let cwd;
@@ -210,8 +215,9 @@ describe('run-result', () => {
         cwd,
         oldCwd,
         envOptions: originalEnvOptions,
-        settings: originalSetting
-      }).create('foo', newSettings, newEnvOptions);
+        settings: originalSetting,
+        helpers,
+      } as any).create('foo', newSettings, newEnvOptions);
     });
     it('returns a RunContext instance', () => {
       assert.ok(runContext instanceof RunContext);

@@ -2,10 +2,38 @@
   "space": true,
   "envs": ["es2020", "node", "mocha"],
   "prettier": true,
+  "ignores": [
+ 		"test/fixtures"
+ 	],
+   "printWidth": 120,
   "rules": {
-    "promise/prefer-await-to-then": "off",
-    "prefer-rest-params": "off",
-    "node/prefer-promises/fs": "off"
-  }
+    "unicorn/prefer-spread": "off",
+    "unicorn/no-object-as-default-parameter": "off"
+  },
+  "overrides": [
+    {
+      "files": "src/*",
+      "rules": {
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-return": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/naming-convention": "off",
+        "@typescript-eslint/no-implicit-any-catch": "off",
+        "@typescript-eslint/restrict-template-expressions": "off"
+      }
+    },
+    {
+      "files": "test/*",
+      "rules": {
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-return": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-empty-function": "off",
+        "@typescript-eslint/naming-convention": "off",
+        "@typescript-eslint/no-floating-promises": "off",
+        "@typescript-eslint/no-implicit-any-catch": "off"
+      }
+    }
+  ]
 }
 

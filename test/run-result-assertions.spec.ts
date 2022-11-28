@@ -1,32 +1,34 @@
-'use strict';
-const path = require('path');
-const assert = require('assert');
-const MemFs = require('mem-fs');
+import path, {dirname} from 'node:path';
+import assert from 'node:assert';
+import {fileURLToPath} from 'node:url';
+import MemFs from 'mem-fs';
 
-const RunResult = require('../lib/run-result');
+import RunResult from '../src/run-result.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 describe('run-result-assertions', () => {
   const memFs = MemFs.create();
 
-  [
+  for (const testFs of [
     {
       description: 'using memory fs',
       options: {memFs},
-      verify: (runResult) => {
+      verify(runResult) {
         assert(runResult.fs);
-      }
+      },
     },
     {
       description: 'using node fs',
-      verify: (runResult) => {
+      verify(runResult) {
         assert(!runResult.fs);
-      }
-    }
-  ].forEach((testFs) => {
+      },
+    },
+  ]) {
     const yoAssert = new RunResult({
       ...testFs.options,
-      cwd: path.join(__dirname, 'fixtures/assert')
-    });
+      cwd: path.join(__dirname, 'fixtures/assert'),
+    } as any);
 
     describe(testFs.description, () => {
       it('fs is correct', () => {
@@ -39,7 +41,7 @@ describe('run-result-assertions', () => {
 
         it('accept an array of files all of which exist', () => {
           assert.doesNotThrow(
-            yoAssert.assertFile.bind(yoAssert, ['testFile', 'testFile2'])
+            yoAssert.assertFile.bind(yoAssert, ['testFile', 'testFile2']),
           );
         });
 
@@ -51,8 +53,8 @@ describe('run-result-assertions', () => {
           assert.throws(
             yoAssert.assertFile.bind(yoAssert, [
               'testFile',
-              'intangibleTestFile'
-            ])
+              'intangibleTestFile',
+            ]),
           );
         });
       });
@@ -60,7 +62,7 @@ describe('run-result-assertions', () => {
       describe('.assertNoFile()', () => {
         it('accept a file that does not exist', () => {
           assert.doesNotThrow(
-            yoAssert.assertNoFile.bind(yoAssert, 'etherealTestFile')
+            yoAssert.assertNoFile.bind(yoAssert, 'etherealTestFile'),
           );
         });
 
@@ -68,8 +70,8 @@ describe('run-result-assertions', () => {
           assert.doesNotThrow(
             yoAssert.assertNoFile.bind(yoAssert, [
               'etherealTestFile',
-              'intangibleTestFile'
-            ])
+              'intangibleTestFile',
+            ]),
           );
         });
 
@@ -81,8 +83,8 @@ describe('run-result-assertions', () => {
           assert.throws(
             yoAssert.assertNoFile.bind(yoAssert, [
               'testFile',
-              'etherealTestFile'
-            ])
+              'etherealTestFile',
+            ]),
           );
         });
       });
@@ -93,8 +95,8 @@ describe('run-result-assertions', () => {
             yoAssert.assertFileContent.bind(
               yoAssert,
               'testFile',
-              /Roses are red/
-            )
+              /Roses are red/,
+            ),
           );
         });
 
@@ -103,8 +105,8 @@ describe('run-result-assertions', () => {
             yoAssert.assertFileContent.bind(
               yoAssert,
               'testFile',
-              'Roses are red'
-            )
+              'Roses are red',
+            ),
           );
         });
 
@@ -113,8 +115,8 @@ describe('run-result-assertions', () => {
             yoAssert.assertFileContent.bind(
               yoAssert,
               'testFile',
-              /Roses are blue/
-            )
+              /Roses are blue/,
+            ),
           );
         });
 
@@ -123,15 +125,15 @@ describe('run-result-assertions', () => {
             yoAssert.assertFileContent.bind(
               yoAssert,
               'testFile',
-              'Roses are blue'
-            )
+              'Roses are blue',
+            ),
           );
         });
 
         it("accept an array of file/regex pairs when each file's content matches the corresponding regex", () => {
           const arg = [
             ['testFile', /Roses are red/],
-            ['testFile2', /Violets are blue/]
+            ['testFile2', /Violets are blue/],
           ];
           assert.doesNotThrow(yoAssert.assertFileContent.bind(yoAssert, arg));
         });
@@ -139,7 +141,7 @@ describe('run-result-assertions', () => {
         it("reject an array of file/regex pairs when one file's content does not matches the corresponding regex", () => {
           const arg = [
             ['testFile', /Roses are red/],
-            ['testFile2', /Violets are orange/]
+            ['testFile2', /Violets are orange/],
           ];
           assert.throws(yoAssert.assertFileContent.bind(yoAssert, arg));
         });
@@ -151,8 +153,8 @@ describe('run-result-assertions', () => {
             yoAssert.assertEqualsFileContent.bind(
               yoAssert,
               'testFile',
-              'Roses are red.\n'
-            )
+              'Roses are red.\n',
+            ),
           );
         });
 
@@ -161,25 +163,25 @@ describe('run-result-assertions', () => {
             yoAssert.assertEqualsFileContent.bind(
               yoAssert,
               'testFile',
-              'Roses are red'
-            )
+              'Roses are red',
+            ),
           );
         });
 
         it("accept an array of file/string pairs when each file's content equals the corresponding string", () => {
           const arg = [
             ['testFile', 'Roses are red.\n'],
-            ['testFile2', 'Violets are blue.\n']
+            ['testFile2', 'Violets are blue.\n'],
           ];
           assert.doesNotThrow(
-            yoAssert.assertEqualsFileContent.bind(yoAssert, arg)
+            yoAssert.assertEqualsFileContent.bind(yoAssert, arg),
           );
         });
 
         it("reject an array of file/string pairs when one file's content does not equal the corresponding string", () => {
           const arg = [
             ['testFile', 'Roses are red.\n'],
-            ['testFile2', 'Violets are green.\n']
+            ['testFile2', 'Violets are green.\n'],
           ];
           assert.throws(yoAssert.assertEqualsFileContent.bind(yoAssert, arg));
         });
@@ -191,8 +193,8 @@ describe('run-result-assertions', () => {
             yoAssert.assertNoFileContent.bind(
               yoAssert,
               'testFile',
-              /Roses are blue/
-            )
+              /Roses are blue/,
+            ),
           );
         });
 
@@ -201,8 +203,8 @@ describe('run-result-assertions', () => {
             yoAssert.assertNoFileContent.bind(
               yoAssert,
               'testFile',
-              'Roses are blue'
-            )
+              'Roses are blue',
+            ),
           );
         });
 
@@ -211,8 +213,8 @@ describe('run-result-assertions', () => {
             yoAssert.assertNoFileContent.bind(
               yoAssert,
               'testFile',
-              /Roses are red/
-            )
+              /Roses are red/,
+            ),
           );
         });
 
@@ -221,15 +223,15 @@ describe('run-result-assertions', () => {
             yoAssert.assertNoFileContent.bind(
               yoAssert,
               'testFile',
-              'Roses are red'
-            )
+              'Roses are red',
+            ),
           );
         });
 
         it("accept an array of file/regex pairs when each file's content does not match its corresponding regex", () => {
           const arg = [
             ['testFile', /Roses are green/],
-            ['testFile2', /Violets are orange/]
+            ['testFile2', /Violets are orange/],
           ];
           assert.doesNotThrow(yoAssert.assertNoFileContent.bind(yoAssert, arg));
         });
@@ -237,7 +239,7 @@ describe('run-result-assertions', () => {
         it("reject an array of file/regex pairs when one file's content does matches its corresponding regex", () => {
           const arg = [
             ['testFile', /Roses are red/],
-            ['testFile2', /Violets are orange/]
+            ['testFile2', /Violets are orange/],
           ];
           assert.throws(yoAssert.assertNoFileContent.bind(yoAssert, arg));
         });
@@ -249,8 +251,8 @@ describe('run-result-assertions', () => {
             yoAssert.assertTextEqual.bind(
               yoAssert,
               'I have a yellow cat',
-              'I have a yellow cat'
-            )
+              'I have a yellow cat',
+            ),
           );
         });
 
@@ -259,8 +261,8 @@ describe('run-result-assertions', () => {
             yoAssert.assertTextEqual.bind(
               yoAssert,
               'I have a yellow cat',
-              'I have a brown cat'
-            )
+              'I have a brown cat',
+            ),
           );
         });
 
@@ -269,8 +271,8 @@ describe('run-result-assertions', () => {
             yoAssert.assertTextEqual.bind(
               yoAssert,
               'I have a\nyellow cat',
-              'I have a\r\nyellow cat'
-            )
+              'I have a\r\nyellow cat',
+            ),
           );
         });
       });
@@ -281,12 +283,12 @@ describe('run-result-assertions', () => {
             yoAssert.assertObjectContent.bind(
               yoAssert,
               {
-                a: 'foo'
+                a: 'foo',
               },
               {
-                a: 'foo'
-              }
-            )
+                a: 'foo',
+              },
+            ),
           );
         });
 
@@ -297,13 +299,13 @@ describe('run-result-assertions', () => {
               {
                 a: {b: 'foo'},
                 b: [0, 'a'],
-                c: 'a'
+                c: 'a',
               },
               {
                 a: {b: 'foo'},
-                b: [0, 'a']
-              }
-            )
+                b: [0, 'a'],
+              },
+            ),
           );
         });
 
@@ -312,12 +314,12 @@ describe('run-result-assertions', () => {
             yoAssert.assertObjectContent.bind(
               yoAssert,
               {
-                b: [0, 'a']
+                b: [0, 'a'],
               },
               {
-                b: [0]
-              }
-            )
+                b: [0],
+              },
+            ),
           );
         });
 
@@ -327,9 +329,9 @@ describe('run-result-assertions', () => {
               yoAssert,
               {},
               {
-                a: 'foo'
-              }
-            )
+                a: 'foo',
+              },
+            ),
           );
         });
 
@@ -338,12 +340,12 @@ describe('run-result-assertions', () => {
             yoAssert.assertObjectContent.bind(
               yoAssert,
               {
-                a: {}
+                a: {},
               },
               {
-                a: {b: 'foo'}
-              }
-            )
+                a: {b: 'foo'},
+              },
+            ),
           );
         });
       });
@@ -354,12 +356,12 @@ describe('run-result-assertions', () => {
             yoAssert.assertNoObjectContent.bind(
               yoAssert,
               {
-                a: 'foo'
+                a: 'foo',
               },
               {
-                a: 'foo'
-              }
-            )
+                a: 'foo',
+              },
+            ),
           );
         });
 
@@ -370,13 +372,13 @@ describe('run-result-assertions', () => {
               {
                 a: {b: 'foo'},
                 b: [0, 'a'],
-                c: 'a'
+                c: 'a',
               },
               {
                 a: {b: 'foo'},
-                b: [0, 'a']
-              }
-            )
+                b: [0, 'a'],
+              },
+            ),
           );
         });
 
@@ -385,12 +387,12 @@ describe('run-result-assertions', () => {
             yoAssert.assertNoObjectContent.bind(
               yoAssert,
               {
-                b: [0, 'a']
+                b: [0, 'a'],
               },
               {
-                b: [0]
-              }
-            )
+                b: [0],
+              },
+            ),
           );
         });
 
@@ -400,9 +402,9 @@ describe('run-result-assertions', () => {
               yoAssert,
               {},
               {
-                a: 'foo'
-              }
-            )
+                a: 'foo',
+              },
+            ),
           );
         });
 
@@ -411,12 +413,12 @@ describe('run-result-assertions', () => {
             yoAssert.assertNoObjectContent.bind(
               yoAssert,
               {
-                a: {}
+                a: {},
               },
               {
-                a: {b: 'foo'}
-              }
-            )
+                a: {b: 'foo'},
+              },
+            ),
           );
         });
       });
@@ -429,8 +431,8 @@ describe('run-result-assertions', () => {
             yoAssert.assertJsonFileContent.bind(yoAssert, file, {
               a: {b: 1},
               b: [1, 2],
-              d: null
-            })
+              d: null,
+            }),
           );
         });
 
@@ -438,21 +440,21 @@ describe('run-result-assertions', () => {
           assert.throws(
             yoAssert.assertJsonFileContent.bind(yoAssert, file, {
               a: {b: 1},
-              b: 'a'
-            })
+              b: 'a',
+            }),
           );
 
           assert.throws(
             yoAssert.assertJsonFileContent.bind(yoAssert, file, {
               a: {b: 3},
-              b: [1]
-            })
+              b: [1],
+            }),
           );
         });
 
         it('fails if file does not exists', () => {
           assert.throws(
-            yoAssert.assertJsonFileContent.bind(yoAssert, 'does-not-exist', {})
+            yoAssert.assertJsonFileContent.bind(yoAssert, 'does-not-exist', {}),
           );
         });
       });
@@ -464,8 +466,8 @@ describe('run-result-assertions', () => {
           assert.throws(
             yoAssert.assertNoJsonFileContent.bind(yoAssert, file, {
               a: {b: 1},
-              b: [1, 2]
-            })
+              b: [1, 2],
+            }),
           );
         });
 
@@ -473,15 +475,15 @@ describe('run-result-assertions', () => {
           assert.doesNotThrow(
             yoAssert.assertNoJsonFileContent.bind(yoAssert, file, {
               c: {b: 1},
-              b: 'a'
-            })
+              b: 'a',
+            }),
           );
 
           assert.doesNotThrow(
             yoAssert.assertNoJsonFileContent.bind(yoAssert, file, {
               a: {b: 3},
-              b: [2]
-            })
+              b: [2],
+            }),
           );
         });
 
@@ -490,11 +492,11 @@ describe('run-result-assertions', () => {
             yoAssert.assertNoJsonFileContent.bind(
               yoAssert,
               'does-not-exist',
-              {}
-            )
+              {},
+            ),
           );
         });
       });
     });
-  });
+  }
 });

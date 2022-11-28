@@ -1,15 +1,25 @@
-'use strict';
-const fs = require('fs');
-const path = require('path');
-const assert = require('assert');
-const sinon = require('sinon');
-const inquirer = require('inquirer');
-const Generator = require('yeoman-generator');
-const tempDirectory = require('temp-dir');
+import fs from 'node:fs';
+import path, {dirname} from 'node:path';
+import assert from 'node:assert';
+import {fileURLToPath} from 'node:url';
+import process from 'node:process';
+import {createRequire} from 'node:module';
+import {
+  assert as sinonAssert,
+  spy as sinonSpy,
+  stub as sinonStub,
+  fake as sinonFake,
+} from 'sinon';
+import inquirer from 'inquirer';
+import Generator from 'yeoman-generator';
+import tempDirectory from 'temp-dir';
 
-const RunContext = require('../lib/run-context');
-const helpers = require('../lib');
-const {DummyPrompt} = require('../lib/adapter');
+import {RunContextBase as RunContext} from '../src/run-context.js';
+import helpers from '../src/helpers.js';
+import {DummyPrompt} from '../src/adapter.js';
+
+const require = createRequire(import.meta.url);
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const tmpdir = path.join(tempDirectory, 'yeoman-run-context');
 
@@ -20,7 +30,7 @@ describe('RunContext', function () {
     process.chdir(__dirname);
 
     this.defaultInput = inquirer.prompts.input;
-    this.execSpy = sinon.spy();
+    this.execSpy = sinonSpy();
     const {execSpy} = this;
     this.Dummy = class extends Generator {
       exec(...args) {
@@ -56,7 +66,7 @@ describe('RunContext', function () {
 
     it('accept path parameter', function (done) {
       const ctx = new RunContext(
-        require.resolve('./fixtures/generator-simple/app')
+        require.resolve('./fixtures/generator-simple/app'),
       );
 
       ctx
@@ -67,18 +77,18 @@ describe('RunContext', function () {
     });
 
     it('propagate generator error events', function (done) {
-      const error = new Error();
+      const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
-      const execSpy = sinon.stub().throws(error);
-      const endSpy = sinon.spy();
-      Dummy.prototype.exec = execSpy;
-      Dummy.prototype.end = execSpy;
+      const execSpy = sinonStub().throws(error);
+      const endSpy = sinonSpy();
+      (Dummy.prototype as any).test = execSpy;
+      (Dummy.prototype as any).end = execSpy;
       const ctx = new RunContext(Dummy);
 
-      ctx.on('error', function (err) {
-        sinon.assert.calledOnce(execSpy);
-        assert.equal(err, error);
-        sinon.assert.notCalled(endSpy);
+      ctx.on('error', function (error_) {
+        sinonAssert.calledOnce(execSpy);
+        assert.equal(error_, error);
+        sinonAssert.notCalled(endSpy);
         done();
       });
     });
@@ -89,18 +99,18 @@ describe('RunContext', function () {
         function () {
           assert(this.ctx.env.get('gen:test'));
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
     it('set namespace and resolved path in generator', function (done) {
       const ctx = new RunContext(this.Dummy, {
         resolved: 'path',
-        namespace: 'simple:app'
+        namespace: 'simple:app',
       });
 
       ctx.on('ready', function () {
-        assert.equal(ctx.env.get('simple:app').resolved, 'path');
+        assert.equal((ctx.env.get('simple:app') as any).resolved, 'path');
         done();
       });
     });
@@ -110,9 +120,9 @@ describe('RunContext', function () {
       this.ctx.on(
         'end',
         function () {
-          sinon.assert.calledOnce(this.execSpy);
+          sinonAssert.calledOnce(this.execSpy);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -122,7 +132,7 @@ describe('RunContext', function () {
         function () {
           assert.equal(this.defaultInput, inquirer.prompts.input);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -136,23 +146,24 @@ describe('RunContext', function () {
 
     it('allows an option to not automatically run in tmpdir', function (done) {
       const cwd = process.cwd();
-      this.ctx.settings.tmpdir = false;
-      this.ctx.on('end', function () {
+      const ctx = new RunContext(this.Dummy, {cwd, tmpdir: false});
+      ctx.on('end', function () {
         assert.equal(cwd, process.cwd());
         done();
       });
     });
 
     it('throws an error when calling cleanTestDirectory with not tmpdir settings', function () {
-      this.ctx.settings.tmpdir = false;
+      const cwd = process.cwd();
+      const ctx = new RunContext(this.Dummy, {cwd, tmpdir: false});
       try {
-        this.ctx.cleanTestDirectory();
+        ctx.cleanTestDirectory();
         assert.fail();
       } catch (error) {
         assert(
           error.message.includes(
-            'Cleanup test dir called with false tmpdir option.'
-          )
+            'Cleanup test dir called with false tmpdir option.',
+          ),
         );
       }
     });
@@ -162,7 +173,7 @@ describe('RunContext', function () {
       const ctx = new RunContext(Dummy, {
         tmpdir: false,
         resolved: 'path',
-        namespace: 'simple:app'
+        namespace: 'simple:app',
       });
       assert.equal(ctx.settings.tmpdir, false);
       assert.equal(ctx.settings.resolved, 'path');
@@ -171,12 +182,12 @@ describe('RunContext', function () {
 
     it('only run a generator once', function (done) {
       this.ctx.on('end', () => {
-        sinon.assert.calledOnce(this.execSpy);
+        sinonAssert.calledOnce(this.execSpy);
         done();
       });
 
-      this.ctx._run();
-      this.ctx._run();
+      this.ctx.setupEventListeners();
+      this.ctx.setupEventListeners();
     });
 
     it('set --force by default', function (done) {
@@ -185,7 +196,7 @@ describe('RunContext', function () {
         function () {
           assert.equal(this.execSpy.firstCall.thisValue.options.force, true);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -195,10 +206,10 @@ describe('RunContext', function () {
         function () {
           assert.equal(
             this.execSpy.firstCall.thisValue.options.skipInstall,
-            true
+            true,
           );
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -208,10 +219,10 @@ describe('RunContext', function () {
         function () {
           assert.equal(
             this.execSpy.firstCall.thisValue.options.skipCache,
-            true
+            true,
           );
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
   });
@@ -223,38 +234,35 @@ describe('RunContext', function () {
 
     it('throw an unhandledRejection when no listener is present', function (done) {
       const error = new Error('dummy exception');
-      const execSpy = sinon.stub().throws(error);
-      const errorHandler = function (err) {
-        sinon.assert.calledOnce(execSpy);
-        assert.equal(err, error);
+      const execSpy = sinonStub().throws(error);
+      const errorHandler = function (error_) {
+        sinonAssert.calledOnce(execSpy);
+        assert.equal(error_, error);
         done();
       };
 
       process.once('unhandledRejection', errorHandler);
 
       const Dummy = helpers.createDummyGenerator();
-      Dummy.prototype.exec = execSpy;
+      (Dummy.prototype as any).test = execSpy;
 
       setImmediate(function () {
-        return new RunContext(Dummy);
+        return new RunContext(Dummy).on('end', () => {});
       });
     });
   });
 
   describe('#toPromise()', function () {
-    it('return a resolved promise with the target directory on success', function () {
-      return this.ctx.toPromise().then(
-        function (runResult) {
-          assert.equal(this.ctx.targetDirectory, runResult.cwd);
-        }.bind(this)
-      );
+    it('return a resolved promise with the target directory on success', async function () {
+      const runResult = await this.ctx.toPromise();
+      assert.equal(this.ctx.targetDirectory, runResult.cwd);
     });
 
-    it('returns a reject promise on error', function () {
-      const error = new Error();
+    it('returns a reject promise on error', async function () {
+      const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
-      const execSpy = sinon.stub().throws(error);
-      Dummy.prototype.exec = execSpy;
+      const execSpy = sinonStub().throws(error);
+      (Dummy.prototype as any).test = execSpy;
       const ctx = new RunContext(Dummy);
 
       return ctx.toPromise().catch(function (error_) {
@@ -265,38 +273,38 @@ describe('RunContext', function () {
 
   describe('#then()', function () {
     it('handle success', function () {
-      return this.ctx.then(
+      return this.ctx.toPromise().then(
         function (runResult) {
           assert.equal(this.ctx.targetDirectory, runResult.cwd);
-        }.bind(this)
+        }.bind(this),
       );
     });
 
-    it('handles errors', function () {
-      const error = new Error();
+    it('handles errors', async function () {
+      const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
-      const execSpy = sinon.stub().throws(error);
-      Dummy.prototype.exec = execSpy;
+      const execSpy = sinonStub().throws(error);
+      (Dummy.prototype as any).test = execSpy;
       const ctx = new RunContext(Dummy);
 
-      return ctx.then(
+      return ctx.toPromise().then(
         function () {},
         function (error_) {
           assert.equal(error_, error);
-        }
+        },
       );
     });
   });
 
   describe('#catch()', function () {
-    it('handles errors', function () {
-      const error = new Error();
+    it('handles errors', async function () {
+      const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
-      const execSpy = sinon.stub().throws(error);
-      Dummy.prototype.exec = execSpy;
+      const execSpy = sinonStub().throws(error);
+      (Dummy.prototype as any).test = execSpy;
       const ctx = new RunContext(Dummy);
 
-      return ctx.catch(function (error_) {
+      return ctx.toPromise().catch(function (error_) {
         assert.equal(error_, error);
       });
     });
@@ -309,10 +317,10 @@ describe('RunContext', function () {
     });
 
     it('call helpers.testDirectory()', function () {
-      sinon.spy(helpers, 'testDirectory');
+      const spy = sinonSpy(helpers, 'testDirectory');
       this.ctx.inDir(this.tmp);
-      assert(helpers.testDirectory.withArgs(this.tmp).calledOnce);
-      helpers.testDirectory.restore();
+      assert(spy.withArgs(this.tmp).calledOnce);
+      spy.restore();
     });
 
     it('is chainable', function () {
@@ -321,34 +329,15 @@ describe('RunContext', function () {
 
     it('accepts optional `cb` to be invoked with resolved `dir`', function (done) {
       const ctx = new RunContext(this.Dummy);
-      const cb = sinon.spy(
+      const cb = sinonSpy(
         function () {
-          sinon.assert.calledOnce(cb);
-          sinon.assert.calledOn(cb, ctx);
-          sinon.assert.calledWith(cb, path.resolve(this.tmp));
-        }.bind(this)
+          sinonAssert.calledOnce(cb);
+          sinonAssert.calledOn(cb, ctx);
+          sinonAssert.calledWith(cb, path.resolve(this.tmp));
+        }.bind(this),
       );
 
       ctx.inDir(this.tmp, cb).on('end', done);
-    });
-
-    it('optional `cb` can use `this.async()` to delay execution', function (done) {
-      const ctx = new RunContext(this.Dummy);
-      let delayed = false;
-
-      ctx
-        .inDir(this.tmp, function () {
-          const release = this.async();
-
-          setTimeout(function () {
-            delayed = true;
-            release();
-          }, 1);
-        })
-        .on('ready', function () {
-          assert(delayed);
-        })
-        .on('end', done);
     });
 
     it('throws error at additional calls with dirPath', function () {
@@ -412,10 +401,10 @@ describe('RunContext', function () {
     });
 
     it('do not call helpers.testDirectory()', function () {
-      sinon.spy(helpers, 'testDirectory');
+      const spy = sinonSpy(helpers, 'testDirectory');
       this.ctx.cd(this.tmp);
-      assert(!helpers.testDirectory.calledOnce);
-      helpers.testDirectory.restore();
+      assert(!spy.calledOnce);
+      spy.restore();
     });
 
     it('is chainable', function () {
@@ -423,18 +412,16 @@ describe('RunContext', function () {
     });
 
     it('should set inDirSet & targetDirectory', function () {
-      assert(!this.ctx.inDirSet);
       assert(!this.ctx.targetDirectory);
       this.ctx.cd(this.tmp);
-      assert.equal(this.ctx.inDirSet, true);
       assert.equal(this.ctx.targetDirectory, this.tmp);
     });
 
     it('should cd into created directory', function () {
-      sinon.spy(process, 'chdir');
+      const spy = sinonSpy(process, 'chdir');
       this.ctx.cd(this.tmp);
-      assert(process.chdir.calledWith(this.tmp));
-      process.chdir.restore();
+      assert(spy.calledWith(this.tmp));
+      spy.restore();
     });
 
     it('should throw error if directory do not exist', function () {
@@ -449,10 +436,10 @@ describe('RunContext', function () {
 
   describe('#inTmpDir', function () {
     it('call helpers.testDirectory()', function () {
-      sinon.spy(helpers, 'testDirectory');
+      const spy = sinonSpy(helpers, 'testDirectory');
       this.ctx.inTmpDir();
-      sinon.assert.calledOnce(helpers.testDirectory);
-      helpers.testDirectory.restore();
+      sinonAssert.calledOnce(spy);
+      spy.restore();
     });
 
     it('is chainable', function () {
@@ -461,7 +448,7 @@ describe('RunContext', function () {
 
     it('accepts optional `cb` to be invoked with resolved `dir`', function (done) {
       const {ctx} = this;
-      const cb = sinon.spy(function (dir) {
+      const cb = sinonSpy(function (dir) {
         assert.equal(this, ctx);
         assert(dir.includes(tempDirectory));
       });
@@ -478,10 +465,10 @@ describe('RunContext', function () {
         function () {
           assert.deepEqual(this.execSpy.firstCall.thisValue.arguments, [
             'one',
-            'two'
+            'two',
           ]);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -492,10 +479,10 @@ describe('RunContext', function () {
         function () {
           assert.deepEqual(this.execSpy.firstCall.thisValue.arguments, [
             'foo',
-            'bar'
+            'bar',
           ]);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -510,10 +497,10 @@ describe('RunContext', function () {
         function () {
           assert.deepEqual(this.execSpy.firstCall.thisValue.arguments, [
             'foo',
-            'bar'
+            'bar',
           ]);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
   });
@@ -526,25 +513,25 @@ describe('RunContext', function () {
         function () {
           assert.equal(this.execSpy.firstCall.thisValue.options.foo, 'bar');
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
     it('allow default settings to be overriden', function (done) {
       this.ctx.withOptions({
         'skip-install': false,
-        force: false
+        force: false,
       });
       this.ctx.on(
         'end',
         function () {
           assert.equal(
             this.execSpy.firstCall.thisValue.options.skipInstall,
-            false
+            false,
           );
           assert.equal(this.execSpy.firstCall.thisValue.options.force, false);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -555,11 +542,11 @@ describe('RunContext', function () {
         function () {
           assert.equal(
             this.execSpy.firstCall.thisValue.options['foo-bar'],
-            false
+            false,
           );
           assert.equal(this.execSpy.firstCall.thisValue.options.fooBar, false);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -570,11 +557,11 @@ describe('RunContext', function () {
         function () {
           assert.equal(
             this.execSpy.firstCall.thisValue.options['bar-foo'],
-            false
+            false,
           );
           assert.equal(this.execSpy.firstCall.thisValue.options.barFoo, false);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
 
@@ -587,22 +574,22 @@ describe('RunContext', function () {
           assert.equal(options.foo, 'bar');
           assert.equal(options.john, 'doe');
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
   });
 
   describe('#withPrompts()', function () {
     it('is call automatically', function () {
-      const askFor = sinon.spy();
-      const prompt = sinon.spy();
+      const askFor = sinonSpy();
+      const prompt = sinonSpy();
       this.Dummy.prototype.askFor = function () {
         askFor();
         return this.prompt({
           name: 'yeoman',
           type: 'input',
           message: 'Hey!',
-          default: 'pass'
+          default: 'pass',
         }).then(function (answers) {
           assert.equal(answers.yeoman, 'pass');
           prompt();
@@ -610,18 +597,18 @@ describe('RunContext', function () {
       };
 
       return this.ctx.toPromise().then(function () {
-        sinon.assert.calledOnce(askFor);
-        sinon.assert.calledOnce(prompt);
+        sinonAssert.calledOnce(askFor);
+        sinonAssert.calledOnce(prompt);
       });
     });
 
     it('mock the prompt', function () {
-      const execSpy = sinon.spy();
+      const execSpy = sinonSpy();
       this.Dummy.prototype.askFor = function () {
         return this.prompt({
           name: 'yeoman',
           type: 'input',
-          message: 'Hey!'
+          message: 'Hey!',
         }).then(function (answers) {
           assert.equal(answers.yeoman, 'yes please');
           execSpy();
@@ -632,24 +619,24 @@ describe('RunContext', function () {
         .withPrompts({yeoman: 'yes please'})
         .toPromise()
         .then(function () {
-          sinon.assert.calledOnce(execSpy);
+          sinonAssert.calledOnce(execSpy);
         });
     });
 
     it('is chainable', function () {
-      const execSpy = sinon.spy();
+      const execSpy = sinonSpy();
       this.Dummy.prototype.askFor = function () {
         return this.prompt([
           {
             name: 'yeoman',
             type: 'input',
-            message: 'Hey!'
+            message: 'Hey!',
           },
           {
             name: 'yo',
             type: 'input',
-            message: 'Yo!'
-          }
+            message: 'Yo!',
+          },
         ]).then(function (answers) {
           execSpy();
           assert.equal(answers.yeoman, 'yes please');
@@ -662,18 +649,18 @@ describe('RunContext', function () {
         .withPrompts({yo: 'yo man'})
         .toPromise()
         .then(function () {
-          sinon.assert.calledOnce(execSpy);
+          sinonAssert.calledOnce(execSpy);
         });
     });
 
     it('calls the callback', function () {
-      const execSpy = sinon.spy();
-      const promptSpy = sinon.fake.returns('yes please');
+      const execSpy = sinonSpy();
+      const promptSpy = sinonFake.returns('yes please');
       this.Dummy.prototype.askFor = function () {
         return this.prompt({
           name: 'yeoman',
           type: 'input',
-          message: 'Hey!'
+          message: 'Hey!',
         }).then(function (answers) {
           execSpy();
           assert.equal(answers.yeoman, 'yes please');
@@ -684,8 +671,8 @@ describe('RunContext', function () {
         .withPrompts({yeoman: 'no please'}, promptSpy)
         .toPromise()
         .then(function () {
-          sinon.assert.calledOnce(execSpy);
-          sinon.assert.calledOnce(promptSpy);
+          sinonAssert.calledOnce(execSpy);
+          sinonAssert.calledOnce(promptSpy);
           assert.equal(promptSpy.getCall(0).args[0], 'no please');
           assert.ok(promptSpy.getCall(0).thisValue instanceof DummyPrompt);
         });
@@ -700,7 +687,7 @@ describe('RunContext', function () {
           assert(this.ctx.env.get('foo:bar'));
           assert(this.ctx.mockedGenerators['foo:bar']);
           done();
-        }.bind(this)
+        }.bind(this),
       );
     });
   });
@@ -714,7 +701,7 @@ describe('RunContext', function () {
           function () {
             assert(this.ctx.env.get('simple:app'));
             done();
-          }.bind(this)
+          }.bind(this),
         );
     });
 
@@ -726,7 +713,7 @@ describe('RunContext', function () {
           function () {
             assert(this.ctx.env.get('dummy:gen'));
             done();
-          }.bind(this)
+          }.bind(this),
         );
     });
 
@@ -740,7 +727,7 @@ describe('RunContext', function () {
             assert(this.ctx.env.get('dummy:gen'));
             assert(this.ctx.env.get('simple:app'));
             done();
-          }.bind(this)
+          }.bind(this),
         );
     });
   });
@@ -757,7 +744,7 @@ describe('RunContext', function () {
           function () {
             assert(this.ctx.env.get('simple:app'));
             done();
-          }.bind(this)
+          }.bind(this),
         );
     });
   });
@@ -767,7 +754,7 @@ describe('RunContext', function () {
       this.ctx
         .withLocalConfig({
           some: true,
-          data: 'here'
+          data: 'here',
         })
         .on(
           'ready',
@@ -775,7 +762,7 @@ describe('RunContext', function () {
             assert.equal(this.ctx.generator.config.get('some'), true);
             assert.equal(this.ctx.generator.config.get('data'), 'here');
             done();
-          }.bind(this)
+          }.bind(this),
         );
     });
   });
@@ -785,7 +772,7 @@ describe('RunContext', function () {
       this.ctx
         .withLocalConfig({
           some: true,
-          data: 'here'
+          data: 'here',
         })
         .on(
           'ready',
@@ -799,7 +786,7 @@ describe('RunContext', function () {
             assert.equal(options.mockedGenerators, this.ctx.mockedGenerators);
             assert.deepEqual(options.settings, this.ctx.settings);
             done();
-          }.bind(this)
+          }.bind(this),
         );
     });
   });
