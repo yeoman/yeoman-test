@@ -62,6 +62,7 @@ export class RunContextBase<
   readonly settings: RunContextSettings;
   readonly envOptions: Environment.Options;
   completed = false;
+  targetDirectory?: string;
 
   protected environmentPromise?: PromiseRunResult<GeneratorType>;
   protected editor?: MemFsEditor.Editor;
@@ -70,8 +71,18 @@ export class RunContextBase<
   private options: any = {};
   private answers: any = {};
 
-  private readonly onReadyCallbacks: Array<(this: this, generator: GeneratorType) => any> = [];
-  private readonly onTargetDirectoryCallbacks: Array<(this: this, targetDirectory: string) => any> = [];
+  private readonly onGeneratorCallbacks: Array<
+    (this: this, generator: GeneratorType) => any
+  > = [];
+
+  private readonly onTargetDirectoryCallbacks: Array<
+    (this: this, targetDirectory: string) => any
+  > = [];
+
+  private readonly onEnvironmentCallbacks: Array<
+    (this: this, env: Environment) => any
+  > = [];
+
   private readonly inDirCallbacks: any[] = [];
   private readonly Generator: string | GeneratorConstructor | typeof Generator;
   private readonly helpers: YeomanTest;
@@ -80,19 +91,14 @@ export class RunContextBase<
     crypto.randomBytes(20).toString('hex'),
   );
 
-  private localConfig: any = null;
   private dependencies: any[] = [];
-  private lookups: LookupOptions[] = [];
   private oldCwd?: string;
   private eventListenersSet = false;
-  private targetDirectory?: string;
   private envCB: any;
   private promptOptions?: DummyPromptOptions;
 
   private ran = false;
   private errored = false;
-
-  private generatorPromise?: Promise<GeneratorType>;
 
   /**
    * This class provide a run context object to façade the complexity involved in setting
@@ -141,15 +147,8 @@ export class RunContextBase<
       await this.build();
     }
 
-    const generator = await this.generatorPromise!;
-
-    for (const onReadyCallback of this.onReadyCallbacks) {
-      // eslint-disable-next-line no-await-in-loop
-      await onReadyCallback.call(this, generator);
-    }
-
     try {
-      await this.env.runGenerator(generator as any);
+      await this.env.runGenerator(this.generator as any);
     } finally {
       this.helpers.restorePrompt(this.env);
       this.completed = true;
@@ -298,8 +297,12 @@ export class RunContextBase<
    * @param lookups - lookup to run.
    */
   withLookups(lookups: LookupOptions | LookupOptions[]): this {
-    this.lookups = this.lookups.concat(lookups);
-    return this;
+    return this.onEnvironment((env) => {
+      lookups = Array.isArray(lookups) ? lookups : [lookups];
+      for (const lookup of lookups) {
+        env.lookup(lookup);
+      }
+    });
   }
 
   /**
@@ -414,7 +417,7 @@ export class RunContextBase<
    */
   withLocalConfig(localConfig: Record<string, unknown>): this {
     assert(typeof localConfig === 'object', 'config should be an object');
-    this.localConfig = localConfig;
+    this.onGenerator((generator) => generator.config.defaults(localConfig));
     return this;
   }
 
@@ -443,9 +446,22 @@ export class RunContextBase<
    * @param callback
    * @returns
    */
-  onTargetDirectory(callback: (this: this, targetDirectory: string) => any): this {
+  onTargetDirectory(
+    callback: (this: this, targetDirectory: string) => any,
+  ): this {
     this.assertNotBuild();
     this.onTargetDirectoryCallbacks.push(callback);
+    return this;
+  }
+
+  /**
+   * Execute callback after generator is ready
+   * @param callback
+   * @returns
+   */
+  onGenerator(callback: (this: this, generator: GeneratorType) => any): this {
+    this.assertNotBuild();
+    this.onGeneratorCallbacks.push(callback);
     return this;
   }
 
@@ -454,9 +470,9 @@ export class RunContextBase<
    * @param callback
    * @returns
    */
-  onReady(callback: (this: this, generator: GeneratorType) => any): this {
+  onEnvironment(callback: (this: this, env: Environment) => any): this {
     this.assertNotBuild();
-    this.onReadyCallbacks.push(callback);
+    this.onEnvironmentCallbacks.push(callback);
     return this;
   }
 
@@ -470,7 +486,7 @@ export class RunContextBase<
    * Build the generator and the environment.
    * @return {RunContext|false} this
    */
-  protected async build(callback?: (context: any) => any): Promise<void> {
+  protected async build(): Promise<void> {
     this.assertNotBuild();
 
     this.ran = true;
@@ -507,8 +523,9 @@ export class RunContextBase<
       await onTargetDirectory.call(this, this.targetDirectory);
     }
 
-    for (const lookup of this.lookups) {
-      this.env.lookup(lookup);
+    for (const onEnvironmentCallback of this.onEnvironmentCallbacks) {
+      // eslint-disable-next-line no-await-in-loop
+      await onEnvironmentCallback.call(this, this.env);
     }
 
     this.helpers.registerDependencies(this.env, this.dependencies);
@@ -529,27 +546,19 @@ export class RunContextBase<
       );
     }
 
-    this.generatorPromise = Promise.resolve(
-      this.env.create(namespace, this.args, this.options) as any,
-    );
-
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.generatorPromise.then((generator) => {
-      this.generator = generator;
-      this.emit('generator', generator);
-    });
+    // eslint-disable-next-line @typescript-eslint/await-thenable
+    this.generator = (await this.env.create(
+      namespace,
+      this.args,
+      this.options,
+    )) as any;
 
     this.helpers.mockPrompt(this.env, this.answers, this.promptOptions);
 
-    if (this.localConfig) {
-      // Only mock local config when withLocalConfig was called
-      this.generatorPromise = this.generatorPromise.then((generator) => {
-        this.helpers.mockLocalConfig(generator, this.localConfig);
-        return generator;
-      });
+    for (const onGeneratorCallback of this.onGeneratorCallbacks) {
+      // eslint-disable-next-line no-await-in-loop
+      await onGeneratorCallback.call(this, this.generator);
     }
-
-    callback?.(this);
   }
 
   /**
@@ -573,30 +582,29 @@ export class RunContextBase<
 
     this.eventListenersSet = true;
 
-    this.onReady(generator => this.emit('ready', generator));
+    this.onGenerator((generator) => this.emit('ready', generator));
+    this.onGenerator((generator) => this.emit('generator', generator));
 
     return this.build().then(async () =>
-      this.generatorPromise!.then((generator) => {
-        this.run()
-          .catch((error) => {
-            if (
-              this.listenerCount('end') === 0 &&
-              this.listenerCount('error') === 0
-            ) {
-              // When there is no listeners throw a unhandled rejection.
-              setImmediate(async function () {
-                // eslint-disable-next-line @typescript-eslint/no-throw-literal
-                throw error;
-              });
-            } else {
-              this.errored = true;
-              this.emit('error', error);
-            }
-          })
-          .finally(() => {
-            this.emit('end');
-          });
-      }),
+      this.run()
+        .catch((error) => {
+          if (
+            this.listenerCount('end') === 0 &&
+            this.listenerCount('error') === 0
+          ) {
+            // When there is no listeners throw a unhandled rejection.
+            setImmediate(async function () {
+              // eslint-disable-next-line @typescript-eslint/no-throw-literal
+              throw error;
+            });
+          } else {
+            this.errored = true;
+            this.emit('error', error);
+          }
+        })
+        .finally(() => {
+          this.emit('end');
+        }),
     );
   }
 
