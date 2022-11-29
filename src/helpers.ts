@@ -18,7 +18,7 @@ import type {RunContextSettings} from './run-context.js';
 /**
  * Dependencies can be path (autodiscovery) or an array [<generator>, <name>]
  */
-export type Dependency = string | [GeneratorConstructor, string];
+export type Dependency = string | Parameters<Environment['registerStub']>;
 
 type GeneratorNew<GenParameter extends YeomanGenerator = YeomanGenerator> =
   new (

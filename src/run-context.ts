@@ -116,11 +116,17 @@ export class RunContextBase<
     helpers = defaultHelpers,
   ) {
     super();
-    this.Generator = generatorType;
     this.settings = {
       namespace: 'gen:test',
       ...settings,
     };
+    this.Generator = generatorType;
+
+    if (typeof generatorType !== 'string') {
+      const {namespace, resolved} = this.settings;
+      this.withGenerators([[generatorType, namespace, resolved]] as any);
+    }
+
     this.envOptions = envOptions;
 
     this.withOptions({
@@ -388,7 +394,13 @@ export class RunContextBase<
   withGenerators(dependencies: Dependency[]): this {
     assert(Array.isArray(dependencies), 'dependencies should be an array');
     return this.onEnvironment((env) => {
-      this.helpers.registerDependencies(env, dependencies);
+      for (const dependency of dependencies) {
+        if (Array.isArray(dependency)) {
+          env.registerStub(...dependency);
+        } else {
+          env.register(dependency);
+        }
+      }
     });
   }
 
@@ -579,25 +591,18 @@ export class RunContextBase<
       await onEnvironmentCallback.call(this, this.env);
     }
 
-    let namespace;
+    let {namespace} = this.settings;
     if (typeof this.Generator === 'string') {
       namespace = this.env.namespace(this.Generator);
       if (namespace !== this.Generator) {
         // Generator is a file path, it should be registered.
         this.env.register(this.Generator);
       }
-    } else {
-      namespace = this.settings.namespace;
-      this.env.registerStub(
-        this.Generator as any,
-        namespace,
-        this.settings.resolved,
-      );
     }
 
     // eslint-disable-next-line @typescript-eslint/await-thenable
     this.generator = (await this.env.create(
-      namespace,
+      namespace!,
       this.args,
       this.options,
     )) as any;
