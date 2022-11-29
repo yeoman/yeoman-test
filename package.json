@@ -41,7 +41,7 @@
     "tui-jsdoc-template": "^1.2.2",
     "typescript": "^4.9.3",
     "xo": "^0.53.1",
-    "yeoman-environment": "^3.12.1",
+    "yeoman-environment": "^3.13.0",
     "yeoman-generator": "^5.7.0"
   },
   "dependencies": {
@@ -57,7 +57,7 @@
   },
   "peerDependencies": {
     "mem-fs": "^2.2.1",
-    "yeoman-environment": "^3.12.1",
+    "yeoman-environment": "^3.13.0",
     "yeoman-generator": "*"
   },
   "scripts": {
