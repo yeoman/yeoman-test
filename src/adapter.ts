@@ -1,7 +1,7 @@
 /* eslint-disable max-params */
 import events from 'node:events';
 import {PassThrough} from 'node:stream';
-import inquirer, {type prompts} from 'inquirer';
+import inquirer from 'inquirer';
 import {spy as sinonSpy, stub as sinonStub} from 'sinon';
 import type Generator from 'yeoman-generator';
 import type Logger from 'yeoman-environment/lib/util/log.js';

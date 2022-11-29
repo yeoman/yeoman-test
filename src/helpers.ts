@@ -319,15 +319,15 @@ export class YeomanTest {
    * @param GeneratorOrNamespace - Generator constructor or namespace
    */
 
-  run(
+  run<GeneratorType extends YeomanGenerator = YeomanGenerator>(
     GeneratorOrNamespace: string | GeneratorConstructor,
     settings?: RunContextSettings,
     envOptions?: Options,
-  ): RunContext {
+  ): RunContext<GeneratorType> {
     const contextSettings = _.cloneDeep(this.settings ?? {});
     const generatorOptions = _.cloneDeep(this.generatorOptions ?? {});
     const RunContext = this.getRunContextType();
-    const runContext = new RunContext(
+    const runContext = new RunContext<GeneratorType>(
       GeneratorOrNamespace,
       {...contextSettings, ...settings},
       envOptions,
@@ -346,12 +346,12 @@ export class YeomanTest {
    * @return {RunContext}
    */
 
-  create(
+  create<GeneratorType extends YeomanGenerator = YeomanGenerator>(
     GeneratorOrNamespace: string | GeneratorConstructor,
     settings?: RunContextSettings,
     envOptions?: Options,
   ) {
-    return this.run(GeneratorOrNamespace, settings, envOptions);
+    return this.run<GeneratorType>(GeneratorOrNamespace, settings, envOptions);
   }
 }
 

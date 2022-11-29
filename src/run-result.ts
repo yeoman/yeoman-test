@@ -26,8 +26,8 @@ function convertArgs(args) {
 /**
  * Provides options for `RunResult`s.
  */
-export type RunResultOptions = {
-  generator: Generator;
+export type RunResultOptions<GeneratorType extends Generator> = {
+  generator: GeneratorType;
 
   /**
    * The environment of the generator.
@@ -67,17 +67,17 @@ export type RunResultOptions = {
  * This class provides utilities for testing generated content.
  */
 
-export default class RunResult {
+export default class RunResult<GeneratorType extends Generator> {
   env: any;
-  generator: any;
+  generator: GeneratorType;
   cwd: string;
   oldCwd: string;
   memFs: Store;
   fs: Editor;
   mockedGenerators: any;
-  options: RunResultOptions;
+  options: RunResultOptions<GeneratorType>;
 
-  constructor(options: RunResultOptions) {
+  constructor(options: RunResultOptions<GeneratorType>) {
     if (options.memFs && !options.cwd) {
       throw new Error('CWD option is required for mem-fs tests');
     }

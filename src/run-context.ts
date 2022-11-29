@@ -48,17 +48,21 @@ export type RunContextSettings = {
   namespace?: string;
 };
 
-type PromiseRunResult = Promise<RunResult>;
+type PromiseRunResult<GeneratorType extends Generator> = Promise<
+  RunResult<GeneratorType>
+>;
 
-export class RunContextBase extends EventEmitter {
+export class RunContextBase<
+  GeneratorType extends Generator,
+> extends EventEmitter {
   readonly mockedGenerators: Record<string, Generator> = {};
   env!: Environment;
-  generator!: Generator;
+  generator!: GeneratorType;
   readonly settings: RunContextSettings;
   readonly envOptions: Environment.Options;
   completed = false;
 
-  protected environmentPromise?: PromiseRunResult;
+  protected environmentPromise?: PromiseRunResult<GeneratorType>;
 
   private args: string[] = [];
   private options: any = {};
@@ -79,7 +83,7 @@ export class RunContextBase extends EventEmitter {
   private ran = false;
   private errored = false;
 
-  private generatorPromise?: Promise<Generator>;
+  private generatorPromise?: Promise<GeneratorType>;
   private readonly temporaryDir = path.join(
     tempDirectory,
     crypto.randomBytes(20).toString('hex'),
@@ -127,7 +131,7 @@ export class RunContextBase extends EventEmitter {
    * Run the generator on the environment and promises a RunResult instance.
    * @return {PromiseRunResult} Promise a RunResult instance.
    */
-  async run(): PromiseRunResult {
+  async run(): PromiseRunResult<GeneratorType> {
     if (!this.ran) {
       await this.build();
     }
@@ -487,7 +491,7 @@ export class RunContextBase extends EventEmitter {
    * Return a promise representing the generator run process
    * @return Promise resolved on end or rejected on error
    */
-  protected async toPromise(): PromiseRunResult {
+  protected async toPromise(): PromiseRunResult<GeneratorType> {
     return this.environmentPromise ?? this.run();
   }
 
@@ -495,7 +499,9 @@ export class RunContextBase extends EventEmitter {
    * Keeps compatibility with events
    */
 
-  private setupEventListeners(): Promise<void | RunResult> | undefined {
+  private setupEventListeners():
+    | Promise<void | RunResult<GeneratorType>>
+    | undefined {
     if (this.eventListenersSet) {
       return undefined;
     }
@@ -551,7 +557,7 @@ export class RunContextBase extends EventEmitter {
     return this;
   }
 
-  private _createRunResultOptions(): RunResultOptions {
+  private _createRunResultOptions(): RunResultOptions<GeneratorType> {
     return {
       env: this.env,
       generator: this.generator,
@@ -568,24 +574,26 @@ export class RunContextBase extends EventEmitter {
   }
 }
 
-export default class RunContext extends RunContextBase {
+export default class RunContext<
+  GeneratorType extends Generator,
+> extends RunContextBase<GeneratorType> {
   // eslint-disable-next-line unicorn/no-thenable
   async then(
-    onfulfilled?: Parameters<PromiseRunResult['then']>[0],
-    onrejected?: Parameters<PromiseRunResult['then']>[1],
-  ): ReturnType<PromiseRunResult['then']> {
+    onfulfilled?: Parameters<PromiseRunResult<GeneratorType>['then']>[0],
+    onrejected?: Parameters<PromiseRunResult<GeneratorType>['then']>[1],
+  ): ReturnType<PromiseRunResult<GeneratorType>['then']> {
     return this.toPromise().then(onfulfilled, onrejected);
   }
 
   async catch(
-    onrejected?: Parameters<PromiseRunResult['catch']>[0],
-  ): ReturnType<PromiseRunResult['catch']> {
+    onrejected?: Parameters<PromiseRunResult<GeneratorType>['catch']>[0],
+  ): ReturnType<PromiseRunResult<GeneratorType>['catch']> {
     return this.toPromise().catch(onrejected);
   }
 
   async finally(
-    onfinally?: Parameters<PromiseRunResult['finally']>[0],
-  ): ReturnType<PromiseRunResult['finally']> {
+    onfinally?: Parameters<PromiseRunResult<GeneratorType>['finally']>[0],
+  ): ReturnType<PromiseRunResult<GeneratorType>['finally']> {
     return this.toPromise().finally(onfinally);
   }
 }
