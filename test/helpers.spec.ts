@@ -317,28 +317,44 @@ describe('yeoman-test', function () {
 
         const runContext = helpers.run(helpers.createDummyGenerator());
         await runContext
-          .onReady(function () {
+          .onGenerator(function (generator) {
             assert.strictEqual(this, runContext);
-            order.push('onReady 0');
+            assert.strictEqual(this.generator, generator);
+            order.push('onGenerator 0');
           })
-          .onReady(function () {
+          .onGenerator(function (generator) {
             assert.strictEqual(this, runContext);
-            order.push('onReady 1');
+            assert.strictEqual(this.generator, generator);
+            order.push('onGenerator 1');
           })
-          .onTargetDirectory(function () {
+          .onEnvironment(function (env) {
             assert.strictEqual(this, runContext);
+            assert.strictEqual(this.env, env);
+            order.push('onEnvironment 0');
+          })
+          .onEnvironment(function (env) {
+            assert.strictEqual(this, runContext);
+            assert.strictEqual(this.env, env);
+            order.push('onEnvironment 1');
+          })
+          .onTargetDirectory(function (targetDirectory) {
+            assert.strictEqual(this, runContext);
+            assert.strictEqual(this.targetDirectory!, targetDirectory);
             order.push('onTargetDir 0');
           })
-          .onTargetDirectory(function () {
+          .onTargetDirectory(function (targetDirectory) {
             assert.strictEqual(this, runContext);
+            assert.strictEqual(this.targetDirectory!, targetDirectory);
             order.push('onTargetDir 1');
           });
 
         assert.deepStrictEqual(order, [
           'onTargetDir 0',
           'onTargetDir 1',
-          'onReady 0',
-          'onReady 1',
+          'onEnvironment 0',
+          'onEnvironment 1',
+          'onGenerator 0',
+          'onGenerator 1',
         ]);
       });
     });
