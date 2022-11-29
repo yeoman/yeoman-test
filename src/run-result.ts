@@ -115,7 +115,7 @@ export default class RunResult<GeneratorType extends Generator> {
    * @param {Function} filter - parameter forwarded to mem-fs-editor#dump
    */
   getSnapshot(
-    filter,
+    filter?,
   ): Record<string, {contents: string; stateCleared: string}> {
     return (this.fs as any).dump(this.cwd, filter);
   }
@@ -125,7 +125,7 @@ export default class RunResult<GeneratorType extends Generator> {
    * @param {Function} filter - parameter forwarded to mem-fs-editor#dump
    * @returns {Object}
    */
-  getStateSnapshot(filter): Record<string, {stateCleared: string}> {
+  getStateSnapshot(filter?): Record<string, {stateCleared: string}> {
     const snapshot = this.getSnapshot(filter);
     for (const dump of Object.values(snapshot)) {
       delete (dump as any).contents;
