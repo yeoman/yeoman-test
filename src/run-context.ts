@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import {existsSync, rmSync} from 'node:fs';
-import path from 'node:path';
+import path, {resolve, isAbsolute} from 'node:path';
 import assert from 'node:assert';
 import {EventEmitter} from 'node:events';
 import process from 'node:process';
@@ -9,6 +9,7 @@ import tempDirectory from 'temp-dir';
 import type Generator from 'yeoman-generator';
 import type Environment from 'yeoman-environment';
 import {type LookupOptions, type Options} from 'yeoman-environment';
+import MemFsEditor from 'mem-fs-editor';
 
 import RunResult, {type RunResultOptions} from './run-result.js';
 import defaultHelpers, {
@@ -63,7 +64,9 @@ export class RunContextBase<
   completed = false;
 
   protected environmentPromise?: PromiseRunResult<GeneratorType>;
+  protected editor?: MemFsEditor.Editor;
 
+  private readonly memFs: Record<string, string | Record<string, unknown>> = {};
   private args: string[] = [];
   private options: any = {};
   private answers: any = {};
@@ -409,6 +412,16 @@ export class RunContextBase<
   }
 
   /**
+   * Add files to mem-fs.
+   * Files will be resolved relative to targetDir.
+   * @param fs
+   */
+  withFiles(fs: Record<string, string | Record<string, unknown>>): this {
+    Object.assign(this.memFs, fs);
+    return this;
+  }
+
+  /**
    * Build the generator and the environment.
    * @return {RunContext|false} this
    */
@@ -441,6 +454,18 @@ export class RunContextBase<
       ...this.envOptions,
     });
     this.env = this.envCB ? (await this.envCB(testEnv)) ?? testEnv : testEnv;
+
+    this.editor = MemFsEditor.create(this.env.sharedFs);
+    for (const [file, content] of Object.entries(this.memFs)) {
+      const resolvedFile = isAbsolute(file)
+        ? file
+        : resolve(this.targetDirectory, file);
+      if (typeof content === 'string') {
+        this.editor.write(resolvedFile, content);
+      } else {
+        this.editor.writeJSON(resolvedFile, content);
+      }
+    }
 
     for (const lookup of this.lookups) {
       this.env.lookup(lookup);
@@ -574,26 +599,40 @@ export class RunContextBase<
   }
 }
 
-export default class RunContext<
-  GeneratorType extends Generator,
-> extends RunContextBase<GeneratorType> {
+export default class RunContext<GeneratorType extends Generator>
+  extends RunContextBase<GeneratorType>
+  implements Promise<RunResult<GeneratorType>>
+{
   // eslint-disable-next-line unicorn/no-thenable
-  async then(
-    onfulfilled?: Parameters<PromiseRunResult<GeneratorType>['then']>[0],
-    onrejected?: Parameters<PromiseRunResult<GeneratorType>['then']>[1],
-  ): ReturnType<PromiseRunResult<GeneratorType>['then']> {
+  async then<TResult1 = RunResult<GeneratorType>, TResult2 = never>(
+    onfulfilled?:
+      | ((value: RunResult<GeneratorType>) => TResult1 | PromiseLike<TResult1>)
+      | undefined
+      | undefined,
+    onrejected?:
+      | ((reason: any) => TResult2 | PromiseLike<TResult2>)
+      | undefined
+      | undefined,
+  ): Promise<TResult1 | TResult2> {
     return this.toPromise().then(onfulfilled, onrejected);
   }
 
-  async catch(
-    onrejected?: Parameters<PromiseRunResult<GeneratorType>['catch']>[0],
-  ): ReturnType<PromiseRunResult<GeneratorType>['catch']> {
+  async catch<TResult = never>(
+    onrejected?:
+      | ((reason: any) => TResult | PromiseLike<TResult>)
+      | undefined
+      | undefined,
+  ): Promise<RunResult<GeneratorType> | TResult> {
     return this.toPromise().catch(onrejected);
   }
 
   async finally(
-    onfinally?: Parameters<PromiseRunResult<GeneratorType>['finally']>[0],
-  ): ReturnType<PromiseRunResult<GeneratorType>['finally']> {
+    onfinally?: (() => void) | undefined | undefined,
+  ): Promise<RunResult<GeneratorType>> {
     return this.toPromise().finally(onfinally);
+  }
+
+  get [Symbol.toStringTag](): string {
+    return `RunContext`;
   }
 }

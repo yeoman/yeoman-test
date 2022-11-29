@@ -6,6 +6,7 @@ import {createRequire} from 'node:module';
 import {assert as sinonAssert, spy as sinonSpy, stub as sinonStub} from 'sinon';
 import yeoman from 'yeoman-environment';
 import Generator from 'yeoman-generator';
+import {jestExpect as expect} from 'mocha-expect-snapshot';
 
 import type Environment from 'yeoman-environment';
 import helpers from '../src/helpers.js';
@@ -285,6 +286,29 @@ describe('yeoman-test', function () {
         .on('error', (_) => {
           done();
         });
+    });
+
+    describe('with a files', function () {
+      it('return a RunContext object', async function () {
+        const runResult = await helpers
+          .run(helpers.createDummyGenerator())
+          .withFiles({'foo.txt': 'foo', 'foo.json': {foo: 'bar'}});
+        expect(runResult.getSnapshot()).toMatchInlineSnapshot(`
+          {
+            "foo.json": {
+              "contents": "{
+            "foo": "bar"
+          }
+          ",
+              "stateCleared": "modified",
+            },
+            "foo.txt": {
+              "contents": "foo",
+              "stateCleared": "modified",
+            },
+          }
+        `);
+      });
     });
   });
 
