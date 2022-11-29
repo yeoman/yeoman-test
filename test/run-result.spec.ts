@@ -5,7 +5,7 @@ import path from 'node:path';
 import process from 'node:process';
 import MemFs from 'mem-fs';
 import MemFsEditor from 'mem-fs-editor';
-import {stub} from 'sinon';
+import { stub } from 'sinon';
 
 import RunContext from '../src/run-context.js';
 import RunResult from '../src/run-result.js';
@@ -20,13 +20,13 @@ describe('run-result', () => {
     });
     describe('with fs option', () => {
       it('throws error without cwd', () => {
-        assert.throws(() => new RunResult({memFs: {}} as any));
+        assert.throws(() => new RunResult({ memFs: {} } as any));
       });
     });
     describe('with fs and cwd options', () => {
       const memFs = {};
       const cwd = {};
-      const options = {memFs, cwd};
+      const options = { memFs, cwd };
       let runResult;
       before(() => {
         runResult = new RunResult(options);
@@ -38,13 +38,7 @@ describe('run-result', () => {
         assert.equal(runResult.cwd, cwd);
       });
     });
-    for (const optionName of [
-      'env',
-      'generator',
-      'oldCwd',
-      'cwd',
-      'mockedGenerators',
-    ]) {
+    for (const optionName of ['env', 'generator', 'oldCwd', 'cwd', 'mockedGenerators']) {
       describe(`with ${optionName} option`, () => {
         const optionValue = {};
         const options = {};
@@ -194,8 +188,8 @@ describe('run-result', () => {
     });
   });
   describe('#create', () => {
-    const newSettings = {newOnly: 'foo', overrided: 'newOverrided'};
-    const newEnvOptions = {newOnlyEnv: 'bar', overridedEnv: 'newOverridedEnv'};
+    const newSettings = { newOnly: 'foo', overrided: 'newOverrided' };
+    const newEnvOptions = { newOnlyEnv: 'bar', overridedEnv: 'newOverridedEnv' };
     const originalEnvOptions = {
       originalOnlyEnv: 'originalOnlyEnv',
       overridedEnv: 'originalOverridedEnv',

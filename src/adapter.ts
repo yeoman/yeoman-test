@@ -1,8 +1,8 @@
 /* eslint-disable max-params */
 import events from 'node:events';
-import {PassThrough} from 'node:stream';
+import { PassThrough } from 'node:stream';
 import inquirer from 'inquirer';
-import {spy as sinonSpy, stub as sinonStub} from 'sinon';
+import { spy as sinonSpy, stub as sinonStub } from 'sinon';
 import type Generator from 'yeoman-generator';
 import type Logger from 'yeoman-environment/lib/util/log.js';
 
@@ -22,11 +22,9 @@ export class DummyPrompt {
     _rl: any,
     answers: Generator.Answers,
     mockedAnswers?: Generator.Answers,
-    options?:
-      | ((answers: Generator.Answers) => Generator.Answers)
-      | DummyPromptOptions,
+    options?: ((answers: Generator.Answers) => Generator.Answers) | DummyPromptOptions,
   ) {
-    this.answers = {...answers, ...mockedAnswers};
+    this.answers = { ...answers, ...mockedAnswers };
     this.question = question;
 
     if (typeof options === 'function') {
@@ -41,7 +39,7 @@ export class DummyPrompt {
       }
     }
 
-    this.callback = this.callback || ((answers) => answers);
+    this.callback = this.callback || (answers => answers);
   }
 
   async run() {

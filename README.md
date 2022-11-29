@@ -1,9 +1,11 @@
 # yeoman-test
+
 [![NPM version][npm-image]][npm-url]
 [![NPM Test](https://github.com/yeoman/yeoman-test/workflows/NPM%20Test/badge.svg)](https://github.com/yeoman/yeoman-test/actions?query=workflow%3A%22NPM+Test%22)
 [![Integration Build](https://github.com/yeoman/yeoman-test/workflows/Integration%20Build/badge.svg)](https://github.com/yeoman/yeoman-test/actions?query=workflow%3A%22Integration+Build%22)
 [![Dependency Status][daviddm-image]][daviddm-url]
 [![Coverage percentage][coveralls-image]][coveralls-url]
+
 > Test utilities for Yeoman generators
 
 ## Installation
@@ -77,7 +79,6 @@ describe('generator test', () => {
 ## License
 
 MIT © [The Yeoman Team](http://yeoman.io)
-
 
 [npm-image]: https://badge.fury.io/js/yeoman-test.svg
 [npm-url]: https://npmjs.org/package/yeoman-test

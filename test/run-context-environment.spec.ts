@@ -1,12 +1,12 @@
 /* eslint-disable max-nested-callbacks */
 import assert from 'node:assert';
-import path, {dirname} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import path, { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import process from 'node:process';
-import {createRequire} from 'node:module';
-import {fake as sinonFake, replace as sinonReplace} from 'sinon';
+import { createRequire } from 'node:module';
+import { fake as sinonFake, replace as sinonReplace } from 'sinon';
 
-import {type LookupOptions} from 'yeoman-environment';
+import { type LookupOptions } from 'yeoman-environment';
 import helpers from '../src/helpers.js';
 import RunContext from '../src/run-context.js';
 import RunResult from '../src/run-result.js';
@@ -16,7 +16,7 @@ const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 describe('RunContext running environment', function () {
-  const defaultEnvOptions = {foo: 'bar'};
+  const defaultEnvOptions = { foo: 'bar' };
   const defaultRunContextOptions = {};
 
   let gen;
@@ -33,13 +33,7 @@ describe('RunContext running environment', function () {
       throw new Error('Generator is required');
     }
 
-    ctx = helpers
-      .create(
-        gen,
-        {...defaultRunContextOptions, ...ctxOptions},
-        {...defaultEnvOptions, envOptions},
-      )
-      .withLookups(lookups);
+    ctx = helpers.create(gen, { ...defaultRunContextOptions, ...ctxOptions }, { ...defaultEnvOptions, envOptions }).withLookups(lookups);
     if (build) {
       ctx.build();
     }
@@ -63,7 +57,7 @@ describe('RunContext running environment', function () {
     });
 
     it('promises a RunResult', () => {
-      return ctx.run().then((runResult) => {
+      return ctx.run().then(runResult => {
         assert(runResult instanceof RunResult);
       });
     });
@@ -102,11 +96,9 @@ describe('RunContext running environment', function () {
       build = false;
     });
     beforeEach(() => {
-      ctx.withEnvironment((env) => {
+      ctx.withEnvironment(env => {
         const FakeGenerator = helpers.createDummyGenerator();
-        const fake = sinonFake.returns(
-          Promise.resolve(new FakeGenerator([], {env})),
-        );
+        const fake = sinonFake.returns(Promise.resolve(new FakeGenerator([], { env })));
         sinonReplace(env, 'create', fake);
       });
     });
@@ -145,7 +137,7 @@ describe('RunContext running environment', function () {
 
   describe('with lookups with packagePaths', () => {
     before(() => {
-      lookups = [{packagePaths: [path.resolve('./fixtures/generator-simple')]}];
+      lookups = [{ packagePaths: [path.resolve('./fixtures/generator-simple')] }];
       gen = 'simple:app';
     });
     after(() => {
@@ -168,7 +160,7 @@ describe('RunContext running environment', function () {
 
   describe('with lookups with npmPaths', () => {
     before(() => {
-      lookups = [{npmPaths: [path.resolve('./fixtures/')]}];
+      lookups = [{ npmPaths: [path.resolve('./fixtures/')] }];
     });
     after(() => {
       lookups = [];
@@ -206,7 +198,7 @@ describe('RunContext running environment', function () {
       it('rejects with the error', () => {
         return ctx.run().then(
           () => assert.fail(),
-          (error) => {
+          error => {
             assert(/throwing error/.test(error.message));
           },
         );
@@ -238,7 +230,7 @@ describe('RunContext running environment', function () {
           .run()
           .then(
             () => assert.fail(),
-            (error) => {
+            error => {
               assert(/throwing error/.test(error.message));
             },
           );

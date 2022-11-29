@@ -1,22 +1,17 @@
 import fs from 'node:fs';
-import path, {dirname} from 'node:path';
+import path, { dirname } from 'node:path';
 import assert from 'node:assert';
-import {fileURLToPath} from 'node:url';
+import { fileURLToPath } from 'node:url';
 import process from 'node:process';
-import {createRequire} from 'node:module';
-import {
-  assert as sinonAssert,
-  spy as sinonSpy,
-  stub as sinonStub,
-  fake as sinonFake,
-} from 'sinon';
+import { createRequire } from 'node:module';
+import { assert as sinonAssert, spy as sinonSpy, stub as sinonStub, fake as sinonFake } from 'sinon';
 import inquirer from 'inquirer';
 import Generator from 'yeoman-generator';
 import tempDirectory from 'temp-dir';
 
-import {RunContextBase as RunContext} from '../src/run-context.js';
+import { RunContextBase as RunContext } from '../src/run-context.js';
 import helpers from '../src/helpers.js';
-import {DummyPrompt} from '../src/adapter.js';
+import { DummyPrompt } from '../src/adapter.js';
 
 const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -24,14 +19,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const tmpdir = path.join(tempDirectory, 'yeoman-run-context');
 
 describe('RunContext', function () {
-  const envOptions = {foo: 'bar'};
+  const envOptions = { foo: 'bar' };
 
   beforeEach(function () {
     process.chdir(__dirname);
 
     this.defaultInput = inquirer.prompts.input;
     this.execSpy = sinonSpy();
-    const {execSpy} = this;
+    const { execSpy } = this;
     this.Dummy = class extends Generator {
       exec(...args) {
         execSpy.apply(this, args);
@@ -65,9 +60,7 @@ describe('RunContext', function () {
     });
 
     it('accept path parameter', function (done) {
-      const ctx = new RunContext(
-        require.resolve('./fixtures/generator-simple/app'),
-      );
+      const ctx = new RunContext(require.resolve('./fixtures/generator-simple/app'));
 
       ctx
         .on('ready', function () {
@@ -146,7 +139,7 @@ describe('RunContext', function () {
 
     it('allows an option to not automatically run in tmpdir', function (done) {
       const cwd = process.cwd();
-      const ctx = new RunContext(this.Dummy, {cwd, tmpdir: false});
+      const ctx = new RunContext(this.Dummy, { cwd, tmpdir: false });
       ctx.on('end', function () {
         assert.equal(cwd, process.cwd());
         done();
@@ -155,16 +148,12 @@ describe('RunContext', function () {
 
     it('throws an error when calling cleanTestDirectory with not tmpdir settings', function () {
       const cwd = process.cwd();
-      const ctx = new RunContext(this.Dummy, {cwd, tmpdir: false});
+      const ctx = new RunContext(this.Dummy, { cwd, tmpdir: false });
       try {
         ctx.cleanTestDirectory();
         assert.fail();
       } catch (error) {
-        assert(
-          error.message.includes(
-            'Cleanup test dir called with false tmpdir option.',
-          ),
-        );
+        assert(error.message.includes('Cleanup test dir called with false tmpdir option.'));
       }
     });
 
@@ -204,10 +193,7 @@ describe('RunContext', function () {
       this.ctx.on(
         'end',
         function () {
-          assert.equal(
-            this.execSpy.firstCall.thisValue.options.skipInstall,
-            true,
-          );
+          assert.equal(this.execSpy.firstCall.thisValue.options.skipInstall, true);
           done();
         }.bind(this),
       );
@@ -217,10 +203,7 @@ describe('RunContext', function () {
       this.ctx.on(
         'end',
         function () {
-          assert.equal(
-            this.execSpy.firstCall.thisValue.options.skipCache,
-            true,
-          );
+          assert.equal(this.execSpy.firstCall.thisValue.options.skipCache, true);
           done();
         }.bind(this),
       );
@@ -361,7 +344,7 @@ describe('RunContext', function () {
       let cbCalled = false;
       this.ctx
         .inDir(this.tmp)
-        .doInDir((dirPath) => {
+        .doInDir(dirPath => {
           cbCalled = true;
           assert.equal(dirPath, this.tmp);
         })
@@ -377,11 +360,11 @@ describe('RunContext', function () {
       let cbCalled2 = false;
       this.ctx
         .inDir(this.tmp)
-        .doInDir((dirPath) => {
+        .doInDir(dirPath => {
           cbCalled1 = true;
           assert.equal(dirPath, this.tmp);
         })
-        .doInDir((dirPath) => {
+        .doInDir(dirPath => {
           cbCalled2 = true;
           assert.equal(dirPath, this.tmp);
         })
@@ -397,7 +380,7 @@ describe('RunContext', function () {
     beforeEach(function () {
       process.chdir(__dirname);
       this.tmp = tmpdir;
-      fs.mkdirSync(tmpdir, {recursive: true});
+      fs.mkdirSync(tmpdir, { recursive: true });
     });
 
     it('do not call helpers.testDirectory()', function () {
@@ -447,7 +430,7 @@ describe('RunContext', function () {
     });
 
     it('accepts optional `cb` to be invoked with resolved `dir`', function (done) {
-      const {ctx} = this;
+      const { ctx } = this;
       const cb = sinonSpy(function (dir) {
         assert.equal(this, ctx);
         assert(dir.includes(tempDirectory));
@@ -463,10 +446,7 @@ describe('RunContext', function () {
       this.ctx.on(
         'end',
         function () {
-          assert.deepEqual(this.execSpy.firstCall.thisValue.arguments, [
-            'one',
-            'two',
-          ]);
+          assert.deepEqual(this.execSpy.firstCall.thisValue.arguments, ['one', 'two']);
           done();
         }.bind(this),
       );
@@ -477,17 +457,14 @@ describe('RunContext', function () {
       this.ctx.on(
         'end',
         function () {
-          assert.deepEqual(this.execSpy.firstCall.thisValue.arguments, [
-            'foo',
-            'bar',
-          ]);
+          assert.deepEqual(this.execSpy.firstCall.thisValue.arguments, ['foo', 'bar']);
           done();
         }.bind(this),
       );
     });
 
     it('throws when arguments passed is neither a String or an Array', function () {
-      assert.throws(this.ctx.withArguments.bind(this.ctx, {foo: 'bar'}));
+      assert.throws(this.ctx.withArguments.bind(this.ctx, { foo: 'bar' }));
     });
 
     it('is chainable', function (done) {
@@ -495,10 +472,7 @@ describe('RunContext', function () {
       this.ctx.on(
         'end',
         function () {
-          assert.deepEqual(this.execSpy.firstCall.thisValue.arguments, [
-            'foo',
-            'bar',
-          ]);
+          assert.deepEqual(this.execSpy.firstCall.thisValue.arguments, ['foo', 'bar']);
           done();
         }.bind(this),
       );
@@ -507,7 +481,7 @@ describe('RunContext', function () {
 
   describe('#withOptions()', function () {
     it('provide options to the generator', function (done) {
-      this.ctx.withOptions({foo: 'bar'});
+      this.ctx.withOptions({ foo: 'bar' });
       this.ctx.on(
         'end',
         function () {
@@ -525,10 +499,7 @@ describe('RunContext', function () {
       this.ctx.on(
         'end',
         function () {
-          assert.equal(
-            this.execSpy.firstCall.thisValue.options.skipInstall,
-            false,
-          );
+          assert.equal(this.execSpy.firstCall.thisValue.options.skipInstall, false);
           assert.equal(this.execSpy.firstCall.thisValue.options.force, false);
           done();
         }.bind(this),
@@ -536,14 +507,11 @@ describe('RunContext', function () {
     });
 
     it('camel case options', function (done) {
-      this.ctx.withOptions({'foo-bar': false});
+      this.ctx.withOptions({ 'foo-bar': false });
       this.ctx.on(
         'end',
         function () {
-          assert.equal(
-            this.execSpy.firstCall.thisValue.options['foo-bar'],
-            false,
-          );
+          assert.equal(this.execSpy.firstCall.thisValue.options['foo-bar'], false);
           assert.equal(this.execSpy.firstCall.thisValue.options.fooBar, false);
           done();
         }.bind(this),
@@ -551,14 +519,11 @@ describe('RunContext', function () {
     });
 
     it('kebab case options', function (done) {
-      this.ctx.withOptions({barFoo: false});
+      this.ctx.withOptions({ barFoo: false });
       this.ctx.on(
         'end',
         function () {
-          assert.equal(
-            this.execSpy.firstCall.thisValue.options['bar-foo'],
-            false,
-          );
+          assert.equal(this.execSpy.firstCall.thisValue.options['bar-foo'], false);
           assert.equal(this.execSpy.firstCall.thisValue.options.barFoo, false);
           done();
         }.bind(this),
@@ -566,11 +531,11 @@ describe('RunContext', function () {
     });
 
     it('is chainable', function (done) {
-      this.ctx.withOptions({foo: 'bar'}).withOptions({john: 'doe'});
+      this.ctx.withOptions({ foo: 'bar' }).withOptions({ john: 'doe' });
       this.ctx.on(
         'end',
         function () {
-          const {options} = this.execSpy.firstCall.thisValue;
+          const { options } = this.execSpy.firstCall.thisValue;
           assert.equal(options.foo, 'bar');
           assert.equal(options.john, 'doe');
           done();
@@ -616,7 +581,7 @@ describe('RunContext', function () {
       };
 
       return this.ctx
-        .withPrompts({yeoman: 'yes please'})
+        .withPrompts({ yeoman: 'yes please' })
         .toPromise()
         .then(function () {
           sinonAssert.calledOnce(execSpy);
@@ -645,8 +610,8 @@ describe('RunContext', function () {
       };
 
       return this.ctx
-        .withPrompts({yeoman: 'yes please'})
-        .withPrompts({yo: 'yo man'})
+        .withPrompts({ yeoman: 'yes please' })
+        .withPrompts({ yo: 'yo man' })
         .toPromise()
         .then(function () {
           sinonAssert.calledOnce(execSpy);
@@ -668,7 +633,7 @@ describe('RunContext', function () {
       };
 
       return this.ctx
-        .withPrompts({yeoman: 'no please'}, promptSpy)
+        .withPrompts({ yeoman: 'no please' }, promptSpy)
         .toPromise()
         .then(function () {
           sinonAssert.calledOnce(execSpy);
@@ -694,27 +659,23 @@ describe('RunContext', function () {
 
   describe('#withGenerators()', function () {
     it('register paths', function (done) {
-      this.ctx
-        .withGenerators([require.resolve('./fixtures/generator-simple/app')])
-        .on(
-          'ready',
-          function () {
-            assert(this.ctx.env.get('simple:app'));
-            done();
-          }.bind(this),
-        );
+      this.ctx.withGenerators([require.resolve('./fixtures/generator-simple/app')]).on(
+        'ready',
+        function () {
+          assert(this.ctx.env.get('simple:app'));
+          done();
+        }.bind(this),
+      );
     });
 
     it('register mocked generator', function (done) {
-      this.ctx
-        .withGenerators([[helpers.createDummyGenerator(), 'dummy:gen']])
-        .on(
-          'ready',
-          function () {
-            assert(this.ctx.env.get('dummy:gen'));
-            done();
-          }.bind(this),
-        );
+      this.ctx.withGenerators([[helpers.createDummyGenerator(), 'dummy:gen']]).on(
+        'ready',
+        function () {
+          assert(this.ctx.env.get('dummy:gen'));
+          done();
+        }.bind(this),
+      );
     });
 
     it('allow multiple calls', function (done) {
@@ -735,7 +696,7 @@ describe('RunContext', function () {
   describe('#withEnvironment()', function () {
     it('register paths', function (done) {
       this.ctx
-        .withEnvironment((env) => {
+        .withEnvironment(env => {
           env.register(require.resolve('./fixtures/generator-simple/app'));
           return env;
         })
