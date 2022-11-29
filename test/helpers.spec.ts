@@ -288,8 +288,8 @@ describe('yeoman-test', function () {
         });
     });
 
-    describe('with a files', function () {
-      it('return a RunContext object', async function () {
+    describe('with files', function () {
+      it('write files to mem-fs', async function () {
         const runResult = await helpers
           .run(helpers.createDummyGenerator())
           .withFiles({'foo.txt': 'foo', 'foo.json': {foo: 'bar'}});
@@ -308,6 +308,38 @@ describe('yeoman-test', function () {
             },
           }
         `);
+      });
+    });
+
+    describe('callbacks', function () {
+      it('calls in order', async function () {
+        const order: string[] = [];
+
+        const runContext = helpers.run(helpers.createDummyGenerator());
+        await runContext
+          .onReady(function () {
+            assert.strictEqual(this, runContext);
+            order.push('onReady 0');
+          })
+          .onReady(function () {
+            assert.strictEqual(this, runContext);
+            order.push('onReady 1');
+          })
+          .onTargetDirectory(function () {
+            assert.strictEqual(this, runContext);
+            order.push('onTargetDir 0');
+          })
+          .onTargetDirectory(function () {
+            assert.strictEqual(this, runContext);
+            order.push('onTargetDir 1');
+          });
+
+        assert.deepStrictEqual(order, [
+          'onTargetDir 0',
+          'onTargetDir 1',
+          'onReady 0',
+          'onReady 1',
+        ]);
       });
     });
   });
