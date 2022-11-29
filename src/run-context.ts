@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import {existsSync, rmSync} from 'node:fs';
-import path, {resolve, isAbsolute} from 'node:path';
+import path, {resolve, isAbsolute, join as pathJoin} from 'node:path';
 import assert from 'node:assert';
 import {EventEmitter} from 'node:events';
 import process from 'node:process';
@@ -63,13 +63,13 @@ export class RunContextBase<
   readonly envOptions: Environment.Options;
   completed = false;
   targetDirectory?: string;
+  editor!: MemFsEditor.Editor;
 
   protected environmentPromise?: PromiseRunResult<GeneratorType>;
-  protected editor?: MemFsEditor.Editor;
 
   private args: string[] = [];
   private options: any = {};
-  private answers: any = {};
+  private answers?: any;
 
   private readonly onGeneratorCallbacks: Array<
     (this: this, generator: GeneratorType) => any
@@ -91,11 +91,9 @@ export class RunContextBase<
     crypto.randomBytes(20).toString('hex'),
   );
 
-  private dependencies: any[] = [];
   private oldCwd?: string;
   private eventListenersSet = false;
   private envCB: any;
-  private promptOptions?: DummyPromptOptions;
 
   private ran = false;
   private errored = false;
@@ -342,6 +340,7 @@ export class RunContextBase<
   }
 
   /**
+   * @deprecated
    * Mock the prompt with dummy answers
    * @param  answers - Answers to the prompt questions
    * @param  options - Options or callback.
@@ -351,9 +350,22 @@ export class RunContextBase<
    */
 
   withPrompts(answers: Generator.Answers, options?: DummyPromptOptions) {
+    return this.withAnswers(answers, options);
+  }
+
+  /**
+   * Mock answers for prompts
+   * @param  answers - Answers to the prompt questions
+   * @param  options - Options or callback.
+   * @return {this}
+   */
+  withAnswers(answers: Generator.Answers, options?: DummyPromptOptions) {
+    const callbackSet = Boolean(this.answers);
     this.answers = {...this.answers, ...answers};
-    this.promptOptions = options;
-    return this;
+    if (callbackSet) return this;
+    return this.onEnvironment((env) => {
+      this.helpers.mockPrompt(env, this.answers, options);
+    });
   }
 
   /**
@@ -375,8 +387,9 @@ export class RunContextBase<
 
   withGenerators(dependencies: Dependency[]): this {
     assert(Array.isArray(dependencies), 'dependencies should be an array');
-    this.dependencies = this.dependencies.concat(dependencies);
-    return this;
+    return this.onEnvironment((env) => {
+      this.helpers.registerDependencies(env, dependencies);
+    });
   }
 
   /**
@@ -398,17 +411,16 @@ export class RunContextBase<
 
   withMockedGenerators(namespaces: string[]): this {
     assert(Array.isArray(namespaces), 'namespaces should be an array');
-    const entries = namespaces.map((namespace) => [
-      namespace,
+    const dependencies = namespaces.map((namespace) => [
       this.helpers.createMockedGenerator(),
+      namespace,
+    ]);
+    const entries = dependencies.map(([generator, namespace]) => [
+      namespace,
+      generator,
     ]);
     Object.assign(this.mockedGenerators, Object.fromEntries(entries));
-    const dependencies = entries.map(([namespace, generator]) => [
-      generator,
-      namespace,
-    ]);
-    this.dependencies = this.dependencies.concat(dependencies);
-    return this;
+    return this.withGenerators(dependencies as Dependency[]);
   }
 
   /**
@@ -417,8 +429,9 @@ export class RunContextBase<
    */
   withLocalConfig(localConfig: Record<string, unknown>): this {
     assert(typeof localConfig === 'object', 'config should be an object');
-    this.onGenerator((generator) => generator.config.defaults(localConfig));
-    return this;
+    return this.onGenerator((generator) =>
+      generator.config.defaults(localConfig),
+    );
   }
 
   /**
@@ -426,18 +439,56 @@ export class RunContextBase<
    * Files will be resolved relative to targetDir.
    * @param files
    */
-  withFiles(files: Record<string, string | Record<string, unknown>>): this {
+  withFiles(files: Record<string, string | Record<string, unknown>>): this;
+  withFiles(
+    relativePath: string,
+    files: Record<string, string | Record<string, unknown>>,
+  ): this;
+  withFiles(
+    relativePath: string | Record<string, string | Record<string, unknown>>,
+    files?: Record<string, string | Record<string, unknown>>,
+  ): this {
     return this.onTargetDirectory(function () {
-      for (const [file, content] of Object.entries(files)) {
+      const targetDirectory =
+        typeof relativePath === 'string'
+          ? pathJoin(this.targetDirectory!, relativePath)
+          : this.targetDirectory!;
+
+      if (typeof relativePath !== 'string') {
+        files = relativePath;
+      }
+
+      for (const [file, content] of Object.entries(files!)) {
         const resolvedFile = isAbsolute(file)
           ? file
-          : resolve(this.targetDirectory!, file);
+          : resolve(targetDirectory, file);
         if (typeof content === 'string') {
-          this.editor!.write(resolvedFile, content);
+          this.editor.write(resolvedFile, content);
         } else {
-          this.editor!.writeJSON(resolvedFile, content);
+          this.editor.writeJSON(resolvedFile, content);
         }
       }
+    });
+  }
+
+  /**
+   * Add .yo-rc.json to mem-fs.
+   *
+   * @param content
+   * @returns
+   */
+  withYoRc(content: string | Record<string, unknown>): this {
+    return this.withFiles({
+      '.yo-rc.json': content,
+    });
+  }
+
+  /**
+   * Commit mem-fs files.
+   */
+  commitFiles(): this {
+    return this.onTargetDirectory(async function () {
+      await (this.editor as any).commit();
     });
   }
 
@@ -528,8 +579,6 @@ export class RunContextBase<
       await onEnvironmentCallback.call(this, this.env);
     }
 
-    this.helpers.registerDependencies(this.env, this.dependencies);
-
     let namespace;
     if (typeof this.Generator === 'string') {
       namespace = this.env.namespace(this.Generator);
@@ -552,8 +601,6 @@ export class RunContextBase<
       this.args,
       this.options,
     )) as any;
-
-    this.helpers.mockPrompt(this.env, this.answers, this.promptOptions);
 
     for (const onGeneratorCallback of this.onGeneratorCallbacks) {
       // eslint-disable-next-line no-await-in-loop
