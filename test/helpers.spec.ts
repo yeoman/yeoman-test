@@ -3,6 +3,7 @@ import path, {dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import process from 'node:process';
 import {createRequire} from 'node:module';
+import {existsSync} from 'node:fs';
 import {assert as sinonAssert, spy as sinonSpy, stub as sinonStub} from 'sinon';
 import yeoman from 'yeoman-environment';
 import Generator from 'yeoman-generator';
@@ -308,6 +309,67 @@ describe('yeoman-test', function () {
             },
           }
         `);
+      });
+
+      it('write files with relative path to mem-fs', async function () {
+        const runResult = await helpers
+          .run(helpers.createDummyGenerator())
+          .withFiles('sub', {'foo.txt': 'foo', 'foo.json': {foo: 'bar'}});
+        expect(runResult.getSnapshot()).toMatchInlineSnapshot(`
+          {
+            "sub/foo.json": {
+              "contents": "{
+            "foo": "bar"
+          }
+          ",
+              "stateCleared": "modified",
+            },
+            "sub/foo.txt": {
+              "contents": "foo",
+              "stateCleared": "modified",
+            },
+          }
+        `);
+      });
+
+      it('write string .yo-rc.json to mem-fs', async function () {
+        const runResult = await helpers
+          .run(helpers.createDummyGenerator())
+          .withYoRc('{"foo": "bar"}');
+        expect(runResult.getSnapshot()).toMatchInlineSnapshot(`
+          {
+            ".yo-rc.json": {
+              "contents": "{"foo": "bar"}",
+              "stateCleared": "modified",
+            },
+          }
+        `);
+      });
+
+      it('write object .yo-rc.json to mem-fs', async function () {
+        const runResult = await helpers
+          .run(helpers.createDummyGenerator())
+          .withYoRc({foo: 'bar'});
+        expect(runResult.getSnapshot()).toMatchInlineSnapshot(`
+          {
+            ".yo-rc.json": {
+              "contents": "{
+            "foo": "bar"
+          }
+          ",
+              "stateCleared": "modified",
+            },
+          }
+        `);
+      });
+
+      it('write files to mem-fs', async function () {
+        const runResult = await helpers
+          .run(helpers.createDummyGenerator())
+          .withFiles({'foo.txt': 'foo', 'foo.json': {foo: 'bar'}})
+          .commitFiles();
+        assert(existsSync(resolve(runResult.cwd, 'foo.txt')));
+        assert(existsSync(resolve(runResult.cwd, 'foo.json')));
       });
     });
 
