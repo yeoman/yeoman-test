@@ -66,18 +66,24 @@ export class RunContextBase<
   protected environmentPromise?: PromiseRunResult<GeneratorType>;
   protected editor?: MemFsEditor.Editor;
 
-  private readonly memFs: Record<string, string | Record<string, unknown>> = {};
   private args: string[] = [];
   private options: any = {};
   private answers: any = {};
 
+  private readonly onReadyCallbacks: Array<(this: this, generator: GeneratorType) => any> = [];
+  private readonly onTargetDirectoryCallbacks: Array<(this: this, targetDirectory: string) => any> = [];
+  private readonly inDirCallbacks: any[] = [];
+  private readonly Generator: string | GeneratorConstructor | typeof Generator;
+  private readonly helpers: YeomanTest;
+  private readonly temporaryDir = path.join(
+    tempDirectory,
+    crypto.randomBytes(20).toString('hex'),
+  );
+
   private localConfig: any = null;
   private dependencies: any[] = [];
-  private readonly inDirCallbacks: any[] = [];
   private lookups: LookupOptions[] = [];
-  private readonly Generator: string | GeneratorConstructor | typeof Generator;
   private oldCwd?: string;
-  private readonly helpers: YeomanTest;
   private eventListenersSet = false;
   private targetDirectory?: string;
   private envCB: any;
@@ -87,10 +93,6 @@ export class RunContextBase<
   private errored = false;
 
   private generatorPromise?: Promise<GeneratorType>;
-  private readonly temporaryDir = path.join(
-    tempDirectory,
-    crypto.randomBytes(20).toString('hex'),
-  );
 
   /**
    * This class provide a run context object to façade the complexity involved in setting
@@ -139,16 +141,21 @@ export class RunContextBase<
       await this.build();
     }
 
-    this.environmentPromise = this.generatorPromise!.then(async (generator) =>
-      this.env
-        .runGenerator(generator as any)
-        .then(() => new RunResult(this._createRunResultOptions()))
-        .finally(() => {
-          this.helpers.restorePrompt(this.env);
-          this.completed = true;
-        }),
-    );
-    return this.environmentPromise;
+    const generator = await this.generatorPromise!;
+
+    for (const onReadyCallback of this.onReadyCallbacks) {
+      // eslint-disable-next-line no-await-in-loop
+      await onReadyCallback.call(this, generator);
+    }
+
+    try {
+      await this.env.runGenerator(generator as any);
+    } finally {
+      this.helpers.restorePrompt(this.env);
+      this.completed = true;
+    }
+
+    return new RunResult(this._createRunResultOptions());
   }
 
   // If any event listeners is added, setup event listeners emitters
@@ -414,11 +421,49 @@ export class RunContextBase<
   /**
    * Add files to mem-fs.
    * Files will be resolved relative to targetDir.
-   * @param fs
+   * @param files
    */
-  withFiles(fs: Record<string, string | Record<string, unknown>>): this {
-    Object.assign(this.memFs, fs);
+  withFiles(files: Record<string, string | Record<string, unknown>>): this {
+    return this.onTargetDirectory(function () {
+      for (const [file, content] of Object.entries(files)) {
+        const resolvedFile = isAbsolute(file)
+          ? file
+          : resolve(this.targetDirectory!, file);
+        if (typeof content === 'string') {
+          this.editor!.write(resolvedFile, content);
+        } else {
+          this.editor!.writeJSON(resolvedFile, content);
+        }
+      }
+    });
+  }
+
+  /**
+   * Execute callback after targetDirectory is set
+   * @param callback
+   * @returns
+   */
+  onTargetDirectory(callback: (this: this, targetDirectory: string) => any): this {
+    this.assertNotBuild();
+    this.onTargetDirectoryCallbacks.push(callback);
     return this;
+  }
+
+  /**
+   * Execute callback after environment is ready
+   * @param callback
+   * @returns
+   */
+  onReady(callback: (this: this, generator: GeneratorType) => any): this {
+    this.assertNotBuild();
+    this.onReadyCallbacks.push(callback);
+    return this;
+  }
+
+  protected assertNotBuild() {
+    if (this.ran || this.completed) {
+      throw new Error('The context is already built');
+    }
   }
 
   /**
@@ -426,9 +471,7 @@ export class RunContextBase<
    * @return {RunContext|false} this
    */
   protected async build(callback?: (context: any) => any): Promise<void> {
-    if (this.ran || this.completed) {
-      throw new Error('The context is already built');
-    }
+    this.assertNotBuild();
 
     this.ran = true;
 
@@ -446,7 +489,9 @@ export class RunContextBase<
       }
     }
 
-    this.targetDirectory = this.targetDirectory ?? process.cwd();
+    if (!this.targetDirectory) {
+      throw new Error('targetDirectory is required');
+    }
 
     const testEnv = this.helpers.createTestEnv(this.envOptions.createEnv, {
       cwd: this.settings.forwardCwd ? this.targetDirectory : undefined,
@@ -456,15 +501,10 @@ export class RunContextBase<
     this.env = this.envCB ? (await this.envCB(testEnv)) ?? testEnv : testEnv;
 
     this.editor = MemFsEditor.create(this.env.sharedFs);
-    for (const [file, content] of Object.entries(this.memFs)) {
-      const resolvedFile = isAbsolute(file)
-        ? file
-        : resolve(this.targetDirectory, file);
-      if (typeof content === 'string') {
-        this.editor.write(resolvedFile, content);
-      } else {
-        this.editor.writeJSON(resolvedFile, content);
-      }
+
+    for (const onTargetDirectory of this.onTargetDirectoryCallbacks) {
+      // eslint-disable-next-line no-await-in-loop
+      await onTargetDirectory.call(this, this.targetDirectory);
     }
 
     for (const lookup of this.lookups) {
@@ -533,9 +573,10 @@ export class RunContextBase<
 
     this.eventListenersSet = true;
 
+    this.onReady(generator => this.emit('ready', generator));
+
     return this.build().then(async () =>
       this.generatorPromise!.then((generator) => {
-        this.emit('ready', generator);
         this.run()
           .catch((error) => {
             if (
