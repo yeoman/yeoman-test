@@ -1,18 +1,17 @@
 import assert from 'node:assert';
-import {existsSync, readFileSync, rmSync} from 'node:fs';
+import { existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import MemFsEditor, {type Editor} from 'mem-fs-editor';
+import MemFsEditor, { type Editor } from 'mem-fs-editor';
 
-import type {Store} from 'mem-fs';
+import type { Store } from 'mem-fs';
 import type Environment from 'yeoman-environment';
 import type Generator from 'yeoman-generator';
 
-import {type RunContextSettings} from './run-context.js';
-import {type YeomanTest} from './helpers.js';
+import { type RunContextSettings } from './run-context.js';
+import { type YeomanTest } from './helpers.js';
 
-const isObject = (object) =>
-  typeof object === 'object' && object !== null && object !== undefined;
+const isObject = object => typeof object === 'object' && object !== null && object !== undefined;
 
 function convertArgs(args) {
   if (args.length > 1) {
@@ -106,7 +105,7 @@ export default class RunResult<GeneratorType extends Generator> {
         ...settings,
         autoCleanup: false,
       },
-      {...this.options.envOptions, memFs: this.memFs, ...envOptions},
+      { ...this.options.envOptions, memFs: this.memFs, ...envOptions },
     );
   }
 
@@ -114,9 +113,7 @@ export default class RunResult<GeneratorType extends Generator> {
    * Return an object with fs changes.
    * @param {Function} filter - parameter forwarded to mem-fs-editor#dump
    */
-  getSnapshot(
-    filter?,
-  ): Record<string, {contents: string; stateCleared: string}> {
+  getSnapshot(filter?): Record<string, { contents: string; stateCleared: string }> {
     return (this.fs as any).dump(this.cwd, filter);
   }
 
@@ -125,7 +122,7 @@ export default class RunResult<GeneratorType extends Generator> {
    * @param {Function} filter - parameter forwarded to mem-fs-editor#dump
    * @returns {Object}
    */
-  getStateSnapshot(filter?): Record<string, {stateCleared: string}> {
+  getStateSnapshot(filter?): Record<string, { stateCleared: string }> {
     const snapshot = this.getSnapshot(filter);
     for (const dump of Object.values(snapshot)) {
       delete (dump as any).contents;
@@ -139,7 +136,7 @@ export default class RunResult<GeneratorType extends Generator> {
    */
   dumpFiles(...files: string[]): this {
     if (files.length === 0) {
-      this.memFs.each((file) => {
+      this.memFs.each(file => {
         console.log(file.path);
         if (file.contents) {
           // eslint-disable-next-line @typescript-eslint/no-base-to-string
@@ -160,7 +157,7 @@ export default class RunResult<GeneratorType extends Generator> {
    * Dumps the name of each file to the console.
    */
   dumpFilenames(): this {
-    this.memFs.each((file) => {
+    this.memFs.each(file => {
       console.log(file.path);
     });
     return this;
@@ -180,7 +177,7 @@ export default class RunResult<GeneratorType extends Generator> {
    */
   cleanup(): this {
     process.chdir(this.oldCwd);
-    rmSync(this.cwd, {recursive: true});
+    rmSync(this.cwd, { recursive: true });
     return this;
   }
 
@@ -194,9 +191,7 @@ export default class RunResult<GeneratorType extends Generator> {
 
   _readFile(filename, json?: boolean) {
     filename = this._fileName(filename);
-    const file = this.fs
-      ? this.fs.read(filename)
-      : readFileSync(filename, 'utf8');
+    const file = this.fs ? this.fs.read(filename) : readFileSync(filename, 'utf8');
 
     return json ? JSON.parse(file) : file;
   }
@@ -279,8 +274,7 @@ export default class RunResult<GeneratorType extends Generator> {
       const body = this._readFile(file);
 
       let match = false;
-      match =
-        typeof regex === 'string' ? body.includes(regex) : regex.test(body);
+      match = typeof regex === 'string' ? body.includes(regex) : regex.test(body);
 
       assert(match, `${file} did not match '${regex}'. Contained:\n\n${body}`);
     }
@@ -361,7 +355,7 @@ export default class RunResult<GeneratorType extends Generator> {
    * result.assertTextEqual('I have a yellow cat', 'I have a yellow cat');
    */
   assertTextEqual(value: string, expected: string): void {
-    const eol = (string) => string.replace(/\r\n/g, '\n');
+    const eol = string => string.replace(/\r\n/g, '\n');
 
     assert.equal(eol(value), eol(expected));
   }
@@ -371,16 +365,10 @@ export default class RunResult<GeneratorType extends Generator> {
    * @param obj      Object that should match the given pattern
    * @param content  An object of key/values the object should contains
    */
-  assertObjectContent(
-    object: Record<string, unknown>,
-    content: Record<string, any>,
-  ): void {
+  assertObjectContent(object: Record<string, unknown>, content: Record<string, any>): void {
     for (const key of Object.keys(content)) {
       if (isObject(content[key])) {
-        this.assertObjectContent(
-          object[key] as Record<string, unknown>,
-          content[key],
-        );
+        this.assertObjectContent(object[key] as Record<string, unknown>, content[key]);
         continue;
       }
 
@@ -394,16 +382,10 @@ export default class RunResult<GeneratorType extends Generator> {
    * @param content An object of key/values the object should not contain
    */
 
-  assertNoObjectContent(
-    object: Record<string, unknown>,
-    content: Record<string, any>,
-  ): void {
+  assertNoObjectContent(object: Record<string, unknown>, content: Record<string, any>): void {
     for (const key of Object.keys(content)) {
       if (isObject(content[key])) {
-        this.assertNoObjectContent(
-          object[key] as Record<string, unknown>,
-          content[key],
-        );
+        this.assertNoObjectContent(object[key] as Record<string, unknown>, content[key]);
         continue;
       }
 
@@ -427,10 +409,7 @@ export default class RunResult<GeneratorType extends Generator> {
    * @param content An object of key/values the file should not contain
    */
 
-  assertNoJsonFileContent(
-    filename: string,
-    content: Record<string, any>,
-  ): void {
+  assertNoJsonFileContent(filename: string, content: Record<string, any>): void {
     this.assertNoObjectContent(this._readFile(filename, true), content);
   }
 }

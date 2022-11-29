@@ -2,10 +2,8 @@
   "space": true,
   "envs": ["es2020", "node", "mocha"],
   "prettier": true,
-  "ignores": [
- 		"test/fixtures"
- 	],
-   "printWidth": 120,
+  "ignores": ["test/fixtures"],
+  "printWidth": 120,
   "rules": {
     "unicorn/prefer-spread": "off",
     "unicorn/no-object-as-default-parameter": "off"
@@ -36,4 +34,3 @@
     }
   ]
 }
-

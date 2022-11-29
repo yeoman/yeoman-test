@@ -1,23 +1,19 @@
 import crypto from 'node:crypto';
-import {existsSync, rmSync} from 'node:fs';
-import path, {resolve, isAbsolute, join as pathJoin} from 'node:path';
+import { existsSync, rmSync } from 'node:fs';
+import path, { resolve, isAbsolute, join as pathJoin } from 'node:path';
 import assert from 'node:assert';
-import {EventEmitter} from 'node:events';
+import { EventEmitter } from 'node:events';
 import process from 'node:process';
 import _ from 'lodash';
 import tempDirectory from 'temp-dir';
 import type Generator from 'yeoman-generator';
 import type Environment from 'yeoman-environment';
-import {type LookupOptions, type Options} from 'yeoman-environment';
+import { type LookupOptions, type Options } from 'yeoman-environment';
 import MemFsEditor from 'mem-fs-editor';
 
-import RunResult, {type RunResultOptions} from './run-result.js';
-import defaultHelpers, {
-  type GeneratorConstructor,
-  type Dependency,
-  type YeomanTest,
-} from './helpers.js';
-import {type DummyPromptOptions} from './adapter.js';
+import RunResult, { type RunResultOptions } from './run-result.js';
+import defaultHelpers, { type GeneratorConstructor, type Dependency, type YeomanTest } from './helpers.js';
+import { type DummyPromptOptions } from './adapter.js';
 
 /**
  * Provides settings for creating a `RunContext`.
@@ -49,13 +45,9 @@ export type RunContextSettings = {
   namespace?: string;
 };
 
-type PromiseRunResult<GeneratorType extends Generator> = Promise<
-  RunResult<GeneratorType>
->;
+type PromiseRunResult<GeneratorType extends Generator> = Promise<RunResult<GeneratorType>>;
 
-export class RunContextBase<
-  GeneratorType extends Generator,
-> extends EventEmitter {
+export class RunContextBase<GeneratorType extends Generator> extends EventEmitter {
   readonly mockedGenerators: Record<string, Generator> = {};
   env!: Environment;
   generator!: GeneratorType;
@@ -71,25 +63,16 @@ export class RunContextBase<
   private options: any = {};
   private answers?: any;
 
-  private readonly onGeneratorCallbacks: Array<
-    (this: this, generator: GeneratorType) => any
-  > = [];
+  private readonly onGeneratorCallbacks: Array<(this: this, generator: GeneratorType) => any> = [];
 
-  private readonly onTargetDirectoryCallbacks: Array<
-    (this: this, targetDirectory: string) => any
-  > = [];
+  private readonly onTargetDirectoryCallbacks: Array<(this: this, targetDirectory: string) => any> = [];
 
-  private readonly onEnvironmentCallbacks: Array<
-    (this: this, env: Environment) => any
-  > = [];
+  private readonly onEnvironmentCallbacks: Array<(this: this, env: Environment) => any> = [];
 
   private readonly inDirCallbacks: any[] = [];
   private readonly Generator: string | GeneratorConstructor | typeof Generator;
   private readonly helpers: YeomanTest;
-  private readonly temporaryDir = path.join(
-    tempDirectory,
-    crypto.randomBytes(20).toString('hex'),
-  );
+  private readonly temporaryDir = path.join(tempDirectory, crypto.randomBytes(20).toString('hex'));
 
   private oldCwd?: string;
   private eventListenersSet = false;
@@ -123,7 +106,7 @@ export class RunContextBase<
     this.Generator = generatorType;
 
     if (typeof generatorType !== 'string') {
-      const {namespace, resolved} = this.settings;
+      const { namespace, resolved } = this.settings;
       this.withGenerators([[generatorType, namespace, resolved]] as any);
     }
 
@@ -183,9 +166,7 @@ export class RunContextBase<
    */
   inDir(dirPath: string, cb?: (folderPath: string) => void): this {
     this.setDir(dirPath, true);
-    this.helpers.testDirectory(dirPath, () =>
-      cb?.call(this, path.resolve(dirPath)),
-    );
+    this.helpers.testDirectory(dirPath, () => cb?.call(this, path.resolve(dirPath)));
     return this;
   }
 
@@ -263,7 +244,7 @@ export class RunContextBase<
   cleanupTemporaryDir() {
     this.restore();
     if (this.temporaryDir && existsSync(this.temporaryDir)) {
-      rmSync(this.temporaryDir, {recursive: true});
+      rmSync(this.temporaryDir, { recursive: true });
     }
   }
 
@@ -277,7 +258,7 @@ export class RunContextBase<
     }
 
     if (this.targetDirectory && existsSync(this.targetDirectory)) {
-      rmSync(this.targetDirectory, {recursive: true});
+      rmSync(this.targetDirectory, { recursive: true });
     }
   }
 
@@ -301,7 +282,7 @@ export class RunContextBase<
    * @param lookups - lookup to run.
    */
   withLookups(lookups: LookupOptions | LookupOptions[]): this {
-    return this.onEnvironment((env) => {
+    return this.onEnvironment(env => {
       lookups = Array.isArray(lookups) ? lookups : [lookups];
       for (const lookup of lookups) {
         env.lookup(lookup);
@@ -315,10 +296,7 @@ export class RunContextBase<
    */
   withArguments(args: string | string[]): this {
     const argsArray = typeof args === 'string' ? args.split(' ') : args;
-    assert(
-      Array.isArray(argsArray),
-      'args should be either a string separated by spaces or an array',
-    );
+    assert(Array.isArray(argsArray), 'args should be either a string separated by spaces or an array');
     this.args = this.args.concat(argsArray);
     return this;
   }
@@ -341,7 +319,7 @@ export class RunContextBase<
       options[_.kebabCase(key)] = options[key];
     }
 
-    this.options = {...this.options, ...options};
+    this.options = { ...this.options, ...options };
     return this;
   }
 
@@ -367,9 +345,9 @@ export class RunContextBase<
    */
   withAnswers(answers: Generator.Answers, options?: DummyPromptOptions) {
     const callbackSet = Boolean(this.answers);
-    this.answers = {...this.answers, ...answers};
+    this.answers = { ...this.answers, ...answers };
     if (callbackSet) return this;
-    return this.onEnvironment((env) => {
+    return this.onEnvironment(env => {
       this.helpers.mockPrompt(env, this.answers, options);
     });
   }
@@ -393,7 +371,7 @@ export class RunContextBase<
 
   withGenerators(dependencies: Dependency[]): this {
     assert(Array.isArray(dependencies), 'dependencies should be an array');
-    return this.onEnvironment((env) => {
+    return this.onEnvironment(env => {
       for (const dependency of dependencies) {
         if (Array.isArray(dependency)) {
           env.registerStub(...dependency);
@@ -423,14 +401,8 @@ export class RunContextBase<
 
   withMockedGenerators(namespaces: string[]): this {
     assert(Array.isArray(namespaces), 'namespaces should be an array');
-    const dependencies = namespaces.map((namespace) => [
-      this.helpers.createMockedGenerator(),
-      namespace,
-    ]);
-    const entries = dependencies.map(([generator, namespace]) => [
-      namespace,
-      generator,
-    ]);
+    const dependencies = namespaces.map(namespace => [this.helpers.createMockedGenerator(), namespace]);
+    const entries = dependencies.map(([generator, namespace]) => [namespace, generator]);
     Object.assign(this.mockedGenerators, Object.fromEntries(entries));
     return this.withGenerators(dependencies as Dependency[]);
   }
@@ -441,9 +413,7 @@ export class RunContextBase<
    */
   withLocalConfig(localConfig: Record<string, unknown>): this {
     assert(typeof localConfig === 'object', 'config should be an object');
-    return this.onGenerator((generator) =>
-      generator.config.defaults(localConfig),
-    );
+    return this.onGenerator(generator => generator.config.defaults(localConfig));
   }
 
   /**
@@ -452,28 +422,20 @@ export class RunContextBase<
    * @param files
    */
   withFiles(files: Record<string, string | Record<string, unknown>>): this;
-  withFiles(
-    relativePath: string,
-    files: Record<string, string | Record<string, unknown>>,
-  ): this;
+  withFiles(relativePath: string, files: Record<string, string | Record<string, unknown>>): this;
   withFiles(
     relativePath: string | Record<string, string | Record<string, unknown>>,
     files?: Record<string, string | Record<string, unknown>>,
   ): this {
     return this.onTargetDirectory(function () {
-      const targetDirectory =
-        typeof relativePath === 'string'
-          ? pathJoin(this.targetDirectory!, relativePath)
-          : this.targetDirectory!;
+      const targetDirectory = typeof relativePath === 'string' ? pathJoin(this.targetDirectory!, relativePath) : this.targetDirectory!;
 
       if (typeof relativePath !== 'string') {
         files = relativePath;
       }
 
       for (const [file, content] of Object.entries(files!)) {
-        const resolvedFile = isAbsolute(file)
-          ? file
-          : resolve(targetDirectory, file);
+        const resolvedFile = isAbsolute(file) ? file : resolve(targetDirectory, file);
         if (typeof content === 'string') {
           this.editor.write(resolvedFile, content);
         } else {
@@ -509,9 +471,7 @@ export class RunContextBase<
    * @param callback
    * @returns
    */
-  onTargetDirectory(
-    callback: (this: this, targetDirectory: string) => any,
-  ): this {
+  onTargetDirectory(callback: (this: this, targetDirectory: string) => any): this {
     this.assertNotBuild();
     this.onTargetDirectoryCallbacks.push(callback);
     return this;
@@ -591,7 +551,7 @@ export class RunContextBase<
       await onEnvironmentCallback.call(this, this.env);
     }
 
-    let {namespace} = this.settings;
+    let { namespace } = this.settings;
     if (typeof this.Generator === 'string') {
       namespace = this.env.namespace(this.Generator);
       if (namespace !== this.Generator) {
@@ -601,11 +561,7 @@ export class RunContextBase<
     }
 
     // eslint-disable-next-line @typescript-eslint/await-thenable
-    this.generator = (await this.env.create(
-      namespace!,
-      this.args,
-      this.options,
-    )) as any;
+    this.generator = (await this.env.create(namespace!, this.args, this.options)) as any;
 
     for (const onGeneratorCallback of this.onGeneratorCallbacks) {
       // eslint-disable-next-line no-await-in-loop
@@ -625,25 +581,20 @@ export class RunContextBase<
    * Keeps compatibility with events
    */
 
-  private setupEventListeners():
-    | Promise<void | RunResult<GeneratorType>>
-    | undefined {
+  private setupEventListeners(): Promise<void | RunResult<GeneratorType>> | undefined {
     if (this.eventListenersSet) {
       return undefined;
     }
 
     this.eventListenersSet = true;
 
-    this.onGenerator((generator) => this.emit('ready', generator));
-    this.onGenerator((generator) => this.emit('generator', generator));
+    this.onGenerator(generator => this.emit('ready', generator));
+    this.onGenerator(generator => this.emit('generator', generator));
 
     return this.build().then(async () =>
       this.run()
-        .catch((error) => {
-          if (
-            this.listenerCount('end') === 0 &&
-            this.listenerCount('error') === 0
-          ) {
+        .catch(error => {
+          if (this.listenerCount('end') === 0 && this.listenerCount('error') === 0) {
             // When there is no listeners throw a unhandled rejection.
             setImmediate(async function () {
               // eslint-disable-next-line @typescript-eslint/no-throw-literal
@@ -706,30 +657,19 @@ export default class RunContext<GeneratorType extends Generator>
 {
   // eslint-disable-next-line unicorn/no-thenable
   async then<TResult1 = RunResult<GeneratorType>, TResult2 = never>(
-    onfulfilled?:
-      | ((value: RunResult<GeneratorType>) => TResult1 | PromiseLike<TResult1>)
-      | undefined
-      | undefined,
-    onrejected?:
-      | ((reason: any) => TResult2 | PromiseLike<TResult2>)
-      | undefined
-      | undefined,
+    onfulfilled?: ((value: RunResult<GeneratorType>) => TResult1 | PromiseLike<TResult1>) | undefined | undefined,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | undefined,
   ): Promise<TResult1 | TResult2> {
     return this.toPromise().then(onfulfilled, onrejected);
   }
 
   async catch<TResult = never>(
-    onrejected?:
-      | ((reason: any) => TResult | PromiseLike<TResult>)
-      | undefined
-      | undefined,
+    onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | undefined,
   ): Promise<RunResult<GeneratorType> | TResult> {
     return this.toPromise().catch(onrejected);
   }
 
-  async finally(
-    onfinally?: (() => void) | undefined | undefined,
-  ): Promise<RunResult<GeneratorType>> {
+  async finally(onfinally?: (() => void) | undefined | undefined): Promise<RunResult<GeneratorType>> {
     return this.toPromise().finally(onfinally);
   }
 
