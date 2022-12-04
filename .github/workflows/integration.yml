@@ -15,28 +15,28 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node-version: [14.x]
+        node-version: [18.x]
 
     steps:
       - name: Checkout yeoman-test
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: yeoman-test
       - name: Checkout yeoman-generator
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: yeoman/generator
           path: yeoman-generator
       - name: Checkout yeoman-environment
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: yeoman/environment
           path: yeoman-environment
-      - uses: actions/setup-node@v2.1.4
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
-      - run: npm install -g npm@7.11.2
       - name: Run yeoman-test test
         run: |
           cd $GITHUB_WORKSPACE/yeoman-test
