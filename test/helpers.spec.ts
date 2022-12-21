@@ -22,7 +22,7 @@ const env = yeoman.createEnv(undefined, undefined, new TestAdapter() as any);
 
 describe('yeoman-test', function () {
   beforeEach(function () {
-    process.chdir(path.join(__dirname, './fixtures'));
+    process.chdir(join(__dirname, './fixtures'));
 
     this.StubGenerator = class extends Generator {};
   });
@@ -40,20 +40,20 @@ describe('yeoman-test', function () {
   });
 
   describe('.createGenerator()', function () {
-    it('create a new generator', function () {
-      const generator = helpers.createGenerator('unicorn:app', [[this.StubGenerator, 'unicorn:app']]);
+    it('create a new generator', async function () {
+      const generator = await helpers.createGenerator('unicorn:app', [[this.StubGenerator, 'unicorn:app']]);
 
       assert.ok(generator instanceof this.StubGenerator);
     });
 
-    it('pass args params to the generator', function () {
-      const generator = helpers.createGenerator('unicorn:app', [[this.StubGenerator, 'unicorn:app']], ['temp']);
+    it('pass args params to the generator', async function () {
+      const generator = await helpers.createGenerator('unicorn:app', [[this.StubGenerator, 'unicorn:app']], ['temp']);
 
       assert.deepEqual(generator.args, ['temp']);
     });
 
-    it('pass options param to the generator', function () {
-      const generator = helpers.createGenerator('unicorn:app', [[this.StubGenerator, 'unicorn:app']], ['temp'], { ui: 'tdd' });
+    it('pass options param to the generator', async function () {
+      const generator = await helpers.createGenerator('unicorn:app', [[this.StubGenerator, 'unicorn:app']], ['temp'], { ui: 'tdd' });
 
       assert.equal(generator.options.ui, 'tdd');
     });
@@ -372,21 +372,21 @@ describe('yeoman-test', function () {
     let mockedCreateEnv;
     const createEnvReturn = {};
     beforeEach(() => {
-      mockedCreateEnv = sinonStub(helpers, 'createEnv').returns(createEnvReturn as Environment);
+      mockedCreateEnv = sinonStub(helpers, 'createEnv').returns(Promise.resolve(createEnvReturn) as Promise<Environment>);
     });
     afterEach(() => {
       mockedCreateEnv.restore();
     });
-    it('calls mocked createEnv', () => {
-      assert.equal(helpers.createTestEnv(), createEnvReturn);
+    it('calls mocked createEnv', async () => {
+      assert.equal(await helpers.createTestEnv(), createEnvReturn);
       assert.ok(mockedCreateEnv.calledOnce);
     });
-    it('calls mocked createEnv with newErrorHandler option', () => {
-      assert.equal(helpers.createTestEnv(), createEnvReturn);
+    it('calls mocked createEnv with newErrorHandler option', async () => {
+      assert.equal(await helpers.createTestEnv(), createEnvReturn);
       assert.equal(mockedCreateEnv.getCall(0).args[1].newErrorHandler, true);
     });
-    it('calls mocked createEnv with sharedOptions.localConfigOnly option', () => {
-      assert.equal(helpers.createTestEnv(), createEnvReturn);
+    it('calls mocked createEnv with sharedOptions.localConfigOnly option', async () => {
+      assert.equal(await helpers.createTestEnv(), createEnvReturn);
       assert.equal(mockedCreateEnv.getCall(0).args[1].sharedOptions.localConfigOnly, true);
     });
   });

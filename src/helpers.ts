@@ -198,11 +198,19 @@ export class YeomanTest {
     args?: string[],
     options?: YeomanGenerator.GeneratorOptions,
     localConfigOnly = true,
-  ): GeneratorType {
-    const env = this.createEnv([], { sharedOptions: { localConfigOnly } });
-    this.registerDependencies(env, dependencies);
+  ): GeneratorType | Promise<GeneratorType> {
+    const maybeEnv = this.createEnv([], { sharedOptions: { localConfigOnly } });
+    // TODO convert method to async.
+    if ('then' in maybeEnv) {
+      return maybeEnv.then(env => {
+        this.registerDependencies(env, dependencies);
+        return env.create<YeomanGenerator['options']>(name, args as any, options as any) as unknown as GeneratorType;
+      });
+    }
 
-    return env.create<YeomanGenerator['options']>(name, args as any, options as any) as unknown as GeneratorType;
+    this.registerDependencies(maybeEnv, dependencies);
+
+    return maybeEnv.create<YeomanGenerator['options']>(name, args as any, options as any) as unknown as GeneratorType;
   }
 
   /**
@@ -239,7 +247,7 @@ export class YeomanTest {
    * });
    */
 
-  createEnv(...args: Parameters<typeof createEnv>): ReturnType<typeof createEnv> {
+  createEnv(...args: Parameters<typeof createEnv>): ReturnType<typeof createEnv> | Promise<ReturnType<typeof createEnv>> {
     return Environment.createEnv(...args);
   }
 
@@ -248,7 +256,6 @@ export class YeomanTest {
    *
    * @param {Function} envContructor - environment constructor method.
    * @param {Object} [options] - Options to be passed to the environment
-   * @returns {Object} environment instance
    * const env = createTestEnv(require('yeoman-environment').createEnv);
    */
 

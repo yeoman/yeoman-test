@@ -532,7 +532,7 @@ export class RunContextBase<GeneratorType extends Generator> extends EventEmitte
       throw new Error('targetDirectory is required');
     }
 
-    const testEnv = this.helpers.createTestEnv(this.envOptions.createEnv, {
+    const testEnv = await this.helpers.createTestEnv(this.envOptions.createEnv, {
       cwd: this.settings.forwardCwd ? this.targetDirectory : undefined,
       ...this.options,
       ...this.envOptions,
