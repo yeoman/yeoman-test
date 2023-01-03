@@ -41,7 +41,7 @@ describe('generator test', () => {
         [.withLookups({})]          // runs Environment lookups
         [.withOptions({})]          // passes options to the generator
         [.withLocalConfig({})]      // sets the generator config as soon as it is instantiated
-        [.withPrompts()]            // simulates the prompt answers
+        [.withAnswers()]            // simulates the prompt answers
         [.build(runContext => {     // instantiates Environment/Generator
           [runContext.env...]       // does something with the environment
           [runContext.generator...] // does something with the generator
