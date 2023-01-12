@@ -47,7 +47,7 @@ export type RunContextSettings = {
 
 type PromiseRunResult<GeneratorType extends Generator> = Promise<RunResult<GeneratorType>>;
 
-export class RunContextBase<GeneratorType extends Generator> extends EventEmitter {
+export class RunContextBase<GeneratorType extends Generator = Generator> extends EventEmitter {
   readonly mockedGenerators: Record<string, Generator> = {};
   env!: Environment;
   generator!: GeneratorType;
