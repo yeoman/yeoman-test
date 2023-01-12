@@ -78,6 +78,7 @@ export class RunContextBase<GeneratorType extends Generator> extends EventEmitte
   private eventListenersSet = false;
   private envCB: any;
 
+  private built = false;
   private ran = false;
   private errored = false;
 
@@ -100,15 +101,9 @@ export class RunContextBase<GeneratorType extends Generator> extends EventEmitte
   ) {
     super();
     this.settings = {
-      namespace: 'gen:test',
       ...settings,
     };
     this.Generator = generatorType;
-
-    if (typeof generatorType !== 'string') {
-      const { namespace, resolved } = this.settings;
-      this.withGenerators([[generatorType, namespace, resolved]] as any);
-    }
 
     this.envOptions = envOptions;
 
@@ -130,7 +125,9 @@ export class RunContextBase<GeneratorType extends Generator> extends EventEmitte
    * @return {PromiseRunResult} Promise a RunResult instance.
    */
   async run(): PromiseRunResult<GeneratorType> {
-    if (!this.ran) {
+    this.ran = true;
+
+    if (!this.built) {
       await this.build();
     }
 
@@ -371,12 +368,18 @@ export class RunContextBase<GeneratorType extends Generator> extends EventEmitte
 
   withGenerators(dependencies: Dependency[]): this {
     assert(Array.isArray(dependencies), 'dependencies should be an array');
-    return this.onEnvironment(env => {
+    return this.onEnvironment(async env => {
       for (const dependency of dependencies) {
         if (Array.isArray(dependency)) {
-          env.registerStub(...dependency);
+          if (typeof dependency[0] === 'string') {
+            // eslint-disable-next-line no-await-in-loop, @typescript-eslint/await-thenable
+            await env.register(...(dependency as Parameters<Environment['register']>));
+          } else {
+            env.registerStub(...(dependency as Parameters<Environment['registerStub']>));
+          }
         } else {
-          env.register(dependency);
+          // eslint-disable-next-line no-await-in-loop, @typescript-eslint/await-thenable
+          await env.register(dependency);
         }
       }
     });
@@ -500,7 +503,7 @@ export class RunContextBase<GeneratorType extends Generator> extends EventEmitte
   }
 
   protected assertNotBuild() {
-    if (this.ran || this.completed) {
+    if (this.built || this.completed) {
       throw new Error('The context is already built');
     }
   }
@@ -512,7 +515,7 @@ export class RunContextBase<GeneratorType extends Generator> extends EventEmitte
   protected async build(): Promise<void> {
     this.assertNotBuild();
 
-    this.ran = true;
+    this.built = true;
 
     if (!this.targetDirectory && this.settings.tmpdir !== false) {
       this.inTmpDir();
@@ -551,17 +554,17 @@ export class RunContextBase<GeneratorType extends Generator> extends EventEmitte
       await onEnvironmentCallback.call(this, this.env);
     }
 
-    let { namespace } = this.settings;
-    if (typeof this.Generator === 'string') {
-      namespace = this.env.namespace(this.Generator);
-      if (namespace !== this.Generator) {
-        // Generator is a file path, it should be registered.
-        this.env.register(this.Generator);
-      }
+    const { namespace = typeof this.Generator === 'string' ? this.env.namespace(this.Generator) : 'gen:test' } = this.settings;
+    if (typeof this.Generator === 'string' && namespace !== this.Generator) {
+      // Generator is a file path, it should be registered.
+      this.env.register(this.Generator, namespace);
+    } else if (typeof this.Generator !== 'string') {
+      const { resolved } = this.settings;
+      this.env.registerStub(this.Generator as unknown as any, namespace, resolved);
     }
 
     // eslint-disable-next-line @typescript-eslint/await-thenable
-    this.generator = (await this.env.create(namespace!, this.args, this.options)) as any;
+    this.generator = (await this.env.create(namespace, this.args, this.options)) as any;
 
     for (const onGeneratorCallback of this.onGeneratorCallbacks) {
       // eslint-disable-next-line no-await-in-loop

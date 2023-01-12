@@ -43,12 +43,14 @@ describe('RunContext', function () {
       this.ctx.cleanTestDirectory();
     }
 
-    if (this.ctx.completed || this.ctx.errored) {
+    if (this.ctx.completed || this.ctx.errored || !this.ctx.ran) {
       done();
       return;
     }
 
-    this.ctx.on('end', done);
+    try {
+      this.ctx.on('end', done);
+    } catch {}
   });
 
   describe('constructor', function () {
@@ -666,6 +668,11 @@ describe('RunContext', function () {
           done();
         }.bind(this),
       );
+    });
+
+    it('register paths with namespaces', async function () {
+      await this.ctx.withGenerators([[require.resolve('./fixtures/generator-simple/app'), 'foo:bar']]).build();
+      assert(this.ctx.env.get('foo:bar'));
     });
 
     it('register mocked generator', function (done) {
