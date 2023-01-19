@@ -22,10 +22,10 @@ export type Dependency = string | Parameters<Environment['registerStub']> | Para
 
 type GeneratorNew<GenParameter extends YeomanGenerator = YeomanGenerator> = new (
   ...args: ConstructorParameters<typeof YeomanGenerator<GenParameter['options']>>
-) => YeomanGenerator<GenParameter['options']>;
+) => GenParameter;
 type GeneratorBuilder<GenParameter extends YeomanGenerator = YeomanGenerator> = (
   ...args: ConstructorParameters<typeof YeomanGenerator<GenParameter['options']>>
-) => YeomanGenerator<GenParameter['options']>;
+) => GenParameter;
 
 export type GeneratorConstructor<GenParameter extends YeomanGenerator = YeomanGenerator> =
   | GeneratorNew<GenParameter>
@@ -305,7 +305,7 @@ export class YeomanTest {
    */
 
   run<GeneratorType extends YeomanGenerator = YeomanGenerator>(
-    GeneratorOrNamespace: string | GeneratorConstructor,
+    GeneratorOrNamespace: string | GeneratorConstructor<GeneratorType>,
     settings?: RunContextSettings,
     envOptions?: Options,
   ): RunContext<GeneratorType> {
@@ -332,7 +332,7 @@ export class YeomanTest {
    */
 
   create<GeneratorType extends YeomanGenerator = YeomanGenerator>(
-    GeneratorOrNamespace: string | GeneratorConstructor,
+    GeneratorOrNamespace: string | GeneratorConstructor<GeneratorType>,
     settings?: RunContextSettings,
     envOptions?: Options,
   ) {

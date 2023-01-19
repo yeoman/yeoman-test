@@ -70,7 +70,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
   private readonly onEnvironmentCallbacks: Array<(this: this, env: Environment) => any> = [];
 
   private readonly inDirCallbacks: any[] = [];
-  private readonly Generator: string | GeneratorConstructor | typeof Generator;
+  private readonly Generator: string | GeneratorConstructor<GeneratorType> | typeof Generator;
   private readonly helpers: YeomanTest;
   private readonly temporaryDir = path.join(tempDirectory, crypto.randomBytes(20).toString('hex'));
 
@@ -94,7 +94,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
    */
 
   constructor(
-    generatorType: string | GeneratorConstructor | typeof Generator,
+    generatorType: string | GeneratorConstructor<GeneratorType> | typeof Generator,
     settings?: RunContextSettings,
     envOptions: Options = {},
     helpers = defaultHelpers,
