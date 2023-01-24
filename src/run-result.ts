@@ -66,7 +66,7 @@ export type RunResultOptions<GeneratorType extends Generator> = {
  * This class provides utilities for testing generated content.
  */
 
-export default class RunResult<GeneratorType extends Generator> {
+export default class RunResult<GeneratorType extends Generator = Generator> {
   env: any;
   generator: GeneratorType;
   cwd: string;
