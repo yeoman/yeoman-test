@@ -15,6 +15,8 @@ import RunResult, { type RunResultOptions } from './run-result.js';
 import defaultHelpers, { type GeneratorConstructor, type Dependency, type YeomanTest } from './helpers.js';
 import { type DummyPromptOptions } from './adapter.js';
 
+const { camelCase, kebabCase, merge: lodashMerge, set: lodashSet } = _;
+
 /**
  * Provides settings for creating a `RunContext`.
  */
@@ -312,8 +314,8 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
     // Add options as both kebab and camel case. This is to stay backward compatibles with
     // the switch we made to meow for options parsing.
     for (const key of Object.keys(options)) {
-      options[_.camelCase(key)] = options[key];
-      options[_.kebabCase(key)] = options[key];
+      options[camelCase(key)] = options[key];
+      options[kebabCase(key)] = options[key];
     }
 
     this.options = { ...this.options, ...options };
@@ -422,7 +424,9 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
   /**
    * Add files to mem-fs.
    * Files will be resolved relative to targetDir.
-   * @param files
+   *
+   * Files with Object content will be merged to existing content.
+   * To avoid merging, `JSON.stringify` the content.
    */
   withFiles(files: Record<string, string | Record<string, unknown>>): this;
   withFiles(relativePath: string, files: Record<string, string | Record<string, unknown>>): this;
@@ -442,7 +446,8 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
         if (typeof content === 'string') {
           this.editor.write(resolvedFile, content);
         } else {
-          this.editor.writeJSON(resolvedFile, content);
+          const fileContent = this.editor.readJSON(resolvedFile, {});
+          this.editor.writeJSON(resolvedFile, lodashMerge(fileContent, content));
         }
       }
     });
@@ -458,6 +463,14 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
     return this.withFiles({
       '.yo-rc.json': content,
     });
+  }
+
+  /**
+   * Add a generator config to .yo-rc.json
+   */
+  withYoRcConfig(key: string, content: Record<string, unknown>): this {
+    const yoRcContent = lodashSet({}, key, content);
+    return this.withYoRc(yoRcContent);
   }
 
   /**
@@ -654,7 +667,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
   }
 }
 
-export default class RunContext<GeneratorType extends Generator>
+export default class RunContext<GeneratorType extends Generator = Generator>
   extends RunContextBase<GeneratorType>
   implements Promise<RunResult<GeneratorType>>
 {

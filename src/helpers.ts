@@ -15,6 +15,8 @@ import RunContext from './run-context.js';
 import testContext from './test-context.js';
 import type { RunContextSettings } from './run-context.js';
 
+const { cloneDeep } = _;
+
 /**
  * Dependencies can be path (autodiscovery) or an array [<generator>, <name>]
  */
@@ -264,7 +266,7 @@ export class YeomanTest {
    */
 
   createTestEnv(envContructor = this.createEnv, options: Environment.Options = { localConfigOnly: true }) {
-    const envOptions = _.cloneDeep(this.environmentOptions ?? {});
+    const envOptions = cloneDeep(this.environmentOptions ?? {});
     if (typeof options === 'boolean') {
       options = {
         newErrorHandler: true,
@@ -309,8 +311,8 @@ export class YeomanTest {
     settings?: RunContextSettings,
     envOptions?: Options,
   ): RunContext<GeneratorType> {
-    const contextSettings = _.cloneDeep(this.settings ?? {});
-    const generatorOptions = _.cloneDeep(this.generatorOptions ?? {});
+    const contextSettings = cloneDeep(this.settings ?? {});
+    const generatorOptions = cloneDeep(this.generatorOptions ?? {});
     const RunContext = this.getRunContextType();
     const runContext = new RunContext<GeneratorType>(
       GeneratorOrNamespace,

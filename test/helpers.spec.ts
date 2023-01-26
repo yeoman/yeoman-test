@@ -309,6 +309,45 @@ describe('yeoman-test', function () {
         `);
       });
 
+      it('merges object .yo-rc.json to mem-fs', async function () {
+        const runResult = await helpers.run(helpers.createDummyGenerator()).withYoRc({ foo: 'bar' }).withYoRc({ bar: 'foo' });
+        expect(runResult.getSnapshot()).toMatchInlineSnapshot(`
+          {
+            ".yo-rc.json": {
+              "contents": "{
+            "foo": "bar",
+            "bar": "foo"
+          }
+          ",
+              "stateCleared": "modified",
+            },
+          }
+        `);
+      });
+
+      it('writes object GeneratorConfig to mem-fs', async function () {
+        const runResult = await helpers
+          .run(helpers.createDummyGenerator())
+          .withYoRcConfig('ns', { foo: 'bar' })
+          .withYoRcConfig('ns.child', { bar: 'foo' });
+        expect(runResult.getSnapshot()).toMatchInlineSnapshot(`
+          {
+            ".yo-rc.json": {
+              "contents": "{
+            "ns": {
+              "foo": "bar",
+              "child": {
+                "bar": "foo"
+              }
+            }
+          }
+          ",
+              "stateCleared": "modified",
+            },
+          }
+        `);
+      });
+
       it('write files to mem-fs', async function () {
         const runResult = await helpers
           .run(helpers.createDummyGenerator())
