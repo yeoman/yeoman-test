@@ -68,6 +68,12 @@ describe('RunContext running environment', function () {
       });
     });
 
+    it('forwards the mem-fs to the environment', () => {
+      return ctx.run().then(() => {
+        assert.equal(ctx.memFs, ctx.env.sharedFs);
+      });
+    });
+
     it('passes newErrorHandler to the environment', () => {
       return ctx.run().then(() => {
         assert(ctx.env.options.newErrorHandler);
