@@ -102,10 +102,11 @@ export default class RunResult<GeneratorType extends Generator = Generator> {
         ...this.options.settings,
         cwd: this.cwd,
         oldCwd: this.oldCwd,
+        memFs: this.memFs,
         ...settings,
         autoCleanup: false,
       },
-      { ...this.options.envOptions, memFs: this.memFs, ...envOptions },
+      { ...this.options.envOptions, ...envOptions },
     );
   }
 

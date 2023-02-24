@@ -234,8 +234,8 @@ describe('run-result', () => {
     it('forwards oldCwd from the original RunResult', () => {
       assert.equal(runContext.oldCwd, oldCwd);
     });
-    it('forwards memFs from the original RunResult to new envOptions', () => {
-      assert.equal(runContext.envOptions.memFs, memFs);
+    it('forwards memFs from the original RunResult to new RunContext', () => {
+      assert.equal(runContext.memFs, memFs);
     });
     it('prefers settings passed to the method', () => {
       assert.equal(runContext.settings.overrided, 'newOverrided');

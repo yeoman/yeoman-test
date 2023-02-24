@@ -10,6 +10,8 @@ import type Generator from 'yeoman-generator';
 import type Environment from 'yeoman-environment';
 import { type LookupOptions, type Options } from 'yeoman-environment';
 import MemFsEditor from 'mem-fs-editor';
+import MemFsEditorState from 'mem-fs-editor/lib/state.js';
+import MemFs from 'mem-fs';
 
 import RunResult, { type RunResultOptions } from './run-result.js';
 import defaultHelpers, { type GeneratorConstructor, type Dependency, type YeomanTest } from './helpers.js';
@@ -35,6 +37,8 @@ export type RunContextSettings = {
 
   autoCleanup?: boolean;
 
+  memFs?: MemFs.Store;
+
   /**
    * File path to the generator (only used if Generator is a constructor)
    */
@@ -58,12 +62,14 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
   completed = false;
   targetDirectory?: string;
   editor!: MemFsEditor.Editor;
+  memFs: MemFs.Store;
 
   protected environmentPromise?: PromiseRunResult<GeneratorType>;
 
   private args: string[] = [];
   private options: any = {};
   private answers?: any;
+  private keepFsState?: boolean;
 
   private readonly onGeneratorCallbacks: Array<(this: this, generator: GeneratorType) => any> = [];
 
@@ -120,6 +126,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
     }
 
     this.helpers = helpers;
+    this.memFs = settings?.memFs ?? MemFs.create();
   }
 
   /**
@@ -422,6 +429,14 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
   }
 
   /**
+   * Don't reset mem-fs state cleared to aggregate snapshots from multiple runs.
+   */
+  withKeepFsState(): this {
+    this.keepFsState = true;
+    return this;
+  }
+
+  /**
    * Add files to mem-fs.
    * Files will be resolved relative to targetDir.
    *
@@ -548,19 +563,27 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
       throw new Error('targetDirectory is required');
     }
 
-    const testEnv = await this.helpers.createTestEnv(this.envOptions.createEnv, {
-      cwd: this.settings.forwardCwd ? this.targetDirectory : undefined,
-      ...this.options,
-      ...this.envOptions,
-    });
-    this.env = this.envCB ? (await this.envCB(testEnv)) ?? testEnv : testEnv;
+    if (!this.keepFsState) {
+      this.memFs.each(file => {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+        delete file[MemFsEditorState.STATE_CLEARED];
+      });
+    }
 
-    this.editor = MemFsEditor.create(this.env.sharedFs);
+    this.editor = MemFsEditor.create(this.memFs);
 
     for (const onTargetDirectory of this.onTargetDirectoryCallbacks) {
       // eslint-disable-next-line no-await-in-loop
       await onTargetDirectory.call(this, this.targetDirectory);
     }
+
+    const testEnv = await this.helpers.createTestEnv(this.envOptions.createEnv, {
+      cwd: this.settings.forwardCwd ? this.targetDirectory : undefined,
+      sharedFs: this.memFs,
+      ...this.options,
+      ...this.envOptions,
+    });
+    this.env = this.envCB ? (await this.envCB(testEnv)) ?? testEnv : testEnv;
 
     for (const onEnvironmentCallback of this.onEnvironmentCallbacks) {
       // eslint-disable-next-line no-await-in-loop
