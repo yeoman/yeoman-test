@@ -429,4 +429,14 @@ describe('yeoman-test', function () {
       assert.equal(mockedCreateEnv.getCall(0).args[1].sharedOptions.localConfigOnly, true);
     });
   });
+  describe('.prepareTemporaryFolder', () => {
+    it('should create a temporaryFolder', async () => {
+      const oldCwd = process.cwd();
+      const context = await helpers.prepareTemporaryDir();
+      assert.notEqual(process.cwd(), oldCwd);
+      assert.equal(context.oldCwd, oldCwd);
+      context.cleanup();
+      assert.equal(process.cwd(), oldCwd);
+    });
+  });
 });

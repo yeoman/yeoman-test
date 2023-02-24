@@ -78,7 +78,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
   private readonly onEnvironmentCallbacks: Array<(this: this, env: Environment) => any> = [];
 
   private readonly inDirCallbacks: any[] = [];
-  private readonly Generator: string | GeneratorConstructor<GeneratorType> | typeof Generator;
+  private readonly Generator?: string | GeneratorConstructor<GeneratorType> | typeof Generator;
   private readonly helpers: YeomanTest;
   private readonly temporaryDir = path.join(tempDirectory, crypto.randomBytes(20).toString('hex'));
 
@@ -102,7 +102,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
    */
 
   constructor(
-    generatorType: string | GeneratorConstructor<GeneratorType> | typeof Generator,
+    generatorType?: string | GeneratorConstructor<GeneratorType> | typeof Generator,
     settings?: RunContextSettings,
     envOptions: Options = {},
     helpers = defaultHelpers,
@@ -530,17 +530,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
     return this;
   }
 
-  protected assertNotBuild() {
-    if (this.built || this.completed) {
-      throw new Error('The context is already built');
-    }
-  }
-
-  /**
-   * Build the generator and the environment.
-   * @return {RunContext|false} this
-   */
-  protected async build(): Promise<void> {
+  async prepare() {
     this.assertNotBuild();
 
     this.built = true;
@@ -576,6 +566,20 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
       // eslint-disable-next-line no-await-in-loop
       await onTargetDirectory.call(this, this.targetDirectory);
     }
+  }
+
+  protected assertNotBuild() {
+    if (this.built || this.completed) {
+      throw new Error('The context is already built');
+    }
+  }
+
+  /**
+   * Build the generator and the environment.
+   * @return {RunContext|false} this
+   */
+  protected async build(): Promise<void> {
+    await this.prepare();
 
     const testEnv = await this.helpers.createTestEnv(this.envOptions.createEnv, {
       cwd: this.settings.forwardCwd ? this.targetDirectory : undefined,
@@ -614,6 +618,22 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
    */
   protected async toPromise(): PromiseRunResult<GeneratorType> {
     return this.environmentPromise ?? this.run();
+  }
+
+  protected _createRunResultOptions(): RunResultOptions<GeneratorType> {
+    return {
+      env: this.env,
+      generator: this.generator,
+      memFs: this.env?.sharedFs ?? this.memFs,
+      settings: {
+        ...this.settings,
+      },
+      oldCwd: this.oldCwd!,
+      cwd: this.targetDirectory!,
+      envOptions: this.envOptions,
+      mockedGenerators: this.mockedGenerators,
+      helpers: this.helpers,
+    };
   }
 
   /**
@@ -672,22 +692,6 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
     this.targetDirectory = dirPath;
     return this;
   }
-
-  private _createRunResultOptions(): RunResultOptions<GeneratorType> {
-    return {
-      env: this.env,
-      generator: this.generator,
-      memFs: this.env.sharedFs,
-      settings: {
-        ...this.settings,
-      },
-      oldCwd: this.oldCwd!,
-      cwd: this.targetDirectory!,
-      envOptions: this.envOptions,
-      mockedGenerators: this.mockedGenerators,
-      helpers: this.helpers,
-    };
-  }
 }
 
 export default class RunContext<GeneratorType extends Generator = Generator>
@@ -714,5 +718,12 @@ export default class RunContext<GeneratorType extends Generator = Generator>
 
   get [Symbol.toStringTag](): string {
     return `RunContext`;
+  }
+}
+
+export class BasicRunContext extends RunContext {
+  async run(): PromiseRunResult<any> {
+    await this.prepare();
+    return new RunResult(this._createRunResultOptions());
   }
 }
