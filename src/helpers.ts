@@ -11,9 +11,8 @@ import type { Options, createEnv } from 'yeoman-environment';
 import type { SinonSpiedInstance } from 'sinon';
 
 import { DummyPrompt, type DummyPromptOptions, TestAdapter } from './adapter.js';
-import RunContext from './run-context.js';
+import RunContext, { BasicRunContext, type RunContextSettings } from './run-context.js';
 import testContext from './test-context.js';
-import type { RunContextSettings } from './run-context.js';
 
 const { cloneDeep } = _;
 
@@ -339,6 +338,19 @@ export class YeomanTest {
     envOptions?: Options,
   ) {
     return this.run<GeneratorType>(GeneratorOrNamespace, settings, envOptions);
+  }
+
+  /**
+   * Prepare temporary dir without generator support.
+   * Generator and environment will be undefined.
+   */
+  prepareTemporaryDir(settings?: RunContextSettings) {
+    const context = new BasicRunContext(undefined, settings);
+    if (settings?.autoCleanup !== false) {
+      testContext.startNewContext(context);
+    }
+
+    return context;
   }
 }
 
