@@ -94,6 +94,33 @@ describe('generator test', () => {
 });
 ```
 
+Generator compose:
+
+```js
+import assert from 'assert';
+import helpers, { result } from 'yeoman-test';
+
+describe('my-gen', () => {
+  before(() => helpers.run('my-gen').withMockedGenerator(['composed-gen']));
+  it('should compose with composed-gen', () => {
+    assert(result.mockedGenerators['composed-gen'].calledOnce);
+  });
+});
+```
+
+Generic test folder:
+
+```js
+import helpers, { result } from 'yeoman-test';
+
+describe('generic test', () => {
+  before(() => helpers.prepareTemporaryDir());
+  it('test', () => {
+    result.assert...;
+  });
+});
+```
+
 [See our api documentation](https://yeoman.github.io/yeoman-test) for latest yeoman-test release.
 
 [See our api documentation](https://yeoman.github.io/yeoman-test/5.0.1) for yeoman-test 5.0.1. Use 5.x for yeoman-environment 2.x support.
