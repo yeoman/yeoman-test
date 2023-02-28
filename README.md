@@ -25,6 +25,8 @@ $ npm install --save-dev yeoman-generator@xxx yeoman-environment@xxx
 Usage:
 
 ```js
+import helpers from 'yeoman-test';
+
 describe('generator test', () => {
   describe('test', () => {
     let runResult;
@@ -36,12 +38,22 @@ describe('generator test', () => {
           {}                       // environment options
         )
         [.cd(dir)]                  // runs the test inside a non temporary dir
-        [.doInDir(dir => {})        // prepares the test dir
+        [.onTargetDirectory(dir => {})        // prepares the test dir
         [.withGenerators([])]       // registers additional generators
         [.withLookups({})]          // runs Environment lookups
         [.withOptions({})]          // passes options to the generator
         [.withLocalConfig({})]      // sets the generator config as soon as it is instantiated
         [.withAnswers()]            // simulates the prompt answers
+        [.withMockedGenerators(['namespace', ...])]      // adds a mocked generator to the namespaces
+        [.withFiles({
+          'foo.txt': 'bar',
+          'test.json', { content: true },
+        })]                         // add files to mem-fs
+        [.withYoRc({ 'generator-foo': { bar: {} } })]    // add config to .yo-rc.json
+        [.withYoRcConfig('generator-foo.bar', { : {} })] // same as above
+        [.commitFiles()]            // commit mem-fs files to disk
+        [.onGenerator(gen => {})]   // do something with the generator
+        [.onEnvironment(env => {})] // do something with the environment
         [.build(runContext => {     // instantiates Environment/Generator
           [runContext.env...]       // does something with the environment
           [runContext.generator...] // does something with the generator
@@ -51,6 +63,7 @@ describe('generator test', () => {
     );
     afterEach(() => {
       if (runResult) {
+        // Optional if context is executed at a temporary folder
         runResult.restore();
       }
     });
@@ -64,6 +77,19 @@ describe('generator test', () => {
       [runResult.assertJsonFileContent('file.txt', {});]
       [runResult.assertNoJsonFileContent('file.txt', {});]
     });
+  });
+});
+```
+
+Convenience last RunResult instance:
+
+```js
+import helpers, { result } from 'yeoman-test';
+
+describe('generator test', () => {
+  before(() => helpers.run('namespace'));
+  it('test', () => {
+    result.assert...;
   });
 });
 ```
