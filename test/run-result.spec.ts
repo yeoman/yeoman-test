@@ -10,6 +10,7 @@ import { stub } from 'sinon';
 import RunContext from '../src/run-context.js';
 import RunResult from '../src/run-result.js';
 import helpers from '../src/helpers.js';
+import testContext, { result } from '../src/test-context.js';
 
 describe('run-result', () => {
   describe('constructor', () => {
@@ -242,6 +243,29 @@ describe('run-result', () => {
     });
     it('prefers envOptions passed to the method', () => {
       assert.equal(runContext.envOptions.overridedEnv, 'newOverridedEnv');
+    });
+  });
+  describe('current runResult value', () => {
+    describe('should proxy methods', () => {
+      let runResult: RunResult;
+      beforeEach(() => {
+        const memFs = MemFs.create();
+        const memFsEditor = MemFsEditor.create(memFs);
+        runResult = new RunResult({
+          memFs,
+          fs: memFsEditor,
+          cwd: process.cwd(),
+        } as any);
+        runResult.fs.write(path.resolve('test.txt'), 'test content');
+        runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
+        testContext.runResult = runResult;
+      });
+      for (const method of Object.getOwnPropertyNames(RunResult.prototype)) {
+        // eslint-disable-next-line @typescript-eslint/no-loop-func
+        it(`.${method}`, () => {
+          assert.equal(result.assertFile, runResult.assertFile);
+        });
+      }
     });
   });
 });

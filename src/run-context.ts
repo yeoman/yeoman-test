@@ -16,6 +16,7 @@ import MemFs from 'mem-fs';
 import RunResult, { type RunResultOptions } from './run-result.js';
 import defaultHelpers, { type GeneratorConstructor, type Dependency, type YeomanTest } from './helpers.js';
 import { type DummyPromptOptions } from './adapter.js';
+import testContext from './test-context.js';
 
 const { camelCase, kebabCase, merge: lodashMerge, set: lodashSet } = _;
 
@@ -150,7 +151,9 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
       this.completed = true;
     }
 
-    return new RunResult(this._createRunResultOptions());
+    const runResult = new RunResult(this._createRunResultOptions());
+    testContext.runResult = runResult;
+    return runResult;
   }
 
   // If any event listeners is added, setup event listeners emitters
@@ -732,6 +735,8 @@ export default class RunContext<GeneratorType extends Generator = Generator>
 export class BasicRunContext extends RunContext {
   async run(): PromiseRunResult<any> {
     await this.prepare();
-    return new RunResult(this._createRunResultOptions());
+    const runResult = new RunResult(this._createRunResultOptions());
+    testContext.runResult = runResult;
+    return runResult;
   }
 }
