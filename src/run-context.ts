@@ -52,6 +52,7 @@ export type RunContextSettings = {
 };
 
 type PromiseRunResult<GeneratorType extends Generator> = Promise<RunResult<GeneratorType>>;
+type MockedGeneratorFactory = (GeneratorClass?: typeof Generator) => typeof Generator;
 
 export class RunContextBase<GeneratorType extends Generator = Generator> extends EventEmitter {
   readonly mockedGenerators: Record<string, Generator> = {};
@@ -63,6 +64,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
   targetDirectory?: string;
   editor!: MemFsEditor.Editor;
   memFs: MemFs.Store;
+  mockedGeneratorFactory: MockedGeneratorFactory;
 
   protected environmentPromise?: PromiseRunResult<GeneratorType>;
 
@@ -127,6 +129,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
 
     this.helpers = helpers;
     this.memFs = settings?.memFs ?? MemFs.create();
+    this.mockedGeneratorFactory = this.helpers.createMockedGenerator as any;
   }
 
   /**
@@ -394,6 +397,11 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
     });
   }
 
+  withMockedGeneratorFactory(mockedGeneratorFactory: MockedGeneratorFactory): this {
+    this.mockedGeneratorFactory = mockedGeneratorFactory;
+    return this;
+  }
+
   /**
    * Create mocked generators
    * @param namespaces - namespaces of mocked generators
@@ -413,10 +421,10 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
 
   withMockedGenerators(namespaces: string[]): this {
     assert(Array.isArray(namespaces), 'namespaces should be an array');
-    const dependencies = namespaces.map(namespace => [this.helpers.createMockedGenerator(), namespace]);
+    const dependencies: Dependency[] = namespaces.map(namespace => [this.mockedGeneratorFactory(), namespace]);
     const entries = dependencies.map(([generator, namespace]) => [namespace, generator]);
     Object.assign(this.mockedGenerators, Object.fromEntries(entries));
-    return this.withGenerators(dependencies as Dependency[]);
+    return this.withGenerators(dependencies);
   }
 
   /**
