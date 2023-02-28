@@ -51,7 +51,7 @@
     "@types/yeoman-generator": "^5.2.11",
     "inquirer": "^8.2.5",
     "lodash": "^4.17.21",
-    "mem-fs-editor": "^9.5.0",
+    "mem-fs-editor": "^9.7.0",
     "sinon": "^14.0.2",
     "temp-dir": "^3.0.0"
   },
