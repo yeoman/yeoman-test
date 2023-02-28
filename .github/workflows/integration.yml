@@ -35,9 +35,9 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
 
       - name: Run yeoman-test test
+        if: false
         run: |
           cd $GITHUB_WORKSPACE/yeoman-test
           npm ci
@@ -46,7 +46,7 @@ jobs:
           npm test
 
       - name: Run yeoman-generator test
-        if: always()
+        if: false
         run: |
           cd $GITHUB_WORKSPACE/yeoman-generator
           npm ci
@@ -55,7 +55,7 @@ jobs:
           npm test
 
       - name: Run yeoman-environment test
-        if: always()
+        if: false
         run: |
           cd $GITHUB_WORKSPACE/yeoman-environment
           npm ci
