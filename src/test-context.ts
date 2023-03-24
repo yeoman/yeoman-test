@@ -1,3 +1,4 @@
+import process from 'node:process';
 import type RunContext from './run-context.js';
 import type RunResult from './run-result.js';
 
@@ -5,7 +6,7 @@ class TestContext {
   runResult?: RunResult;
   private runContext?: RunContext<any>;
 
-  startNewContext(runContext: RunContext<any>) {
+  startNewContext(runContext?: RunContext<any>) {
     this.runContext?.cleanupTemporaryDir();
     this.runContext = runContext;
     this.runResult = undefined;
@@ -13,6 +14,14 @@ class TestContext {
 }
 
 const testContext = new TestContext();
+
+const cleanupTemporaryDir = () => {
+  testContext.startNewContext();
+};
+
+process.on('exit', cleanupTemporaryDir);
+process.on('SIGINT', cleanupTemporaryDir);
+process.on('SIGTERM', cleanupTemporaryDir);
 
 export default testContext;
 
