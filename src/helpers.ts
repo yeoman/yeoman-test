@@ -354,7 +354,9 @@ export class YeomanTest {
   }
 }
 
-export default new YeomanTest();
+const defaultHelpers = new YeomanTest();
+
+export default defaultHelpers;
 
 export const createHelpers = options => {
   const helpers = new YeomanTest();
