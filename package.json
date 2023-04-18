@@ -34,7 +34,6 @@
     "husky": "^8.0.2",
     "jsdoc": "^3.6.10",
     "lint-staged": "^13.0.3",
-    "mem-fs": "^3.0.0",
     "mocha": "^10.1.0",
     "mocha-expect-snapshot": "^7.0.0",
     "prettier": "^2.2.1",
@@ -51,12 +50,12 @@
     "@types/yeoman-generator": "^5.2.11",
     "inquirer": "^8.2.5",
     "lodash": "^4.17.21",
+    "mem-fs": "^3.0.0",
     "mem-fs-editor": "^10.0.1",
     "sinon": "^14.0.2",
     "temp-dir": "^3.0.0"
   },
   "peerDependencies": {
-    "mem-fs": ">=2.2.1",
     "yeoman-environment": "^3.13.0",
     "yeoman-generator": "*"
   },
