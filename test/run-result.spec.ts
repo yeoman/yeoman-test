@@ -3,8 +3,8 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import MemFs from 'mem-fs';
-import MemFsEditor from 'mem-fs-editor';
+import { create as createMemFs } from 'mem-fs';
+import { create as createMemFsEditor } from 'mem-fs-editor';
 import { stub } from 'sinon';
 
 import RunContext from '../src/run-context.js';
@@ -30,7 +30,7 @@ describe('run-result', () => {
       const options = { memFs, cwd };
       let runResult;
       before(() => {
-        runResult = new RunResult(options);
+        runResult = new RunResult(options as any);
       });
       it('loads memFs option', () => {
         assert.equal(runResult.memFs, memFs);
@@ -61,8 +61,8 @@ describe('run-result', () => {
     let runResult;
     let consoleMock;
     beforeEach(() => {
-      const memFs = MemFs.create();
-      const memFsEditor = MemFsEditor.create(memFs);
+      const memFs = createMemFs();
+      const memFsEditor = createMemFsEditor(memFs);
       runResult = new RunResult({
         memFs,
         fs: memFsEditor,
@@ -96,8 +96,8 @@ describe('run-result', () => {
     let runResult;
     let consoleMock;
     beforeEach(() => {
-      const memFs = MemFs.create();
-      const memFsEditor = MemFsEditor.create(memFs);
+      const memFs = createMemFs();
+      const memFsEditor = createMemFsEditor(memFs);
       runResult = new RunResult({
         memFs,
         fs: memFsEditor,
@@ -120,8 +120,8 @@ describe('run-result', () => {
   describe('#getSnapshot', () => {
     let runResult;
     beforeEach(() => {
-      const memFs = MemFs.create();
-      const memFsEditor = MemFsEditor.create(memFs);
+      const memFs = createMemFs();
+      const memFsEditor = createMemFsEditor(memFs);
       runResult = new RunResult({
         memFs,
         fs: memFsEditor,
@@ -146,8 +146,8 @@ describe('run-result', () => {
   describe('#getSnapshotState', () => {
     let runResult;
     beforeEach(() => {
-      const memFs = MemFs.create();
-      const memFsEditor = MemFsEditor.create(memFs);
+      const memFs = createMemFs();
+      const memFsEditor = createMemFsEditor(memFs);
       runResult = new RunResult({
         memFs,
         fs: memFsEditor,
@@ -249,8 +249,8 @@ describe('run-result', () => {
     describe('should proxy methods', () => {
       let runResult: RunResult;
       beforeEach(() => {
-        const memFs = MemFs.create();
-        const memFsEditor = MemFsEditor.create(memFs);
+        const memFs = createMemFs();
+        const memFsEditor = createMemFsEditor(memFs);
         runResult = new RunResult({
           memFs,
           fs: memFsEditor,

@@ -9,9 +9,10 @@ import tempDirectory from 'temp-dir';
 import type Generator from 'yeoman-generator';
 import type Environment from 'yeoman-environment';
 import { type LookupOptions, type Options } from 'yeoman-environment';
-import MemFsEditor from 'mem-fs-editor';
-import MemFsEditorState from 'mem-fs-editor/lib/state.js';
-import MemFs from 'mem-fs';
+import { create as createMemFsEditor, type MemFsEditor, type VinylMemFsEditorFile } from 'mem-fs-editor';
+// eslint-disable-next-line n/file-extension-in-import
+import { resetFileCommitStates } from 'mem-fs-editor/state';
+import { create as createMemFs, type Store } from 'mem-fs';
 
 import RunResult, { type RunResultOptions } from './run-result.js';
 import defaultHelpers, { type GeneratorConstructor, type Dependency, type YeomanTest } from './helpers.js';
@@ -38,7 +39,7 @@ export type RunContextSettings = {
 
   autoCleanup?: boolean;
 
-  memFs?: MemFs.Store;
+  memFs?: Store;
 
   /**
    * File path to the generator (only used if Generator is a constructor)
@@ -63,8 +64,8 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
   readonly envOptions: Environment.Options;
   completed = false;
   targetDirectory?: string;
-  editor!: MemFsEditor.Editor;
-  memFs: MemFs.Store;
+  editor!: MemFsEditor;
+  memFs: Store<VinylMemFsEditorFile>;
   mockedGeneratorFactory: MockedGeneratorFactory;
 
   protected environmentPromise?: PromiseRunResult<GeneratorType>;
@@ -129,7 +130,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
     }
 
     this.helpers = helpers;
-    this.memFs = settings?.memFs ?? MemFs.create();
+    this.memFs = (settings?.memFs as Store<VinylMemFsEditorFile>) ?? createMemFs();
     this.mockedGeneratorFactory = this.helpers.createMockedGenerator as any;
   }
 
@@ -566,12 +567,11 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
 
     if (!this.keepFsState) {
       this.memFs.each(file => {
-        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-        delete file[MemFsEditorState.STATE_CLEARED];
+        resetFileCommitStates(file);
       });
     }
 
-    this.editor = MemFsEditor.create(this.memFs);
+    this.editor = createMemFsEditor(this.memFs);
 
     for (const onTargetDirectory of this.onTargetDirectoryCallbacks) {
       // eslint-disable-next-line no-await-in-loop
