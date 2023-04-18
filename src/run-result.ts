@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import MemFsEditor, { type Editor } from 'mem-fs-editor';
+import { create as createMemFsEditor, type MemFsEditor } from 'mem-fs-editor';
 
 import type { Store } from 'mem-fs';
 import type Environment from 'yeoman-environment';
@@ -50,7 +50,7 @@ export type RunResultOptions<GeneratorType extends Generator> = {
    */
   memFs: Store;
 
-  fs?: MemFsEditor.Editor;
+  fs?: MemFsEditor;
 
   /**
    * The mocked generators of the context.
@@ -72,7 +72,7 @@ export default class RunResult<GeneratorType extends Generator = Generator> {
   cwd: string;
   oldCwd: string;
   memFs: Store;
-  fs: Editor;
+  fs: MemFsEditor;
   mockedGenerators: any;
   options: RunResultOptions<GeneratorType>;
 
@@ -86,7 +86,7 @@ export default class RunResult<GeneratorType extends Generator = Generator> {
     this.cwd = options.cwd ?? process.cwd();
     this.oldCwd = options.oldCwd;
     this.memFs = options.memFs;
-    this.fs = this.memFs && MemFsEditor.create(this.memFs);
+    this.fs = this.memFs && createMemFsEditor(this.memFs);
     this.mockedGenerators = options.mockedGenerators || {};
     this.options = options;
   }
@@ -192,7 +192,7 @@ export default class RunResult<GeneratorType extends Generator = Generator> {
 
   _readFile(filename, json?: boolean) {
     filename = this._fileName(filename);
-    const file = this.fs ? this.fs.read(filename) : readFileSync(filename, 'utf8');
+    const file = (this.fs ? this.fs.read(filename) : undefined) ?? readFileSync(filename, 'utf8');
 
     return json ? JSON.parse(file) : file;
   }
