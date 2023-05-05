@@ -129,8 +129,8 @@ describe('RunContext running environment', function () {
     });
 
     it('registers the generator on the environment', () => {
-      return ctx.run().then(() => {
-        assert(ctx.env.get('simple:app') === SimpleApp);
+      return ctx.run().then(async () => {
+        assert((await ctx.env.get('simple:app')) === SimpleApp);
       });
     });
 

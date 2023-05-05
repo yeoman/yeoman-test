@@ -108,6 +108,10 @@ export class YeomanTest {
 
   mockPrompt(envOrGenerator: YeomanGenerator | Environment, mockedAnswers?: YeomanGenerator.Answers, options?: DummyPromptOptions) {
     const environment = 'env' in envOrGenerator ? envOrGenerator.env : envOrGenerator;
+    if (!environment.adapter) {
+      throw new Error('environment is not an Environment instance');
+    }
+
     const { promptModule } = environment.adapter;
 
     for (const name of Object.keys(promptModule.prompts)) {
