@@ -104,8 +104,8 @@ describe('RunContext', function () {
         namespace: 'simple:app',
       });
 
-      ctx.on('ready', function () {
-        assert.equal((ctx.env.get('simple:app') as any).resolved, 'path');
+      ctx.on('ready', async function () {
+        assert.equal(((await ctx.env.get('simple:app')) as any).resolved, 'path');
         done();
       });
     });
