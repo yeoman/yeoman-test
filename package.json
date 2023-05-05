@@ -20,22 +20,20 @@
   "repository": "yeoman/yeoman-test",
   "license": "MIT",
   "engines": {
-    "node": "^14.15.0 || ^16.13.0 || >=18.12.0"
+    "node": "^16.17.0 || >=18.12.0"
   },
   "config": {
     "doc_path": "../yeoman-test-doc"
   },
   "devDependencies": {
-    "@node-loaders/esbuild": "^0.8.0",
-    "@types/mocha": "^10.0.0",
     "@types/node": "^16.18.19",
     "@types/sinon": "^10.0.13",
+    "c8": "^7.13.0",
     "coveralls": "^3.1.1",
+    "esmocha": "^0.1.4",
     "husky": "^8.0.2",
     "jsdoc": "^3.6.10",
     "lint-staged": "^13.0.3",
-    "mocha": "^10.1.0",
-    "mocha-expect-snapshot": "^7.0.0",
     "prettier": "^2.2.1",
     "prettier-plugin-packagejson": "^2.3.0",
     "tui-jsdoc-template": "^1.2.2",
@@ -60,7 +58,7 @@
     "yeoman-generator": "*"
   },
   "scripts": {
-    "test": "mocha",
+    "test": "c8 esmocha",
     "build": "tsc",
     "prepare": "npm run build",
     "pretest": "xo",
