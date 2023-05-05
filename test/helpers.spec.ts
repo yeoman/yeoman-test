@@ -7,7 +7,7 @@ import { existsSync } from 'node:fs';
 import { assert as sinonAssert, spy as sinonSpy, stub as sinonStub } from 'sinon';
 import yeoman from 'yeoman-environment';
 import Generator from 'yeoman-generator';
-import { jestExpect as expect } from 'mocha-expect-snapshot';
+import { expect } from 'esmocha';
 
 import type Environment from 'yeoman-environment';
 import helpers from '../src/helpers.js';
