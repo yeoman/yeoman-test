@@ -54,7 +54,7 @@
     "temp-dir": "^3.0.0"
   },
   "peerDependencies": {
-    "yeoman-environment": "^3.13.0 | ^4.0.0-alpha.0"
+    "yeoman-environment": "^3.13.0 || ^4.0.0-alpha.0"
   },
   "scripts": {
     "test": "c8 esmocha",
