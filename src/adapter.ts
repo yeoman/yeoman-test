@@ -1,28 +1,27 @@
 /* eslint-disable max-params */
 import events from 'node:events';
 import { PassThrough } from 'node:stream';
-import inquirer from 'inquirer';
 import { spy as sinonSpy, stub as sinonStub } from 'sinon';
-import type Generator from 'yeoman-generator';
-import type Logger from 'yeoman-environment/lib/util/log.js';
+import type { PromptAnswers, PromptQuestion, Logger, InputOutputAdapter, PromptQuestions } from '@yeoman/types';
+import { createPromptModule, type PromptModule } from 'inquirer';
 
 export type DummyPromptOptions = {
-  callback?: (answers: Generator.Answers) => Generator.Answers;
+  callback?: (answers: PromptAnswers) => PromptAnswers;
   throwOnMissingAnswer?: boolean;
 };
 
 export class DummyPrompt {
-  answers: Generator.Answers;
-  question: inquirer.Question;
-  callback!: (answers: Generator.Answers) => Generator.Answers;
+  answers: PromptAnswers;
+  question: PromptQuestion;
+  callback!: (answers: PromptAnswers) => PromptAnswers;
   throwOnMissingAnswer = false;
 
   constructor(
-    question: inquirer.Question,
+    question: PromptQuestion,
     _rl: any,
-    answers: Generator.Answers,
-    mockedAnswers?: Generator.Answers,
-    options?: ((answers: Generator.Answers) => Generator.Answers) | DummyPromptOptions,
+    answers: PromptAnswers,
+    mockedAnswers?: PromptAnswers,
+    options?: ((answers: PromptAnswers) => PromptAnswers) | DummyPromptOptions,
   ) {
     this.answers = { ...answers, ...mockedAnswers };
     this.question = question;
@@ -85,13 +84,13 @@ export class DummyPrompt {
   }
 }
 
-export class TestAdapter {
-  promptModule: inquirer.PromptModule;
+export class TestAdapter implements InputOutputAdapter {
+  promptModule: PromptModule;
   diff: any;
-  log: typeof Logger;
+  log: Logger;
 
-  constructor(mockedAnswers?) {
-    this.promptModule = inquirer.createPromptModule({
+  constructor(mockedAnswers?: PromptAnswers) {
+    this.promptModule = createPromptModule({
       input: new PassThrough() as any,
       output: new PassThrough() as any,
       skipTTYChecks: true,
@@ -101,7 +100,7 @@ export class TestAdapter {
       this.promptModule.registerPrompt(
         promptName,
         class CustomDummyPrompt extends DummyPrompt {
-          constructor(question, rl, answers) {
+          constructor(question: PromptQuestion, rl: any, answers: PromptAnswers) {
             super(question, rl, answers, mockedAnswers);
           }
         } as any,
@@ -109,7 +108,7 @@ export class TestAdapter {
     }
 
     this.diff = sinonSpy();
-    this.log = sinonSpy();
+    this.log = sinonSpy() as any;
     Object.assign(this.log, events.EventEmitter.prototype);
 
     // Make sure all log methods are defined
@@ -128,11 +127,18 @@ export class TestAdapter {
       'table',
     ];
     for (const methodName of adapterMethods) {
-      this.log[methodName] = sinonStub().returns(this.log);
+      (this.log as any)[methodName] = sinonStub().returns(this.log);
     }
   }
 
-  prompt(questions, prefilledAnswers) {
-    return this.promptModule(questions, prefilledAnswers);
+  close(): void {
+    // No empty
+  }
+
+  async prompt<A extends PromptAnswers = PromptAnswers>(
+    questions: PromptQuestions<A>,
+    initialAnswers?: Partial<A> | undefined,
+  ): Promise<A> {
+    return this.promptModule(questions, initialAnswers);
   }
 }

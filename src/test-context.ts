@@ -1,9 +1,10 @@
 import process from 'node:process';
+import type { BaseGenerator } from '@yeoman/types';
 import type RunContext from './run-context.js';
 import type RunResult from './run-result.js';
 
 class TestContext {
-  runResult?: RunResult;
+  runResult?: RunResult<BaseGenerator>;
   private runContext?: RunContext<any>;
 
   startNewContext(runContext?: RunContext<any>) {
@@ -25,8 +26,8 @@ process.on('SIGTERM', cleanupTemporaryDir);
 
 export default testContext;
 
-const handler2 = {
-  get(_target, prop, receiver) {
+const handler2: ProxyHandler<RunResult> = {
+  get(_target: RunResult, prop: string, receiver: any) {
     if (testContext.runResult === undefined) {
       throw new Error('Last result is missing.');
     }
@@ -38,4 +39,4 @@ const handler2 = {
 /**
  * Provides a proxy for last executed context result.
  */
-export const result: RunResult = new Proxy({}, handler2);
+export const result: RunResult = new Proxy({} as any, handler2);

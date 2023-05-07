@@ -2,14 +2,12 @@ import assert from 'node:assert';
 import { existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import { create as createMemFsEditor, type MemFsEditor } from 'mem-fs-editor';
-
 import type { Store } from 'mem-fs';
-import type Environment from 'yeoman-environment';
-import type Generator from 'yeoman-generator';
-
+import { create as createMemFsEditor, type MemFsEditor } from 'mem-fs-editor';
+import type { BaseEnvironment, BaseEnvironmentOptions, BaseGenerator } from '@yeoman/types';
+import type GeneratorImplementation from 'yeoman-generator';
 import { type RunContextSettings } from './run-context.js';
-import { type YeomanTest } from './helpers.js';
+import { type GeneratorFactory, type YeomanTest } from './helpers.js';
 
 const isObject = object => typeof object === 'object' && object !== null && object !== undefined;
 
@@ -25,15 +23,15 @@ function convertArgs(args) {
 /**
  * Provides options for `RunResult`s.
  */
-export type RunResultOptions<GeneratorType extends Generator> = {
+export type RunResultOptions<GeneratorType extends BaseGenerator> = {
   generator: GeneratorType;
 
   /**
    * The environment of the generator.
    */
-  env: Environment;
+  env: BaseEnvironment;
 
-  envOptions: Environment.Options;
+  envOptions: BaseEnvironmentOptions;
 
   /**
    * The working directory after running the generator.
@@ -55,7 +53,7 @@ export type RunResultOptions<GeneratorType extends Generator> = {
   /**
    * The mocked generators of the context.
    */
-  mockedGenerators: Record<string, Generator>;
+  mockedGenerators: Record<string, BaseGenerator>;
 
   settings: RunContextSettings;
 
@@ -66,7 +64,7 @@ export type RunResultOptions<GeneratorType extends Generator> = {
  * This class provides utilities for testing generated content.
  */
 
-export default class RunResult<GeneratorType extends Generator = Generator> {
+export default class RunResult<GeneratorType extends BaseGenerator = GeneratorImplementation> {
   env: any;
   generator: GeneratorType;
   cwd: string;
@@ -95,7 +93,11 @@ export default class RunResult<GeneratorType extends Generator = Generator> {
    * Create another RunContext reusing the settings.
    * See helpers.create api
    */
-  create(GeneratorOrNamespace, settings, envOptions) {
+  create<GeneratorType extends BaseGenerator = GeneratorImplementation>(
+    GeneratorOrNamespace: string | GeneratorFactory<GeneratorType>,
+    settings?: RunContextSettings,
+    envOptions?: BaseEnvironmentOptions,
+  ) {
     return this.options.helpers.create(
       GeneratorOrNamespace,
       {

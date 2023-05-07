@@ -4,12 +4,11 @@ import { resolve } from 'node:path';
 import process from 'node:process';
 import _ from 'lodash';
 import { spy as sinonSpy, stub as sinonStub } from 'sinon';
-import YeomanGenerator from 'yeoman-generator';
+import GeneratorImplementation, { type StorageRecord, type BaseOptions as GeneratorOptions } from 'yeoman-generator';
 import Environment from 'yeoman-environment';
-import type { GeneratorOptions } from 'yeoman-generator';
-import type { Options, createEnv } from 'yeoman-environment';
+import type { createEnv } from 'yeoman-environment';
+import type { BaseEnvironmentOptions, BaseGenerator, GetGeneratorConstructor, PromptAnswers, PromptQuestion } from '@yeoman/types';
 import type { SinonSpiedInstance } from 'sinon';
-
 import { DummyPrompt, type DummyPromptOptions, TestAdapter } from './adapter.js';
 import RunContext, { BasicRunContext, type RunContextSettings } from './run-context.js';
 import testContext from './test-context.js';
@@ -19,18 +18,11 @@ const { cloneDeep } = _;
 /**
  * Dependencies can be path (autodiscovery) or an array [<generator>, <name>]
  */
-export type Dependency = string | Parameters<Environment['registerStub']> | Parameters<Environment['register']>;
+export type Dependency = string | Parameters<Environment['registerStub']>;
 
-type GeneratorNew<GenParameter extends YeomanGenerator = YeomanGenerator> = new (
-  ...args: ConstructorParameters<typeof YeomanGenerator<GenParameter['options']>>
-) => GenParameter;
-type GeneratorBuilder<GenParameter extends YeomanGenerator = YeomanGenerator> = (
-  ...args: ConstructorParameters<typeof YeomanGenerator<GenParameter['options']>>
-) => GenParameter;
-
-export type GeneratorConstructor<GenParameter extends YeomanGenerator = YeomanGenerator> =
-  | GeneratorNew<GenParameter>
-  | GeneratorBuilder<GenParameter>;
+export type GeneratorFactory<GenParameter extends BaseGenerator = GeneratorImplementation> =
+  | GetGeneratorConstructor<GenParameter>
+  | ((...args: ConstructorParameters<GetGeneratorConstructor<GenParameter>>) => GenParameter);
 
 /**
  * Collection of unit test helpers. (mostly related to Mocha syntax)
@@ -39,7 +31,7 @@ export type GeneratorConstructor<GenParameter extends YeomanGenerator = YeomanGe
 
 export class YeomanTest {
   settings?: RunContextSettings;
-  environmentOptions?: Options;
+  environmentOptions?: BaseEnvironmentOptions;
   generatorOptions?: GeneratorOptions;
 
   /**
@@ -70,7 +62,7 @@ export class YeomanTest {
    * });
    */
 
-  testDirectory(dir: string, cb?: (error?) => unknown) {
+  testDirectory(dir: string, cb?: (error?: any) => unknown) {
     if (!dir) {
       throw new Error('Missing directory');
     }
@@ -106,19 +98,19 @@ export class YeomanTest {
    * mockPrompt(angular, {'bootstrap': 'Y', 'compassBoostrap': 'Y'});
    */
 
-  mockPrompt(envOrGenerator: YeomanGenerator | Environment, mockedAnswers?: YeomanGenerator.Answers, options?: DummyPromptOptions) {
+  mockPrompt(envOrGenerator: BaseGenerator | Environment, mockedAnswers?: PromptAnswers, options?: DummyPromptOptions) {
     const environment = 'env' in envOrGenerator ? envOrGenerator.env : envOrGenerator;
     if (!environment.adapter) {
       throw new Error('environment is not an Environment instance');
     }
 
-    const { promptModule } = environment.adapter;
+    const { promptModule } = environment.adapter as TestAdapter;
 
     for (const name of Object.keys(promptModule.prompts)) {
       promptModule.registerPrompt(
         name,
         class CustomDummyPrompt extends DummyPrompt {
-          constructor(question, rl, answers) {
+          constructor(question: PromptQuestion, rl: any, answers: PromptAnswers) {
             super(question, rl, answers, mockedAnswers, options);
           }
         } as any,
@@ -131,8 +123,8 @@ export class YeomanTest {
    * Restore defaults prompts on a generator.
    * @param generator or environment
    */
-  restorePrompt(envOrGenerator: YeomanGenerator | Environment) {
-    const environment: Environment = (envOrGenerator as any).env ?? envOrGenerator;
+  restorePrompt(envOrGenerator: BaseGenerator | Environment) {
+    const environment: Environment = envOrGenerator.env ?? envOrGenerator;
     environment.adapter.promptModule.restoreDefaultPrompts();
   }
 
@@ -142,20 +134,20 @@ export class YeomanTest {
    * @param generator - a Yeoman generator
    * @param localConfig - localConfig - should look just like if called config.getAll()
    */
-  mockLocalConfig(generator: YeomanGenerator, localConfig) {
-    generator.config.defaults(localConfig);
+  mockLocalConfig(generator: BaseGenerator, localConfig: StorageRecord) {
+    (generator as any).config.defaults(localConfig);
   }
 
   /**
    * Create a mocked generator
    */
   createMockedGenerator(
-    GeneratorClass: typeof YeomanGenerator<GeneratorOptions> = class MockedGenerator extends YeomanGenerator {},
-  ): SinonSpiedInstance<typeof YeomanGenerator<GeneratorOptions>> {
+    GeneratorClass: typeof GeneratorImplementation = class MockedGenerator extends GeneratorImplementation {},
+  ): SinonSpiedInstance<typeof GeneratorImplementation> {
     const generator = sinonSpy(GeneratorClass);
     for (const methodName of ['run', 'queueTasks', 'runWithOptions', 'queueOwnTasks']) {
-      if (GeneratorClass.prototype[methodName]) {
-        generator.prototype[methodName] = sinonStub();
+      if ((GeneratorClass.prototype as any)[methodName]) {
+        (GeneratorClass.prototype as any)[methodName] = sinonStub();
       }
     }
 
@@ -165,17 +157,30 @@ export class YeomanTest {
   /**
    * Create a simple, dummy generator
    */
-  createDummyGenerator<GenParameter extends YeomanGenerator = YeomanGenerator>(
-    Generator = YeomanGenerator,
-  ): typeof YeomanGenerator<GenParameter['options']> {
-    class DummyGenerator extends Generator<GenParameter['options']> {
-      shouldRun?: boolean;
-
-      test() {
+  createDummyGenerator<GenParameter extends BaseGenerator = GeneratorImplementation>(
+    Generator: GetGeneratorConstructor<GenParameter> = GeneratorImplementation as any,
+    contents: Record<string, (...args: any[]) => void> = {
+      test(this: any) {
         this.shouldRun = true;
+      },
+    },
+  ): GenParameter {
+    class DummyGenerator extends Generator {
+      constructor(...args: any[]) {
+        args[1].namespace = args[1].namespace ?? 'dummy';
+        args[1].resolved = args[1].resolved ?? 'dummy';
+        super(...args);
       }
     }
-    return DummyGenerator;
+
+    for (const [propName, propValue] of Object.entries(contents)) {
+      Object.defineProperty(DummyGenerator.prototype, propName, {
+        value: propValue ?? Object.create(null),
+        writable: true,
+      });
+    }
+
+    return DummyGenerator as any;
   }
 
   /**
@@ -197,25 +202,16 @@ export class YeomanTest {
    *            ];
    * var angular = createGenerator('angular:app', deps);
    */
-  createGenerator<GeneratorType extends YeomanGenerator = YeomanGenerator>(
+  async createGenerator<GeneratorType extends BaseGenerator = GeneratorImplementation>(
     name: string,
     dependencies: Dependency[],
     args?: string[],
-    options?: YeomanGenerator.GeneratorOptions,
+    options?: GeneratorOptions,
     localConfigOnly = true,
-  ): GeneratorType | Promise<GeneratorType> {
-    const maybeEnv = this.createEnv([], { sharedOptions: { localConfigOnly } });
-    // TODO convert method to async.
-    if ('then' in maybeEnv) {
-      return maybeEnv.then(env => {
-        this.registerDependencies(env, dependencies);
-        return env.create<YeomanGenerator['options']>(name, args as any, options as any) as unknown as GeneratorType;
-      });
-    }
-
-    this.registerDependencies(maybeEnv, dependencies);
-
-    return maybeEnv.create<YeomanGenerator['options']>(name, args as any, options as any) as unknown as GeneratorType;
+  ): Promise<GeneratorType> {
+    const env = await this.createEnv([], { sharedOptions: { localConfigOnly } });
+    this.registerDependencies(env, dependencies);
+    return env.create(name, args as any, options as any) as unknown as GeneratorType;
   }
 
   /**
@@ -230,9 +226,9 @@ export class YeomanTest {
     for (const dependency of dependencies) {
       if (Array.isArray(dependency)) {
         if (typeof dependency[0] === 'string') {
-          env.register(...(dependency as Parameters<Environment['register']>));
+          env.register(...dependency);
         } else {
-          env.registerStub(...(dependency as Parameters<Environment['registerStub']>));
+          env.registerStub(...dependency);
         }
       } else {
         env.register(dependency);
@@ -263,15 +259,15 @@ export class YeomanTest {
   /**
    * Creates a test environment.
    *
-   * @param {Function} envContructor - environment constructor method.
-   * @param {Object} [options] - Options to be passed to the environment
+   * @param {Function} - environment constructor method.
+   * @param {Object} - Options to be passed to the environment
    * const env = createTestEnv(require('yeoman-environment').createEnv);
    */
 
-  createTestEnv(envContructor = this.createEnv, options: Environment.Options = { localConfigOnly: true }) {
-    const envOptions = cloneDeep(this.environmentOptions ?? {});
+  createTestEnv(envContructor = this.createEnv, options: BaseEnvironmentOptions = { localConfigOnly: true }) {
+    let envOptions = cloneDeep(this.environmentOptions ?? {});
     if (typeof options === 'boolean') {
-      options = {
+      envOptions = {
         newErrorHandler: true,
         ...envOptions,
         sharedOptions: {
@@ -280,19 +276,19 @@ export class YeomanTest {
         },
       };
     } else {
-      options = {
-        newErrorHandler: true,
-        ...envOptions,
-        ...options,
-      };
-      options.sharedOptions = {
+      envOptions.sharedOptions = {
         localConfigOnly: true,
         ...envOptions.sharedOptions,
         ...options.sharedOptions,
       };
+      envOptions = {
+        newErrorHandler: true,
+        ...envOptions,
+        ...options,
+      };
     }
 
-    return envContructor([], options, new TestAdapter() as any);
+    return envContructor([], envOptions, new TestAdapter() as any);
   }
 
   /**
@@ -309,10 +305,10 @@ export class YeomanTest {
    * @param GeneratorOrNamespace - Generator constructor or namespace
    */
 
-  run<GeneratorType extends YeomanGenerator = YeomanGenerator>(
-    GeneratorOrNamespace: string | GeneratorConstructor<GeneratorType>,
+  run<GeneratorType extends BaseGenerator = GeneratorImplementation>(
+    GeneratorOrNamespace: string | GeneratorFactory<GeneratorType>,
     settings?: RunContextSettings,
-    envOptions?: Options,
+    envOptions?: BaseEnvironmentOptions,
   ): RunContext<GeneratorType> {
     const contextSettings = cloneDeep(this.settings ?? {});
     const generatorOptions = cloneDeep(this.generatorOptions ?? {});
@@ -336,10 +332,10 @@ export class YeomanTest {
    * @return {RunContext}
    */
 
-  create<GeneratorType extends YeomanGenerator = YeomanGenerator>(
-    GeneratorOrNamespace: string | GeneratorConstructor<GeneratorType>,
+  create<GeneratorType extends BaseGenerator = GeneratorImplementation>(
+    GeneratorOrNamespace: string | GeneratorFactory<GeneratorType>,
     settings?: RunContextSettings,
-    envOptions?: Options,
+    envOptions?: BaseEnvironmentOptions,
   ) {
     return this.run<GeneratorType>(GeneratorOrNamespace, settings, envOptions);
   }
@@ -362,7 +358,7 @@ const defaultHelpers = new YeomanTest();
 
 export default defaultHelpers;
 
-export const createHelpers = options => {
+export const createHelpers = (options: any) => {
   const helpers = new YeomanTest();
   Object.assign(helpers, options);
   return helpers;

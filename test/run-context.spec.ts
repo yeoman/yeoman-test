@@ -8,7 +8,6 @@ import { assert as sinonAssert, spy as sinonSpy, stub as sinonStub, fake as sino
 import inquirer from 'inquirer';
 import Generator from 'yeoman-generator';
 import tempDirectory from 'temp-dir';
-
 import { RunContextBase as RunContext } from '../src/run-context.js';
 import helpers from '../src/helpers.js';
 import { DummyPrompt } from '../src/adapter.js';
@@ -28,7 +27,7 @@ describe('RunContext', function () {
   beforeEach(function () {
     process.chdir(__dirname);
 
-    defaultInput = inquirer.prompts.input;
+    defaultInput = inquirer.prompt.input;
     execSpy = sinonSpy();
     Dummy = class extends Generator {
       exec(...args) {
@@ -120,7 +119,7 @@ describe('RunContext', function () {
 
     it('reset mocked prompt after running', function (done) {
       ctx.on('end', function () {
-        assert.equal(defaultInput, inquirer.prompts.input);
+        assert.equal(defaultInput, inquirer.prompt.input);
         done();
       });
     });

@@ -8,7 +8,6 @@ import { assert as sinonAssert, spy as sinonSpy, stub as sinonStub } from 'sinon
 import yeoman from 'yeoman-environment';
 import Generator from 'yeoman-generator';
 import { expect } from 'esmocha';
-
 import type Environment from 'yeoman-environment';
 import helpers from '../src/helpers.js';
 import { TestAdapter } from '../src/adapter.js';

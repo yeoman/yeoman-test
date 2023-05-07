@@ -5,17 +5,18 @@ import assert from 'node:assert';
 import { EventEmitter } from 'node:events';
 import process from 'node:process';
 import _ from 'lodash';
-import tempDirectory from 'temp-dir';
-import type Generator from 'yeoman-generator';
-import type Environment from 'yeoman-environment';
-import { type LookupOptions, type Options } from 'yeoman-environment';
-import { create as createMemFsEditor, type MemFsEditor, type VinylMemFsEditorFile } from 'mem-fs-editor';
 // eslint-disable-next-line n/file-extension-in-import
 import { resetFileCommitStates } from 'mem-fs-editor/state';
 import { create as createMemFs, type Store } from 'mem-fs';
-
+import tempDirectory from 'temp-dir';
+import type { BaseEnvironmentOptions, BaseGenerator, GetGeneratorConstructor, GetGeneratorOptions, PromptAnswers } from '@yeoman/types';
+import type Environment from 'yeoman-environment';
+import { type LookupOptions } from 'yeoman-environment';
+import type GeneratorImplementation from 'yeoman-generator';
+import type { StorageRecord } from 'yeoman-generator';
+import { create as createMemFsEditor, type MemFsEditor, type VinylMemFsEditorFile } from 'mem-fs-editor';
 import RunResult, { type RunResultOptions } from './run-result.js';
-import defaultHelpers, { type GeneratorConstructor, type Dependency, type YeomanTest } from './helpers.js';
+import defaultHelpers, { type Dependency, type YeomanTest, type GeneratorFactory } from './helpers.js';
 import { type DummyPromptOptions } from './adapter.js';
 import testContext from './test-context.js';
 
@@ -53,15 +54,18 @@ export type RunContextSettings = {
   namespace?: string;
 };
 
-type PromiseRunResult<GeneratorType extends Generator> = Promise<RunResult<GeneratorType>>;
-type MockedGeneratorFactory = (GeneratorClass?: typeof Generator) => typeof Generator;
+type PromiseRunResult<GeneratorType extends BaseGenerator> = Promise<RunResult<GeneratorType>>;
+type MockedGeneratorFactory = <GenParameter extends BaseGenerator = GeneratorImplementation>(
+  GeneratorClass?: GetGeneratorConstructor<GenParameter>,
+) => GenParameter;
+type EnvOptions = BaseEnvironmentOptions & { createEnv?: any };
 
-export class RunContextBase<GeneratorType extends Generator = Generator> extends EventEmitter {
-  readonly mockedGenerators: Record<string, Generator> = {};
+export class RunContextBase<GeneratorType extends BaseGenerator = GeneratorImplementation> extends EventEmitter {
+  readonly mockedGenerators: Record<string, BaseGenerator> = {};
   env!: Environment;
   generator!: GeneratorType;
   readonly settings: RunContextSettings;
-  readonly envOptions: Environment.Options;
+  readonly envOptions: EnvOptions;
   completed = false;
   targetDirectory?: string;
   editor!: MemFsEditor;
@@ -71,7 +75,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
   protected environmentPromise?: PromiseRunResult<GeneratorType>;
 
   private args: string[] = [];
-  private options: any = {};
+  private options: Partial<Omit<GetGeneratorOptions<GeneratorType>, 'env' | 'namespace' | 'resolved'>> = {};
   private answers?: any;
   private keepFsState?: boolean;
 
@@ -82,7 +86,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
   private readonly onEnvironmentCallbacks: Array<(this: this, env: Environment) => any> = [];
 
   private readonly inDirCallbacks: any[] = [];
-  private readonly Generator?: string | GeneratorConstructor<GeneratorType> | typeof Generator;
+  private readonly Generator?: string | GeneratorFactory<GeneratorType>;
   private readonly helpers: YeomanTest;
   private readonly temporaryDir = path.join(tempDirectory, crypto.randomBytes(20).toString('hex'));
 
@@ -106,9 +110,9 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
    */
 
   constructor(
-    generatorType?: string | GeneratorConstructor<GeneratorType> | typeof Generator,
+    generatorType?: string | GeneratorFactory<GeneratorType>,
     settings?: RunContextSettings,
-    envOptions: Options = {},
+    envOptions: EnvOptions = {},
     helpers = defaultHelpers,
   ) {
     super();
@@ -119,11 +123,6 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
 
     this.envOptions = envOptions;
 
-    this.withOptions({
-      force: true,
-      skipCache: true,
-      skipInstall: true,
-    });
     this.oldCwd = this.settings.oldCwd;
     if (this.settings.cwd) {
       this.cd(this.settings.cwd);
@@ -284,7 +283,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
    * @param {Function} [cb] - callback who'll receive the folder path as argument
    * @return {this} run context instance
    */
-  withEnvironment(cb) {
+  withEnvironment(cb: any) {
     this.envCB = cb;
     return this;
   }
@@ -295,10 +294,11 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
    * @param lookups - lookup to run.
    */
   withLookups(lookups: LookupOptions | LookupOptions[]): this {
-    return this.onEnvironment(env => {
+    return this.onEnvironment(async env => {
       lookups = Array.isArray(lookups) ? lookups : [lookups];
       for (const lookup of lookups) {
-        env.lookup(lookup);
+        // eslint-disable-next-line no-await-in-loop
+        await env.lookup(lookup);
       }
     });
   }
@@ -320,7 +320,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
    * @return {this}
    */
 
-  withOptions(options: any): this {
+  withOptions(options: Partial<Omit<GetGeneratorOptions<GeneratorType>, 'env' | 'namespace' | 'resolved'>>): this {
     if (!options) {
       return this;
     }
@@ -346,7 +346,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
    * @return {this}
    */
 
-  withPrompts(answers: Generator.Answers, options?: DummyPromptOptions) {
+  withPrompts(answers: PromptAnswers, options?: DummyPromptOptions) {
     return this.withAnswers(answers, options);
   }
 
@@ -356,7 +356,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
    * @param  options - Options or callback.
    * @return {this}
    */
-  withAnswers(answers: Generator.Answers, options?: DummyPromptOptions) {
+  withAnswers(answers: PromptAnswers, options?: DummyPromptOptions) {
     const callbackSet = Boolean(this.answers);
     this.answers = { ...this.answers, ...answers };
     if (callbackSet) return this;
@@ -388,13 +388,13 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
       for (const dependency of dependencies) {
         if (Array.isArray(dependency)) {
           if (typeof dependency[0] === 'string') {
-            // eslint-disable-next-line no-await-in-loop, @typescript-eslint/await-thenable
-            await env.register(...(dependency as Parameters<Environment['register']>));
+            // eslint-disable-next-line no-await-in-loop
+            await env.register(...dependency);
           } else {
-            env.registerStub(...(dependency as Parameters<Environment['registerStub']>));
+            env.registerStub(...dependency);
           }
         } else {
-          // eslint-disable-next-line no-await-in-loop, @typescript-eslint/await-thenable
+          // eslint-disable-next-line no-await-in-loop
           await env.register(dependency);
         }
       }
@@ -435,9 +435,9 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
    * Mock the local configuration with the provided config
    * @param localConfig - should look just like if called config.getAll()
    */
-  withLocalConfig(localConfig: Record<string, unknown>): this {
+  withLocalConfig(localConfig: StorageRecord): this {
     assert(typeof localConfig === 'object', 'config should be an object');
-    return this.onGenerator(generator => generator.config.defaults(localConfig));
+    return this.onGenerator(generator => (generator as any).config.defaults(localConfig));
   }
 
   /**
@@ -589,12 +589,16 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
    * Build the generator and the environment.
    * @return {RunContext|false} this
    */
-  protected async build(): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/member-ordering
+  async build(): Promise<void> {
     await this.prepare();
 
     const testEnv = await this.helpers.createTestEnv(this.envOptions.createEnv, {
       cwd: this.settings.forwardCwd ? this.targetDirectory : undefined,
       sharedFs: this.memFs,
+      force: true,
+      skipCache: true,
+      skipInstall: true,
       ...this.options,
       ...this.envOptions,
     });
@@ -614,8 +618,12 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
       this.env.registerStub(this.Generator as unknown as any, namespace, resolved);
     }
 
-    // eslint-disable-next-line @typescript-eslint/await-thenable
-    this.generator = (await this.env.create(namespace, this.args, this.options)) as any;
+    this.generator = await this.env.create(namespace, this.args, {
+      force: true,
+      skipCache: true,
+      skipInstall: true,
+      ...this.options,
+    });
 
     for (const onGeneratorCallback of this.onGeneratorCallbacks) {
       // eslint-disable-next-line no-await-in-loop
@@ -688,7 +696,7 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
    *                            file path for predictable results
    * @return {this} run context instance
    */
-  private setDir(dirPath, tmpdir) {
+  private setDir(dirPath: string, tmpdir: boolean) {
     if (this.targetDirectory) {
       this.completed = true;
       throw new Error('Test directory has already been set.');
@@ -705,25 +713,25 @@ export class RunContextBase<GeneratorType extends Generator = Generator> extends
   }
 }
 
-export default class RunContext<GeneratorType extends Generator = Generator>
+export default class RunContext<GeneratorType extends BaseGenerator = GeneratorImplementation>
   extends RunContextBase<GeneratorType>
   implements Promise<RunResult<GeneratorType>>
 {
   // eslint-disable-next-line unicorn/no-thenable
   async then<TResult1 = RunResult<GeneratorType>, TResult2 = never>(
-    onfulfilled?: ((value: RunResult<GeneratorType>) => TResult1 | PromiseLike<TResult1>) | undefined | undefined,
-    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | undefined,
+    onfulfilled?: ((value: RunResult<GeneratorType>) => TResult1 | PromiseLike<TResult1>) | undefined,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined,
   ): Promise<TResult1 | TResult2> {
     return this.toPromise().then(onfulfilled, onrejected);
   }
 
   async catch<TResult = never>(
-    onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | undefined,
+    onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined,
   ): Promise<RunResult<GeneratorType> | TResult> {
     return this.toPromise().catch(onrejected);
   }
 
-  async finally(onfinally?: (() => void) | undefined | undefined): Promise<RunResult<GeneratorType>> {
+  async finally(onfinally?: (() => void) | undefined): Promise<RunResult<GeneratorType>> {
     return this.toPromise().finally(onfinally);
   }
 

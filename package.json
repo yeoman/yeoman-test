@@ -37,21 +37,20 @@
     "prettier": "^2.2.1",
     "prettier-plugin-packagejson": "^2.3.0",
     "tui-jsdoc-template": "^1.2.2",
-    "typescript": "^4.9.3",
-    "xo": "^0.53.1",
-    "yeoman-environment": "^4.0.0-alpha.1"
+    "typescript": "^5.0.4",
+    "xo": "^0.54.2",
+    "yeoman-environment": "^3.16.1"
   },
   "dependencies": {
-    "@types/inquirer": "^8.2.5",
-    "@types/yeoman-environment": "^2.10.8",
-    "@types/yeoman-generator": "^5.2.11",
-    "inquirer": "^8.2.5",
+    "@types/inquirer": "^9.0.3",
+    "@yeoman/types": "^0.1.2",
+    "inquirer": "^9.2.2",
     "lodash": "^4.17.21",
     "mem-fs": "^3.0.0",
     "mem-fs-editor": "^10.0.1",
     "sinon": "^14.0.2",
     "temp-dir": "^3.0.0",
-    "yeoman-generator": "^5.7.0"
+    "yeoman-generator": "^6.0.0-alpha.2"
   },
   "peerDependencies": {
     "yeoman-environment": "^3.13.0 || ^4.0.0-alpha.0"
@@ -82,10 +81,5 @@
       "prettier --write",
       "git add"
     ]
-  },
-  "overrides": {
-    "yeoman-generator": {
-      "yeoman-environment": "^4.0.0-alpha.0"
-    }
   }
 }

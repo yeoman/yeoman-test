@@ -2,7 +2,6 @@ import path, { dirname } from 'node:path';
 import assert from 'node:assert';
 import { fileURLToPath } from 'node:url';
 import { create as createMemFs } from 'mem-fs';
-
 import RunResult from '../src/run-result.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));

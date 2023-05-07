@@ -6,7 +6,6 @@ import process from 'node:process';
 import { create as createMemFs } from 'mem-fs';
 import { create as createMemFsEditor } from 'mem-fs-editor';
 import { stub } from 'sinon';
-
 import RunContext from '../src/run-context.js';
 import RunResult from '../src/run-result.js';
 import helpers from '../src/helpers.js';
