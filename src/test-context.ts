@@ -4,7 +4,7 @@ import type RunContext from './run-context.js';
 import type RunResult from './run-result.js';
 
 class TestContext {
-  runResult?: RunResult<BaseGenerator>;
+  runResult?: RunResult;
   private runContext?: RunContext<any>;
 
   startNewContext(runContext?: RunContext<any>) {

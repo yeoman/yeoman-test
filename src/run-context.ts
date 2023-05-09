@@ -12,8 +12,6 @@ import tempDirectory from 'temp-dir';
 import type { BaseEnvironmentOptions, BaseGenerator, GetGeneratorConstructor, GetGeneratorOptions, PromptAnswers } from '@yeoman/types';
 import type Environment from 'yeoman-environment';
 import { type LookupOptions } from 'yeoman-environment';
-import type GeneratorImplementation from 'yeoman-generator';
-import type { StorageRecord } from 'yeoman-generator';
 import { create as createMemFsEditor, type MemFsEditor, type VinylMemFsEditorFile } from 'mem-fs-editor';
 import RunResult, { type RunResultOptions } from './run-result.js';
 import defaultHelpers, { type Dependency, type YeomanTest, type GeneratorFactory } from './helpers.js';
@@ -55,12 +53,12 @@ export type RunContextSettings = {
 };
 
 type PromiseRunResult<GeneratorType extends BaseGenerator> = Promise<RunResult<GeneratorType>>;
-type MockedGeneratorFactory = <GenParameter extends BaseGenerator = GeneratorImplementation>(
+type MockedGeneratorFactory<GenParameter extends BaseGenerator = BaseGenerator> = (
   GeneratorClass?: GetGeneratorConstructor<GenParameter>,
 ) => GenParameter;
 type EnvOptions = BaseEnvironmentOptions & { createEnv?: any };
 
-export class RunContextBase<GeneratorType extends BaseGenerator = GeneratorImplementation> extends EventEmitter {
+export class RunContextBase<GeneratorType extends BaseGenerator = BaseGenerator> extends EventEmitter {
   readonly mockedGenerators: Record<string, BaseGenerator> = {};
   env!: Environment;
   generator!: GeneratorType;
@@ -435,7 +433,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = GeneratorImple
    * Mock the local configuration with the provided config
    * @param localConfig - should look just like if called config.getAll()
    */
-  withLocalConfig(localConfig: StorageRecord): this {
+  withLocalConfig(localConfig: any): this {
     assert(typeof localConfig === 'object', 'config should be an object');
     return this.onGenerator(generator => (generator as any).config.defaults(localConfig));
   }
@@ -713,7 +711,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = GeneratorImple
   }
 }
 
-export default class RunContext<GeneratorType extends BaseGenerator = GeneratorImplementation>
+export default class RunContext<GeneratorType extends BaseGenerator = BaseGenerator>
   extends RunContextBase<GeneratorType>
   implements Promise<RunResult<GeneratorType>>
 {
@@ -740,7 +738,7 @@ export default class RunContext<GeneratorType extends BaseGenerator = GeneratorI
   }
 }
 
-export class BasicRunContext extends RunContext {
+export class BasicRunContext<GeneratorType extends BaseGenerator = BaseGenerator> extends RunContext<GeneratorType> {
   async run(): PromiseRunResult<any> {
     await this.prepare();
     const runResult = new RunResult(this._createRunResultOptions());

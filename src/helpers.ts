@@ -4,10 +4,18 @@ import { resolve } from 'node:path';
 import process from 'node:process';
 import _ from 'lodash';
 import { spy as sinonSpy, stub as sinonStub } from 'sinon';
-import GeneratorImplementation, { type StorageRecord, type BaseOptions as GeneratorOptions } from 'yeoman-generator';
+import GeneratorImplementation from 'yeoman-generator';
 import Environment from 'yeoman-environment';
 import type { createEnv } from 'yeoman-environment';
-import type { BaseEnvironmentOptions, BaseGenerator, GetGeneratorConstructor, PromptAnswers, PromptQuestion } from '@yeoman/types';
+import type {
+  BaseEnvironmentOptions,
+  BaseGenerator,
+  GeneratorBaseOptions,
+  GetGeneratorConstructor,
+  GetGeneratorOptions,
+  PromptAnswers,
+  PromptQuestion,
+} from '@yeoman/types';
 import type { SinonSpiedInstance } from 'sinon';
 import { DummyPrompt, type DummyPromptOptions, TestAdapter } from './adapter.js';
 import RunContext, { BasicRunContext, type RunContextSettings } from './run-context.js';
@@ -32,7 +40,7 @@ export type GeneratorFactory<GenParameter extends BaseGenerator = GeneratorImple
 export class YeomanTest {
   settings?: RunContextSettings;
   environmentOptions?: BaseEnvironmentOptions;
-  generatorOptions?: GeneratorOptions;
+  generatorOptions?: GeneratorBaseOptions;
 
   /**
    * @deprecated
@@ -134,7 +142,7 @@ export class YeomanTest {
    * @param generator - a Yeoman generator
    * @param localConfig - localConfig - should look just like if called config.getAll()
    */
-  mockLocalConfig(generator: BaseGenerator, localConfig: StorageRecord) {
+  mockLocalConfig(generator: BaseGenerator, localConfig: any) {
     (generator as any).config.defaults(localConfig);
   }
 
@@ -209,7 +217,7 @@ export class YeomanTest {
     name: string,
     dependencies: Dependency[],
     args?: string[],
-    options?: GeneratorOptions,
+    options?: GetGeneratorOptions<GeneratorType>,
     localConfigOnly = true,
   ): Promise<GeneratorType> {
     const env = await this.createEnv([], { sharedOptions: { localConfigOnly } });
