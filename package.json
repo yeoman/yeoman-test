@@ -47,10 +47,10 @@
     "inquirer": "^9.2.2",
     "lodash": "^4.17.21",
     "mem-fs": "^3.0.0",
-    "mem-fs-editor": "^10.0.1",
+    "mem-fs-editor": "^10.0.2",
     "sinon": "^14.0.2",
     "temp-dir": "^3.0.0",
-    "yeoman-generator": "^6.0.0-alpha.2"
+    "yeoman-generator": "^6.0.0-alpha.3"
   },
   "peerDependencies": {
     "yeoman-environment": "^3.13.0 || ^4.0.0-alpha.0"

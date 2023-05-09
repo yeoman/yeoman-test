@@ -141,14 +141,13 @@ export class YeomanTest {
   /**
    * Create a mocked generator
    */
-  createMockedGenerator(
-    GeneratorClass: typeof GeneratorImplementation = class MockedGenerator extends GeneratorImplementation {},
-  ): SinonSpiedInstance<typeof GeneratorImplementation> {
-    const generator = sinonSpy(GeneratorClass);
+  createMockedGenerator(GeneratorClass = GeneratorImplementation): SinonSpiedInstance<typeof GeneratorImplementation> {
+    class MockedGenerator extends GeneratorClass {}
+    const generator = sinonSpy(MockedGenerator);
     for (const methodName of ['run', 'queueTasks', 'runWithOptions', 'queueOwnTasks']) {
-      if ((GeneratorClass.prototype as any)[methodName]) {
-        (GeneratorClass.prototype as any)[methodName] = sinonStub();
-      }
+      Object.defineProperty(MockedGenerator.prototype, methodName, {
+        value: sinonStub(),
+      });
     }
 
     return generator;
@@ -164,11 +163,15 @@ export class YeomanTest {
         this.shouldRun = true;
       },
     },
-  ): GenParameter {
+  ): new (...args: any[]) => GenParameter {
     class DummyGenerator extends Generator {
       constructor(...args: any[]) {
-        args[1].namespace = args[1].namespace ?? 'dummy';
-        args[1].resolved = args[1].resolved ?? 'dummy';
+        const optIndex = Array.isArray(args[0]) ? 1 : 0;
+        args[optIndex] = args[optIndex] ?? {};
+        const options = args[optIndex];
+        options.namespace = options.namespace ?? 'dummy';
+        options.resolved = options.resolved ?? 'dummy';
+
         super(...args);
       }
     }
