@@ -50,7 +50,7 @@
     "mem-fs-editor": "^10.0.2",
     "sinon": "^14.0.2",
     "temp-dir": "^3.0.0",
-    "yeoman-generator": "^6.0.0-alpha.3"
+    "yeoman-generator": "^6.0.0-alpha.4"
   },
   "peerDependencies": {
     "yeoman-environment": "^3.13.0 || ^4.0.0-alpha.0"
