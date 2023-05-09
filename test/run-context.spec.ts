@@ -78,8 +78,8 @@ describe('RunContext', function () {
       const Dummy = helpers.createDummyGenerator();
       const execSpy = sinonStub().throws(error);
       const endSpy = sinonSpy();
-      (Dummy.prototype as any).test = execSpy;
-      (Dummy.prototype as any).end = execSpy;
+      Dummy.prototype.test = execSpy;
+      Dummy.prototype.end = execSpy;
       const ctx = new RunContext(Dummy);
 
       ctx.on('error', function (error_) {
@@ -213,7 +213,7 @@ describe('RunContext', function () {
       process.once('unhandledRejection', errorHandler);
 
       const Dummy = helpers.createDummyGenerator();
-      (Dummy.prototype as any).test = execSpy;
+      Dummy.prototype.test = execSpy;
 
       setImmediate(function () {
         return new RunContext(Dummy).on('end', () => {});
@@ -231,7 +231,7 @@ describe('RunContext', function () {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
       const execSpy = sinonStub().throws(error);
-      (Dummy.prototype as any).test = execSpy;
+      Dummy.prototype.test = execSpy;
       const ctx = new RunContext(Dummy);
 
       return ctx.toPromise().catch(function (error_) {
@@ -251,7 +251,7 @@ describe('RunContext', function () {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
       const execSpy = sinonStub().throws(error);
-      (Dummy.prototype as any).test = execSpy;
+      Dummy.prototype.test = execSpy;
       const ctx = new RunContext(Dummy);
 
       return ctx.toPromise().then(
@@ -268,7 +268,7 @@ describe('RunContext', function () {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
       const execSpy = sinonStub().throws(error);
-      (Dummy.prototype as any).test = execSpy;
+      Dummy.prototype.test = execSpy;
       const ctx = new RunContext(Dummy);
 
       return ctx.toPromise().catch(function (error_) {
