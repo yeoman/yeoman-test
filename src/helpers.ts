@@ -7,7 +7,7 @@ import { spy as sinonSpy, stub as sinonStub } from 'sinon';
 import type {
   BaseEnvironmentOptions,
   BaseGenerator,
-  GeneratorBaseOptions,
+  BaseGeneratorOptions,
   GetGeneratorConstructor,
   GetGeneratorOptions,
   PromptAnswers,
@@ -38,7 +38,7 @@ export type GeneratorFactory<GenParameter extends BaseGenerator = DefaultGenerat
 export class YeomanTest {
   settings?: RunContextSettings;
   environmentOptions?: BaseEnvironmentOptions;
-  generatorOptions?: GeneratorBaseOptions;
+  generatorOptions?: BaseGeneratorOptions;
 
   /**
    * @deprecated

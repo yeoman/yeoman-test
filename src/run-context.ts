@@ -11,7 +11,7 @@ import { create as createMemFs, type Store } from 'mem-fs';
 import tempDirectory from 'temp-dir';
 import type { BaseEnvironmentOptions, BaseGenerator, GetGeneratorConstructor, GetGeneratorOptions, PromptAnswers } from '@yeoman/types';
 import { type LookupOptions } from 'yeoman-environment';
-import { create as createMemFsEditor, type MemFsEditor, type VinylMemFsEditorFile } from 'mem-fs-editor';
+import { create as createMemFsEditor, type MemFsEditorFile, type MemFsEditor } from 'mem-fs-editor';
 import RunResult, { type RunResultOptions } from './run-result.js';
 import defaultHelpers, { type Dependency, type YeomanTest, type GeneratorFactory } from './helpers.js';
 import { type DummyPromptOptions } from './adapter.js';
@@ -38,7 +38,7 @@ export type RunContextSettings = {
 
   autoCleanup?: boolean;
 
-  memFs?: Store;
+  memFs?: Store<MemFsEditorFile>;
 
   /**
    * File path to the generator (only used if Generator is a constructor)
@@ -67,7 +67,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
   completed = false;
   targetDirectory?: string;
   editor!: MemFsEditor;
-  memFs: Store<VinylMemFsEditorFile>;
+  memFs: Store<MemFsEditorFile>;
   mockedGeneratorFactory: MockedGeneratorFactory;
 
   protected environmentPromise?: PromiseRunResult<GeneratorType>;
@@ -128,7 +128,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     }
 
     this.helpers = helpers;
-    this.memFs = (settings?.memFs as Store<VinylMemFsEditorFile>) ?? createMemFs();
+    this.memFs = settings?.memFs ?? createMemFs();
     this.mockedGeneratorFactory = this.helpers.createMockedGenerator as any;
   }
 
