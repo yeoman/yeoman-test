@@ -2,28 +2,46 @@
   "name": "yeoman-test",
   "version": "8.0.0-beta.0",
   "description": "Test utilities for Yeoman generators",
-  "homepage": "http://yeoman.io/authoring/testing.html",
-  "author": "The Yeoman Team",
-  "type": "module",
-  "files": [
-    "dist"
-  ],
-  "types": "./dist/index.d.ts",
-  "exports": {
-    "types": "./dist/index.d.ts",
-    "import": "./dist/index.js"
-  },
   "keywords": [
     "yeoman",
     "unit test"
   ],
+  "homepage": "http://yeoman.io/authoring/testing.html",
   "repository": "yeoman/yeoman-test",
   "license": "MIT",
-  "engines": {
-    "node": "^16.17.0 || >=18.12.0"
+  "author": "The Yeoman Team",
+  "type": "module",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.js"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "doc": "npm run doc:generate && npm run doc:fix && npm run doc:prettier",
+    "doc:fix": "sed -i -e 's:^[[:space:]]*<!--[[:space:]]*$::g' -e 's:^[[:space:]]*-->[[:space:]]*$::g' $npm_package_config_doc_path/global.html",
+    "doc:generate": "jsdoc -c jsdoc.json -d $npm_package_config_doc_path",
+    "doc:prettier": "prettier $npm_package_config_doc_path --write --ignore-path .prettierignore-doc",
+    "precommit": "lint-staged",
+    "prepare": "npm run build",
+    "pretest": "xo",
+    "test": "c8 esmocha"
   },
   "config": {
     "doc_path": "../yeoman-test-doc"
+  },
+  "dependencies": {
+    "inquirer": "^9.2.2",
+    "lodash": "^4.17.21",
+    "mem-fs": "^3.0.0",
+    "mem-fs-editor": "^10.0.2",
+    "sinon": "^14.0.2",
+    "temp-dir": "^3.0.0",
+    "type-fest": "^3.10.0"
   },
   "devDependencies": {
     "@types/inquirer": "^9.0.3",
@@ -43,53 +61,20 @@
     "yeoman-environment": "^3.16.1",
     "yeoman-generator": "^6.0.0-beta.1"
   },
-  "dependencies": {
-    "inquirer": "^9.2.2",
-    "lodash": "^4.17.21",
-    "mem-fs": "^3.0.0",
-    "mem-fs-editor": "^10.0.2",
-    "sinon": "^14.0.2",
-    "temp-dir": "^3.0.0",
-    "type-fest": "^3.10.0"
-  },
   "peerDependencies": {
     "@yeoman/types": "^0.3.0",
     "yeoman-environment": "^3.13.0 || ^4.0.0-alpha.0",
     "yeoman-generator": "^5.8.0 || ^6.0.0-beta.1"
   },
   "peerDependenciesMeta": {
-    "yeoman-generator": {
-      "optional": true
-    },
     "yeoman-environment": {
       "optional": true
+    },
+    "yeoman-generator": {
+      "optional": true
     }
   },
-  "scripts": {
-    "test": "c8 esmocha",
-    "build": "tsc",
-    "prepare": "npm run build",
-    "pretest": "xo",
-    "precommit": "lint-staged",
-    "doc": "npm run doc:generate && npm run doc:fix && npm run doc:prettier",
-    "doc:generate": "jsdoc -c jsdoc.json -d $npm_package_config_doc_path",
-    "doc:prettier": "prettier $npm_package_config_doc_path --write --ignore-path .prettierignore-doc",
-    "doc:fix": "sed -i -e 's:^[[:space:]]*<!--[[:space:]]*$::g' -e 's:^[[:space:]]*-->[[:space:]]*$::g' $npm_package_config_doc_path/global.html",
-    "coverage": "nyc report --reporter=text-lcov | coveralls"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run pretest"
-    }
-  },
-  "lint-staged": {
-    "*.js": [
-      "xo --fix",
-      "git add"
-    ],
-    "*.json": [
-      "prettier --write",
-      "git add"
-    ]
+  "engines": {
+    "node": "^16.17.0 || >=18.12.0"
   }
 }
