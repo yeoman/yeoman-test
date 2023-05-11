@@ -132,7 +132,7 @@ export class TestAdapter implements InputOutputAdapter {
   }
 
   close(): void {
-    // No empty
+    this.promptModule.restoreDefaultPrompts();
   }
 
   async prompt<A extends PromptAnswers = PromptAnswers>(

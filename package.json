@@ -26,6 +26,7 @@
     "doc_path": "../yeoman-test-doc"
   },
   "devDependencies": {
+    "@types/inquirer": "^9.0.3",
     "@types/node": "^16.18.19",
     "@types/sinon": "^10.0.13",
     "c8": "^7.13.0",
@@ -39,21 +40,30 @@
     "tui-jsdoc-template": "^1.2.2",
     "typescript": "^5.0.4",
     "xo": "^0.54.2",
-    "yeoman-environment": "^3.16.1"
+    "yeoman-environment": "^3.16.1",
+    "yeoman-generator": "^6.0.0-beta.1"
   },
   "dependencies": {
-    "@types/inquirer": "^9.0.3",
-    "@yeoman/types": "^0.1.2",
     "inquirer": "^9.2.2",
     "lodash": "^4.17.21",
     "mem-fs": "^3.0.0",
     "mem-fs-editor": "^10.0.2",
     "sinon": "^14.0.2",
     "temp-dir": "^3.0.0",
-    "yeoman-generator": "^6.0.0-alpha.4"
+    "type-fest": "^3.10.0"
   },
   "peerDependencies": {
+    "@yeoman/types": ">=0.2.0",
+    "yeoman-generator": "^5.8.0 || ^6.0.0-beta.1",
     "yeoman-environment": "^3.13.0 || ^4.0.0-alpha.0"
+  },
+  "peerDependenciesMeta": {
+    "yeoman-generator": {
+      "optional": true
+    },
+    "yeoman-environment": {
+      "optional": true
+    }
   },
   "scripts": {
     "test": "c8 esmocha",

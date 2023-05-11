@@ -10,13 +10,13 @@ import { resetFileCommitStates } from 'mem-fs-editor/state';
 import { create as createMemFs, type Store } from 'mem-fs';
 import tempDirectory from 'temp-dir';
 import type { BaseEnvironmentOptions, BaseGenerator, GetGeneratorConstructor, GetGeneratorOptions, PromptAnswers } from '@yeoman/types';
-import type Environment from 'yeoman-environment';
 import { type LookupOptions } from 'yeoman-environment';
 import { create as createMemFsEditor, type MemFsEditor, type VinylMemFsEditorFile } from 'mem-fs-editor';
 import RunResult, { type RunResultOptions } from './run-result.js';
 import defaultHelpers, { type Dependency, type YeomanTest, type GeneratorFactory } from './helpers.js';
 import { type DummyPromptOptions } from './adapter.js';
 import testContext from './test-context.js';
+import type { DefaultGeneratorApi, DefaultEnvironmentApi } from './type-helpers.js';
 
 const { camelCase, kebabCase, merge: lodashMerge, set: lodashSet } = _;
 
@@ -53,14 +53,14 @@ export type RunContextSettings = {
 };
 
 type PromiseRunResult<GeneratorType extends BaseGenerator> = Promise<RunResult<GeneratorType>>;
-type MockedGeneratorFactory<GenParameter extends BaseGenerator = BaseGenerator> = (
+type MockedGeneratorFactory<GenParameter extends BaseGenerator = DefaultGeneratorApi> = (
   GeneratorClass?: GetGeneratorConstructor<GenParameter>,
-) => GenParameter;
+) => Promise<GenParameter>;
 type EnvOptions = BaseEnvironmentOptions & { createEnv?: any };
 
-export class RunContextBase<GeneratorType extends BaseGenerator = BaseGenerator> extends EventEmitter {
+export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGeneratorApi> extends EventEmitter {
   readonly mockedGenerators: Record<string, BaseGenerator> = {};
-  env!: Environment;
+  env!: DefaultEnvironmentApi;
   generator!: GeneratorType;
   readonly settings: RunContextSettings;
   readonly envOptions: EnvOptions;
@@ -81,7 +81,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = BaseGenerator>
 
   private readonly onTargetDirectoryCallbacks: Array<(this: this, targetDirectory: string) => any> = [];
 
-  private readonly onEnvironmentCallbacks: Array<(this: this, env: Environment) => any> = [];
+  private readonly onEnvironmentCallbacks: Array<(this: this, env: DefaultEnvironmentApi) => any> = [];
 
   private readonly inDirCallbacks: any[] = [];
   private readonly Generator?: string | GeneratorFactory<GeneratorType>;
@@ -95,6 +95,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = BaseGenerator>
   private built = false;
   private ran = false;
   private errored = false;
+  private readonly beforePrepareCallbacks: Array<(this: this) => void | Promise<void>> = [];
 
   /**
    * This class provide a run context object to façade the complexity involved in setting
@@ -296,7 +297,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = BaseGenerator>
       lookups = Array.isArray(lookups) ? lookups : [lookups];
       for (const lookup of lookups) {
         // eslint-disable-next-line no-await-in-loop
-        await env.lookup(lookup);
+        await (env as any).lookup(lookup);
       }
     });
   }
@@ -386,14 +387,12 @@ export class RunContextBase<GeneratorType extends BaseGenerator = BaseGenerator>
       for (const dependency of dependencies) {
         if (Array.isArray(dependency)) {
           if (typeof dependency[0] === 'string') {
-            // eslint-disable-next-line no-await-in-loop
-            await env.register(...dependency);
+            (env as any).register(...dependency);
           } else {
-            env.registerStub(...dependency);
+            (env as any).registerStub(...dependency);
           }
         } else {
-          // eslint-disable-next-line no-await-in-loop
-          await env.register(dependency);
+          (env as any).register(dependency);
         }
       }
     });
@@ -423,10 +422,13 @@ export class RunContextBase<GeneratorType extends BaseGenerator = BaseGenerator>
 
   withMockedGenerators(namespaces: string[]): this {
     assert(Array.isArray(namespaces), 'namespaces should be an array');
-    const dependencies: Dependency[] = namespaces.map(namespace => [this.mockedGeneratorFactory(), namespace]);
-    const entries = dependencies.map(([generator, namespace]) => [namespace, generator]);
-    Object.assign(this.mockedGenerators, Object.fromEntries(entries));
-    return this.withGenerators(dependencies);
+    return this.onBeforePrepare(async () => {
+      const MockedGenerator = await this.mockedGeneratorFactory();
+      const dependencies: Dependency[] = namespaces.map(namespace => [MockedGenerator, namespace]) as any;
+      const entries = dependencies.map(([generator, namespace]) => [namespace, generator]);
+      Object.assign(this.mockedGenerators, Object.fromEntries(entries));
+      this.withGenerators(dependencies);
+    });
   }
 
   /**
@@ -530,17 +532,35 @@ export class RunContextBase<GeneratorType extends BaseGenerator = BaseGenerator>
   }
 
   /**
+   * Execute callback prefore parepare
+   * @param callback
+   * @returns
+   */
+  onBeforePrepare(callback: (this: this) => void | Promise<void>): this {
+    this.assertNotBuild();
+    this.beforePrepareCallbacks.push(callback);
+    return this;
+  }
+
+  /**
    * Execute callback after environment is ready
    * @param callback
    * @returns
    */
-  onEnvironment(callback: (this: this, env: Environment) => any): this {
+  onEnvironment(callback: (this: this, env: DefaultEnvironmentApi) => any): this {
     this.assertNotBuild();
     this.onEnvironmentCallbacks.push(callback);
     return this;
   }
 
   async prepare() {
+    if (this.beforePrepareCallbacks.length > 0) {
+      for (const cb of this.beforePrepareCallbacks) {
+        // eslint-disable-next-line no-await-in-loop
+        await cb.call(this);
+      }
+    }
+
     this.assertNotBuild();
 
     this.built = true;

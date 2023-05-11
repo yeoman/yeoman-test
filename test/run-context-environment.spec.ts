@@ -101,8 +101,8 @@ describe('RunContext running environment', function () {
       build = false;
     });
     beforeEach(() => {
-      ctx.withEnvironment(env => {
-        const FakeGenerator = helpers.createDummyGenerator();
+      ctx.withEnvironment(async env => {
+        const FakeGenerator = await helpers.createDummyGenerator();
         const fake = sinonFake.returns(Promise.resolve(new FakeGenerator([], { env })));
         sinonReplace(env, 'create', fake);
       });

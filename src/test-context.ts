@@ -1,5 +1,4 @@
 import process from 'node:process';
-import type { BaseGenerator } from '@yeoman/types';
 import type RunContext from './run-context.js';
 import type RunResult from './run-result.js';
 
