@@ -19,6 +19,12 @@ import RunContext, { BasicRunContext, type RunContextSettings } from './run-cont
 import testContext from './test-context.js';
 import type { DefaultEnvironmentApi, DefaultGeneratorApi } from './type-helpers.js';
 
+let GeneratorImplementation;
+try {
+  const GeneratorImport = await import('yeoman-generator');
+  GeneratorImplementation = GeneratorImport.default ?? GeneratorImport;
+} catch {}
+
 const { cloneDeep } = _;
 
 /**
@@ -147,12 +153,7 @@ export class YeomanTest {
   /**
    * Create a mocked generator
    */
-  async createMockedGenerator(GeneratorClass): Promise<SinonSpiedInstance<DefaultGeneratorApi>> {
-    if (!GeneratorClass) {
-      const GeneratorImplementation = await import('yeoman-generator');
-      GeneratorClass = (GeneratorImplementation.default ?? GeneratorImplementation) as any;
-    }
-
+  createMockedGenerator(GeneratorClass = GeneratorImplementation): SinonSpiedInstance<DefaultGeneratorApi> {
     class MockedGenerator extends GeneratorClass {}
     const generator = sinonSpy(MockedGenerator);
     for (const methodName of ['run', 'queueTasks', 'runWithOptions', 'queueOwnTasks']) {
@@ -167,21 +168,15 @@ export class YeomanTest {
   /**
    * Create a simple, dummy generator
    */
-  async createDummyGenerator<GenParameter extends BaseGenerator = DefaultGeneratorApi>(
-    Generator?: GetGeneratorConstructor<GenParameter>,
+  createDummyGenerator<GenParameter extends BaseGenerator = DefaultGeneratorApi>(
+    Generator: GetGeneratorConstructor<GenParameter> = GeneratorImplementation,
     contents: Record<string, (...args: any[]) => void> = {
       test(this: any) {
         this.shouldRun = true;
       },
     },
-  ): Promise<new (...args: any[]) => GenParameter> {
-    if (!Generator) {
-      const GeneratorImplementation = await import('yeoman-generator');
-      Generator = (GeneratorImplementation.default ?? GeneratorImplementation) as any;
-    }
-
-    const GeneratorConstructor: GetGeneratorConstructor<GenParameter> = Generator as any;
-    class DummyGenerator extends GeneratorConstructor {
+  ): new (...args: any[]) => GenParameter {
+    class DummyGenerator extends Generator {
       constructor(...args: any[]) {
         const optIndex = Array.isArray(args[0]) ? 1 : 0;
         args[optIndex] = args[optIndex] ?? {};

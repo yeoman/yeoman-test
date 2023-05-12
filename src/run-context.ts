@@ -55,7 +55,7 @@ export type RunContextSettings = {
 type PromiseRunResult<GeneratorType extends BaseGenerator> = Promise<RunResult<GeneratorType>>;
 type MockedGeneratorFactory<GenParameter extends BaseGenerator = DefaultGeneratorApi> = (
   GeneratorClass?: GetGeneratorConstructor<GenParameter>,
-) => Promise<GenParameter>;
+) => GenParameter;
 type EnvOptions = BaseEnvironmentOptions & { createEnv?: any };
 
 export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGeneratorApi> extends EventEmitter {
@@ -422,13 +422,10 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
 
   withMockedGenerators(namespaces: string[]): this {
     assert(Array.isArray(namespaces), 'namespaces should be an array');
-    return this.onBeforePrepare(async () => {
-      const MockedGenerator = await this.mockedGeneratorFactory();
-      const dependencies: Dependency[] = namespaces.map(namespace => [MockedGenerator, namespace]) as any;
-      const entries = dependencies.map(([generator, namespace]) => [namespace, generator]);
-      Object.assign(this.mockedGenerators, Object.fromEntries(entries));
-      this.withGenerators(dependencies);
-    });
+    const dependencies: Dependency[] = namespaces.map(namespace => [this.mockedGeneratorFactory(), namespace]) as any;
+    const entries = dependencies.map(([generator, namespace]) => [namespace, generator]);
+    Object.assign(this.mockedGenerators, Object.fromEntries(entries));
+    return this.withGenerators(dependencies);
   }
 
   /**

@@ -75,19 +75,18 @@ describe('RunContext', function () {
 
     it('propagate generator error events', function (done) {
       const error = new Error('an error');
+      const Dummy = helpers.createDummyGenerator();
       const execSpy = sinonStub().throws(error);
       const endSpy = sinonSpy();
-      helpers.createDummyGenerator().then(Dummy => {
-        Dummy.prototype.test = execSpy;
-        Dummy.prototype.end = execSpy;
-        const ctx = new RunContext(Dummy);
+      Dummy.prototype.test = execSpy;
+      Dummy.prototype.end = execSpy;
+      const ctx = new RunContext(Dummy);
 
-        ctx.on('error', function (error_) {
-          sinonAssert.calledOnce(execSpy);
-          assert.equal(error_, error);
-          sinonAssert.notCalled(endSpy);
-          done();
-        });
+      ctx.on('error', function (error_) {
+        sinonAssert.calledOnce(execSpy);
+        assert.equal(error_, error);
+        sinonAssert.notCalled(endSpy);
+        done();
       });
     });
 
@@ -153,8 +152,8 @@ describe('RunContext', function () {
       }
     });
 
-    it('accepts settings', async function () {
-      const Dummy = await helpers.createDummyGenerator();
+    it('accepts settings', function () {
+      const Dummy = helpers.createDummyGenerator();
       const ctx = new RunContext(Dummy, {
         tmpdir: false,
         resolved: 'path',
@@ -205,20 +204,19 @@ describe('RunContext', function () {
     it('throw an unhandledRejection when no listener is present', function (done) {
       const error = new Error('dummy exception');
       const execSpy = sinonStub().throws(error);
-      helpers.createDummyGenerator().then(DummyGenerator => {
-        const errorHandler = function (error_) {
-          sinonAssert.calledOnce(execSpy);
-          assert.equal(error_, error);
-          done();
-        };
+      const errorHandler = function (error_) {
+        sinonAssert.calledOnce(execSpy);
+        assert.equal(error_, error);
+        done();
+      };
 
-        process.once('unhandledRejection', errorHandler);
+      process.once('unhandledRejection', errorHandler);
 
-        DummyGenerator.prototype.test = execSpy;
+      const Dummy = helpers.createDummyGenerator();
+      Dummy.prototype.test = execSpy;
 
-        setImmediate(function () {
-          return new RunContext(DummyGenerator).on('end', () => {});
-        });
+      setImmediate(function () {
+        return new RunContext(Dummy).on('end', () => {});
       });
     });
   });
@@ -231,7 +229,7 @@ describe('RunContext', function () {
 
     it('returns a reject promise on error', async function () {
       const error = new Error('an error');
-      const Dummy = await helpers.createDummyGenerator();
+      const Dummy = helpers.createDummyGenerator();
       const execSpy = sinonStub().throws(error);
       Dummy.prototype.test = execSpy;
       const ctx = new RunContext(Dummy);
@@ -251,7 +249,7 @@ describe('RunContext', function () {
 
     it('handles errors', async function () {
       const error = new Error('an error');
-      const Dummy = await helpers.createDummyGenerator();
+      const Dummy = helpers.createDummyGenerator();
       const execSpy = sinonStub().throws(error);
       Dummy.prototype.test = execSpy;
       const ctx = new RunContext(Dummy);
@@ -268,7 +266,7 @@ describe('RunContext', function () {
   describe('#catch()', function () {
     it('handles errors', async function () {
       const error = new Error('an error');
-      const Dummy = await helpers.createDummyGenerator();
+      const Dummy = helpers.createDummyGenerator();
       const execSpy = sinonStub().throws(error);
       Dummy.prototype.test = execSpy;
       const ctx = new RunContext(Dummy);
@@ -629,25 +627,21 @@ describe('RunContext', function () {
     });
 
     it('register mocked generator', function (done) {
-      helpers.createDummyGenerator().then(DummyGenerator => {
-        ctx.withGenerators([[DummyGenerator, 'dummy:gen']]).on('ready', function () {
-          assert(ctx.env.get('dummy:gen'));
-          done();
-        });
+      ctx.withGenerators([[helpers.createDummyGenerator(), 'dummy:gen']]).on('ready', function () {
+        assert(ctx.env.get('dummy:gen'));
+        done();
       });
     });
 
     it('allow multiple calls', function (done) {
-      helpers.createDummyGenerator().then(DymmyGenerator => {
-        ctx
-          .withGenerators([require.resolve('./fixtures/generator-simple/app')])
-          .withGenerators([[DymmyGenerator, 'dummy:gen']])
-          .on('ready', function () {
-            assert(ctx.env.get('dummy:gen'));
-            assert(ctx.env.get('simple:app'));
-            done();
-          });
-      });
+      ctx
+        .withGenerators([require.resolve('./fixtures/generator-simple/app')])
+        .withGenerators([[helpers.createDummyGenerator(), 'dummy:gen']])
+        .on('ready', function () {
+          assert(ctx.env.get('dummy:gen'));
+          assert(ctx.env.get('simple:app'));
+          done();
+        });
     });
   });
 
