@@ -9,7 +9,14 @@ import _ from 'lodash';
 import { resetFileCommitStates } from 'mem-fs-editor/state';
 import { create as createMemFs, type Store } from 'mem-fs';
 import tempDirectory from 'temp-dir';
-import type { BaseEnvironmentOptions, BaseGenerator, GetGeneratorConstructor, GetGeneratorOptions, PromptAnswers } from '@yeoman/types';
+import type {
+  BaseEnvironment,
+  BaseEnvironmentOptions,
+  BaseGenerator,
+  GetGeneratorConstructor,
+  GetGeneratorOptions,
+  PromptAnswers,
+} from '@yeoman/types';
 import { type LookupOptions } from 'yeoman-environment';
 import { create as createMemFsEditor, type MemFsEditorFile, type MemFsEditor } from 'mem-fs-editor';
 import RunResult, { type RunResultOptions } from './run-result.js';
@@ -387,12 +394,12 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       for (const dependency of dependencies) {
         if (Array.isArray(dependency)) {
           if (typeof dependency[0] === 'string') {
-            (env as any).register(...dependency);
+            env.register(...(dependency as Parameters<BaseEnvironment['register']>));
           } else {
-            (env as any).registerStub(...dependency);
+            env.registerStub(...(dependency as Parameters<BaseEnvironment['registerStub']>));
           }
         } else {
-          (env as any).register(dependency);
+          env.register(dependency as string);
         }
       }
     });

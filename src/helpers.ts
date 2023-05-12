@@ -5,6 +5,7 @@ import process from 'node:process';
 import _ from 'lodash';
 import { spy as sinonSpy, stub as sinonStub } from 'sinon';
 import type {
+  BaseEnvironment,
   BaseEnvironmentOptions,
   BaseGenerator,
   BaseGeneratorOptions,
@@ -30,7 +31,7 @@ const { cloneDeep } = _;
 /**
  * Dependencies can be path (autodiscovery) or an array [<generator>, <name>]
  */
-export type Dependency = string | Parameters<DefaultEnvironmentApi['registerStub']>;
+export type Dependency = Parameters<DefaultEnvironmentApi['register']> | Parameters<DefaultEnvironmentApi['registerStub']>;
 
 export type GeneratorFactory<GenParameter extends BaseGenerator = DefaultGeneratorApi> =
   | GetGeneratorConstructor<GenParameter>
@@ -241,12 +242,12 @@ export class YeomanTest {
     for (const dependency of dependencies) {
       if (Array.isArray(dependency)) {
         if (typeof dependency[0] === 'string') {
-          (env as any).register(...dependency);
+          env.register(...(dependency as Parameters<BaseEnvironment['register']>));
         } else {
-          (env as any).registerStub(...dependency);
+          env.registerStub(...(dependency as Parameters<BaseEnvironment['registerStub']>));
         }
       } else {
-        (env as any).register(dependency);
+        env.register(dependency as string);
       }
     }
   }
