@@ -26,18 +26,6 @@ describe('yeoman-test', function () {
     this.StubGenerator = class extends Generator {};
   });
 
-  describe('.registerDependencies()', function () {
-    it('accepts dependency as a path', function () {
-      helpers.registerDependencies(env, [require.resolve('./fixtures/generator-simple/app')]);
-      assert(env.get('simple:app'));
-    });
-
-    it('accepts dependency as array of [<generator>, <name>]', function () {
-      helpers.registerDependencies(env, [[this.StubGenerator, 'stub:app']]);
-      assert(env.get('stub:app'));
-    });
-  });
-
   describe('.createGenerator()', function () {
     it('create a new generator', async function () {
       const generator = await helpers.createGenerator('unicorn:app', [[this.StubGenerator, 'unicorn:app']]);
@@ -170,7 +158,7 @@ describe('yeoman-test', function () {
     describe('with a namespace', function () {
       it('return a RunContext object', function (done) {
         const context = helpers.run('simple:app').withEnvironment(env => {
-          helpers.registerDependencies(env, [require.resolve('./fixtures/generator-simple/app')]);
+          env.register(require.resolve('./fixtures/generator-simple/app'));
         });
         assert(context instanceof RunContext);
         context.on('end', done);

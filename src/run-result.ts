@@ -4,10 +4,10 @@ import path from 'node:path';
 import process from 'node:process';
 import type { Store } from 'mem-fs';
 import { create as createMemFsEditor, type MemFsEditorFile, type MemFsEditor } from 'mem-fs-editor';
-import type { BaseEnvironmentOptions, BaseGenerator } from '@yeoman/types';
+import type { BaseEnvironmentOptions, BaseGenerator, GetGeneratorConstructor } from '@yeoman/types';
+import type { DefaultEnvironmentApi, DefaultGeneratorApi } from '../types/type-helpers.js';
 import { type RunContextSettings } from './run-context.js';
-import { type GeneratorFactory, type YeomanTest } from './helpers.js';
-import type { DefaultEnvironmentApi, DefaultGeneratorApi } from './type-helpers.js';
+import { type YeomanTest } from './helpers.js';
 
 const isObject = object => typeof object === 'object' && object !== null && object !== undefined;
 
@@ -94,7 +94,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    * See helpers.create api
    */
   create<GeneratorType extends BaseGenerator = DefaultGeneratorApi>(
-    GeneratorOrNamespace: string | GeneratorFactory<GeneratorType>,
+    GeneratorOrNamespace: string | GetGeneratorConstructor<GeneratorType>,
     settings?: RunContextSettings,
     envOptions?: BaseEnvironmentOptions,
   ) {

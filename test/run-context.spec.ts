@@ -604,12 +604,10 @@ describe('RunContext', function () {
   });
 
   describe('#withMockedGenerators()', function () {
-    it('creates mocked generator', function (done) {
-      ctx.withMockedGenerators(['foo:bar']).on('ready', function () {
-        assert(ctx.env.get('foo:bar'));
-        assert(ctx.mockedGenerators['foo:bar']);
-        done();
-      });
+    it('creates mocked generator', async function () {
+      await ctx.withMockedGenerators(['foo:bar']).build();
+      assert(ctx.env.get('foo:bar'));
+      assert(ctx.mockedGenerators['foo:bar']);
     });
   });
 
@@ -622,12 +620,12 @@ describe('RunContext', function () {
     });
 
     it('register paths with namespaces', async function () {
-      await ctx.withGenerators([[require.resolve('./fixtures/generator-simple/app'), 'foo:bar']]).build();
+      await ctx.withGenerators([[require.resolve('./fixtures/generator-simple/app'), { namespace: 'foo:bar' }]]).build();
       assert(ctx.env.get('foo:bar'));
     });
 
     it('register mocked generator', function (done) {
-      ctx.withGenerators([[helpers.createDummyGenerator(), 'dummy:gen']]).on('ready', function () {
+      ctx.withGenerators([[helpers.createDummyGenerator(), { namespace: 'dummy:gen' }]]).on('ready', function () {
         assert(ctx.env.get('dummy:gen'));
         done();
       });
@@ -636,7 +634,7 @@ describe('RunContext', function () {
     it('allow multiple calls', function (done) {
       ctx
         .withGenerators([require.resolve('./fixtures/generator-simple/app')])
-        .withGenerators([[helpers.createDummyGenerator(), 'dummy:gen']])
+        .withGenerators([[helpers.createDummyGenerator(), { namespace: 'dummy:gen' }]])
         .on('ready', function () {
           assert(ctx.env.get('dummy:gen'));
           assert(ctx.env.get('simple:app'));

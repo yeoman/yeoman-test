@@ -17,7 +17,8 @@
   },
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "types"
   ],
   "scripts": {
     "build": "tsc",
@@ -29,7 +30,7 @@
     "precommit": "lint-staged",
     "prepare": "npm run build",
     "pretest": "xo",
-    "test": "c8 esmocha"
+    "test": "c8 esmocha --forbid-only"
   },
   "config": {
     "doc_path": "../yeoman-test-doc"
@@ -58,13 +59,13 @@
     "tui-jsdoc-template": "^1.2.2",
     "typescript": "^5.0.4",
     "xo": "^0.54.2",
-    "yeoman-environment": "^3.16.1",
+    "yeoman-environment": "^3.17.0",
     "yeoman-generator": "^5.8.0"
   },
   "peerDependencies": {
-    "@yeoman/types": "^0.3.0",
-    "yeoman-environment": "^3.13.0 || ^4.0.0-alpha.0",
-    "yeoman-generator": "^5.8.0 || ^6.0.0-beta.1"
+    "@yeoman/types": ">=0.4.0 < 2.0.0",
+    "yeoman-environment": ">=3.17.0 < 5.0.0",
+    "yeoman-generator": ">=5.8.0 < 7.0.0"
   },
   "peerDependenciesMeta": {
     "yeoman-environment": {

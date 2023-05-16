@@ -10,20 +10,19 @@ import { resetFileCommitStates } from 'mem-fs-editor/state';
 import { create as createMemFs, type Store } from 'mem-fs';
 import tempDirectory from 'temp-dir';
 import type {
-  BaseEnvironment,
   BaseEnvironmentOptions,
   BaseGenerator,
   GetGeneratorConstructor,
   GetGeneratorOptions,
   PromptAnswers,
+  LookupOptions,
 } from '@yeoman/types';
-import { type LookupOptions } from 'yeoman-environment';
 import { create as createMemFsEditor, type MemFsEditorFile, type MemFsEditor } from 'mem-fs-editor';
+import type { DefaultGeneratorApi, DefaultEnvironmentApi } from '../types/type-helpers.js';
 import RunResult, { type RunResultOptions } from './run-result.js';
-import defaultHelpers, { type Dependency, type YeomanTest, type GeneratorFactory } from './helpers.js';
+import defaultHelpers, { type Dependency, type YeomanTest } from './helpers.js';
 import { type DummyPromptOptions } from './adapter.js';
 import testContext from './test-context.js';
-import type { DefaultGeneratorApi, DefaultEnvironmentApi } from './type-helpers.js';
 
 const { camelCase, kebabCase, merge: lodashMerge, set: lodashSet } = _;
 
@@ -62,7 +61,7 @@ export type RunContextSettings = {
 type PromiseRunResult<GeneratorType extends BaseGenerator> = Promise<RunResult<GeneratorType>>;
 type MockedGeneratorFactory<GenParameter extends BaseGenerator = DefaultGeneratorApi> = (
   GeneratorClass?: GetGeneratorConstructor<GenParameter>,
-) => GenParameter;
+) => GetGeneratorConstructor<GenParameter>;
 type EnvOptions = BaseEnvironmentOptions & { createEnv?: any };
 
 export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGeneratorApi> extends EventEmitter {
@@ -91,7 +90,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
   private readonly onEnvironmentCallbacks: Array<(this: this, env: DefaultEnvironmentApi) => any> = [];
 
   private readonly inDirCallbacks: any[] = [];
-  private readonly Generator?: string | GeneratorFactory<GeneratorType>;
+  private readonly Generator?: string | GetGeneratorConstructor<GeneratorType>;
   private readonly helpers: YeomanTest;
   private readonly temporaryDir = path.join(tempDirectory, crypto.randomBytes(20).toString('hex'));
 
@@ -116,7 +115,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    */
 
   constructor(
-    generatorType?: string | GeneratorFactory<GeneratorType>,
+    generatorType?: string | GetGeneratorConstructor<GeneratorType>,
     settings?: RunContextSettings,
     envOptions: EnvOptions = {},
     helpers = defaultHelpers,
@@ -392,14 +391,10 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     assert(Array.isArray(dependencies), 'dependencies should be an array');
     return this.onEnvironment(async env => {
       for (const dependency of dependencies) {
-        if (Array.isArray(dependency)) {
-          if (typeof dependency[0] === 'string') {
-            env.register(...(dependency as Parameters<BaseEnvironment['register']>));
-          } else {
-            env.registerStub(...(dependency as Parameters<BaseEnvironment['registerStub']>));
-          }
+        if (typeof dependency === 'string') {
+          env.register(dependency);
         } else {
-          env.register(dependency as string);
+          env.register(...dependency);
         }
       }
     });
@@ -429,9 +424,9 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
 
   withMockedGenerators(namespaces: string[]): this {
     assert(Array.isArray(namespaces), 'namespaces should be an array');
-    const dependencies: Dependency[] = namespaces.map(namespace => [this.mockedGeneratorFactory(), namespace]) as any;
-    const entries = dependencies.map(([generator, namespace]) => [namespace, generator]);
-    Object.assign(this.mockedGenerators, Object.fromEntries(entries));
+    const mockedGenerators = Object.fromEntries(namespaces.map(namespace => [namespace, this.mockedGeneratorFactory()]));
+    const dependencies: Dependency[] = Object.entries(mockedGenerators).map(([namespace, mock]) => [mock, { namespace }]);
+    Object.assign(this.mockedGenerators, mockedGenerators);
     return this.withGenerators(dependencies);
   }
 
@@ -634,10 +629,10 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     const { namespace = typeof this.Generator === 'string' ? this.env.namespace(this.Generator) : 'gen:test' } = this.settings;
     if (typeof this.Generator === 'string' && namespace !== this.Generator) {
       // Generator is a file path, it should be registered.
-      this.env.register(this.Generator, namespace);
+      this.env.register(this.Generator, { namespace });
     } else if (typeof this.Generator !== 'string') {
       const { resolved } = this.settings;
-      this.env.registerStub(this.Generator as unknown as any, namespace, resolved);
+      this.env.register(this.Generator as any, { namespace, resolved });
     }
 
     this.generator = await this.env.create(namespace, this.args, {

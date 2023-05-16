@@ -1,5 +1,5 @@
 {
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "types/type-helpers.d.ts"],
   "compilerOptions": {
     /* Language and Environment */
     "target": "ES2022" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
@@ -19,6 +19,7 @@
     "allowSyntheticDefaultImports": true /* Allow 'import x from y' when a module doesn't have a default export. */,
     "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
     "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
+    "allowJs": true,
 
     /* Type Checking */
     "strict": true /* Enable all strict type-checking options. */,

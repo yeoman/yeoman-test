@@ -5,7 +5,6 @@ import process from 'node:process';
 import _ from 'lodash';
 import { spy as sinonSpy, stub as sinonStub } from 'sinon';
 import type {
-  BaseEnvironment,
   BaseEnvironmentOptions,
   BaseGenerator,
   BaseGeneratorOptions,
@@ -15,10 +14,11 @@ import type {
   PromptQuestion,
 } from '@yeoman/types';
 import type { SinonSpiedInstance } from 'sinon';
+import type { DefaultEnvironmentApi, DefaultGeneratorApi } from '../types/type-helpers.js';
 import { DummyPrompt, type DummyPromptOptions, TestAdapter } from './adapter.js';
 import RunContext, { BasicRunContext, type RunContextSettings } from './run-context.js';
 import testContext from './test-context.js';
-import type { DefaultEnvironmentApi, DefaultGeneratorApi } from './type-helpers.js';
+import { defaultEnvironment } from './default-environment.js';
 
 let GeneratorImplementation;
 try {
@@ -31,11 +31,7 @@ const { cloneDeep } = _;
 /**
  * Dependencies can be path (autodiscovery) or an array [<generator>, <name>]
  */
-export type Dependency = Parameters<DefaultEnvironmentApi['register']> | Parameters<DefaultEnvironmentApi['registerStub']>;
-
-export type GeneratorFactory<GenParameter extends BaseGenerator = DefaultGeneratorApi> =
-  | GetGeneratorConstructor<GenParameter>
-  | ((...args: ConstructorParameters<GetGeneratorConstructor<GenParameter>>) => GenParameter);
+export type Dependency = string | Parameters<DefaultEnvironmentApi['register']>;
 
 /**
  * Collection of unit test helpers. (mostly related to Mocha syntax)
@@ -226,30 +222,15 @@ export class YeomanTest {
     localConfigOnly = true,
   ): Promise<GeneratorType> {
     const env = await this.createEnv([], { sharedOptions: { localConfigOnly } });
-    this.registerDependencies(env, dependencies);
-    return env.create(name, args as any, options as any) as unknown as GeneratorType;
-  }
-
-  /**
-   * @deprecated
-   * Register a list of dependent generators into the provided env.
-   * Dependecies can be path (autodiscovery) or an array [{generator}, {name}]
-   *
-   * @param dependencies - paths to the generators dependencies
-   */
-
-  registerDependencies(env: DefaultEnvironmentApi, dependencies: Dependency[]) {
     for (const dependency of dependencies) {
-      if (Array.isArray(dependency)) {
-        if (typeof dependency[0] === 'string') {
-          env.register(...(dependency as Parameters<BaseEnvironment['register']>));
-        } else {
-          env.registerStub(...(dependency as Parameters<BaseEnvironment['registerStub']>));
-        }
+      if (typeof dependency === 'string') {
+        env.register(dependency);
       } else {
-        env.register(dependency as string);
+        env.register(...dependency);
       }
     }
+
+    return env.create(name, args as any, options as any) as unknown as GeneratorType;
   }
 
   /**
@@ -269,9 +250,7 @@ export class YeomanTest {
    */
 
   async createEnv(...args: any[]): Promise<DefaultEnvironmentApi> {
-    const dynamicEnv = await import('yeoman-environment');
-    const createEnv = dynamicEnv.createEnv ?? dynamicEnv.default.createEnv;
-    return createEnv(...args);
+    return (await defaultEnvironment())(...args);
   }
 
   /**
@@ -324,7 +303,7 @@ export class YeomanTest {
    */
 
   run<GeneratorType extends BaseGenerator = DefaultGeneratorApi>(
-    GeneratorOrNamespace: string | GeneratorFactory<GeneratorType>,
+    GeneratorOrNamespace: string | GetGeneratorConstructor<GeneratorType>,
     settings?: RunContextSettings,
     envOptions?: BaseEnvironmentOptions,
   ): RunContext<GeneratorType> {
@@ -351,7 +330,7 @@ export class YeomanTest {
    */
 
   create<GeneratorType extends BaseGenerator = DefaultGeneratorApi>(
-    GeneratorOrNamespace: string | GeneratorFactory<GeneratorType>,
+    GeneratorOrNamespace: string | GetGeneratorConstructor<GeneratorType>,
     settings?: RunContextSettings,
     envOptions?: BaseEnvironmentOptions,
   ) {
