@@ -635,11 +635,14 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       this.env.register(this.Generator as any, { namespace, resolved });
     }
 
-    this.generator = await this.env.create(namespace, this.args, {
-      force: true,
-      skipCache: true,
-      skipInstall: true,
-      ...this.options,
+    this.generator = await this.env.create(namespace, {
+      generatorArgs: this.args,
+      generatorOptions: {
+        force: true,
+        skipCache: true,
+        skipInstall: true,
+        ...this.options,
+      },
     });
 
     for (const onGeneratorCallback of this.onGeneratorCallbacks) {

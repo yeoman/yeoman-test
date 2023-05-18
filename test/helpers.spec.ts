@@ -48,7 +48,7 @@ describe('yeoman-test', function () {
 
   describe('.mockPrompt()', function () {
     beforeEach(async function () {
-      this.generator = await env.instantiate(helpers.createDummyGenerator(), [], {});
+      this.generator = await env.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
       helpers.mockPrompt(this.generator, { answer: 'foo' });
     });
 
@@ -59,7 +59,7 @@ describe('yeoman-test', function () {
     });
 
     it('uses default values when no answer is passed', async function () {
-      const generator = await env.instantiate(helpers.createDummyGenerator(), [], {});
+      const generator = await env.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
       helpers.mockPrompt(generator);
       return generator.prompt([{ name: 'respuesta', message: 'foo', type: 'input', default: 'bar' }]).then(function (answers) {
         assert.equal(answers.respuesta, 'bar');
@@ -67,7 +67,7 @@ describe('yeoman-test', function () {
     });
 
     it('supports `null` answer for `list` type', async function () {
-      const generator = await env.instantiate(helpers.createDummyGenerator(), [], {});
+      const generator = await env.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
 
       helpers.mockPrompt(generator, {
         respuesta: null,
@@ -79,7 +79,7 @@ describe('yeoman-test', function () {
     });
 
     it('treats `null` as no answer for `input` type', async function () {
-      const generator = await env.instantiate(helpers.createDummyGenerator(), [], {});
+      const generator = await env.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
 
       helpers.mockPrompt(generator, {
         respuesta: null,
@@ -91,7 +91,7 @@ describe('yeoman-test', function () {
     });
 
     it('uses `true` as the default value for `confirm` type', async function () {
-      const generator = await env.instantiate(helpers.createDummyGenerator(), [], {});
+      const generator = await env.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
       helpers.mockPrompt(generator, {});
 
       return generator.prompt([{ name: 'respuesta', message: 'foo', type: 'confirm' }]).then(function (answers) {
@@ -100,7 +100,7 @@ describe('yeoman-test', function () {
     });
 
     it('supports `false` answer for `confirm` type', async function () {
-      const generator = await env.instantiate(helpers.createDummyGenerator(), [], {});
+      const generator = await env.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
       helpers.mockPrompt(generator, { respuesta: false });
 
       return generator.prompt([{ name: 'respuesta', message: 'foo', type: 'confirm' }]).then(function (answers) {
@@ -115,7 +115,7 @@ describe('yeoman-test', function () {
     });
 
     it('can be call multiple time on the same generator', async function () {
-      const generator = await env.instantiate(helpers.createDummyGenerator(), [], {});
+      const generator = await env.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
       helpers.mockPrompt(generator, { foo: 1 });
       helpers.mockPrompt(generator, { foo: 2 });
       return generator.prompt({ message: 'bar', name: 'foo' }).then(function (answers) {
@@ -124,7 +124,7 @@ describe('yeoman-test', function () {
     });
 
     it('throws if answer is not provided', async function () {
-      const generator = await env.instantiate(helpers.createDummyGenerator(), [], {});
+      const generator = await env.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
       helpers.mockPrompt(generator, { foo: 1 }, { throwOnMissingAnswer: true });
       return this.generator.prompt([{ message: 'bar', name: 'notFound' }]).then(
         () => assert.fail(),

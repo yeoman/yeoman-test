@@ -230,7 +230,7 @@ export class YeomanTest {
       }
     }
 
-    return env.create(name, args as any, options as any) as unknown as GeneratorType;
+    return env.create<GeneratorType>(name, { generatorArgs: args, generatorOptions: options });
   }
 
   /**
