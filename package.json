@@ -64,8 +64,8 @@
   },
   "peerDependencies": {
     "@yeoman/types": "^1.0.0",
-    "yeoman-environment": "^3.18.0 || ^4.0.0-alpha.5",
-    "yeoman-generator": "^5.8.0 || ^6.0.0-beta.3"
+    "yeoman-environment": "^3.18.0 || ^4.0.0-alpha.6",
+    "yeoman-generator": "^5.8.0 || ^6.0.0-beta.4"
   },
   "peerDependenciesMeta": {
     "yeoman-environment": {
