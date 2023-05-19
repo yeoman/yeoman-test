@@ -59,7 +59,7 @@
     "tui-jsdoc-template": "^1.2.2",
     "typescript": "^5.0.4",
     "xo": "^0.54.2",
-    "yeoman-environment": "^3.18.0",
+    "yeoman-environment": "^3.18.2",
     "yeoman-generator": "^5.8.0"
   },
   "peerDependencies": {
