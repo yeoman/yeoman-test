@@ -63,7 +63,7 @@
     "yeoman-generator": "^5.8.0"
   },
   "peerDependencies": {
-    "@yeoman/types": "^0.5.0",
+    "@yeoman/types": "^1.0.0",
     "yeoman-environment": "^3.18.0 || ^4.0.0-alpha.5",
     "yeoman-generator": "^5.8.0 || ^6.0.0-beta.3"
   },
