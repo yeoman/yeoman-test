@@ -5,6 +5,7 @@ import process from 'node:process';
 import _ from 'lodash';
 import { spy as sinonSpy, stub as sinonStub } from 'sinon';
 import type {
+  BaseEnvironment,
   BaseEnvironmentOptions,
   BaseGenerator,
   BaseGeneratorOptions,
@@ -18,7 +19,7 @@ import type { DefaultEnvironmentApi, DefaultGeneratorApi } from '../types/type-h
 import { DummyPrompt, type DummyPromptOptions, TestAdapter } from './adapter.js';
 import RunContext, { BasicRunContext, type RunContextSettings } from './run-context.js';
 import testContext from './test-context.js';
-import { defaultEnvironment } from './default-environment.js';
+import { createEnv } from './default-environment.js';
 
 let GeneratorImplementation;
 try {
@@ -27,6 +28,8 @@ try {
 } catch {}
 
 const { cloneDeep } = _;
+
+export type CreateEnv = (options: BaseEnvironmentOptions) => Promise<BaseEnvironment>;
 
 /**
  * Dependencies can be path (autodiscovery) or an array [<generator>, <name>]
@@ -133,7 +136,7 @@ export class YeomanTest {
    * @param generator or environment
    */
   restorePrompt(envOrGenerator: BaseGenerator | DefaultEnvironmentApi) {
-    const environment: DefaultEnvironmentApi = (envOrGenerator as any).env ?? envOrGenerator;
+    const environment: DefaultEnvironmentApi = (envOrGenerator as BaseGenerator).env ?? envOrGenerator;
     environment.adapter.close();
   }
 
@@ -221,7 +224,7 @@ export class YeomanTest {
     options?: GetGeneratorOptions<GeneratorType>,
     localConfigOnly = true,
   ): Promise<GeneratorType> {
-    const env = await this.createEnv([], { sharedOptions: { localConfigOnly } });
+    const env = await this.createEnv({ sharedOptions: { localConfigOnly } });
     for (const dependency of dependencies) {
       if (typeof dependency === 'string') {
         env.register(dependency);
@@ -249,8 +252,8 @@ export class YeomanTest {
    * });
    */
 
-  async createEnv(...args: any[]): Promise<DefaultEnvironmentApi> {
-    return (await defaultEnvironment())(...args);
+  async createEnv(options: BaseEnvironmentOptions): Promise<DefaultEnvironmentApi> {
+    return createEnv(options);
   }
 
   /**
@@ -261,7 +264,7 @@ export class YeomanTest {
    * const env = createTestEnv(require('yeoman-environment').createEnv);
    */
 
-  async createTestEnv(envContructor = this.createEnv, options: BaseEnvironmentOptions = { localConfigOnly: true }) {
+  async createTestEnv(envContructor: CreateEnv = this.createEnv, options: BaseEnvironmentOptions = { localConfigOnly: true }) {
     let envOptions = cloneDeep(this.environmentOptions ?? {});
     if (typeof options === 'boolean') {
       envOptions = {
@@ -285,7 +288,7 @@ export class YeomanTest {
       };
     }
 
-    return envContructor([], envOptions, new TestAdapter() as any);
+    return envContructor({ ...envOptions, adapter: new TestAdapter() });
   }
 
   /**

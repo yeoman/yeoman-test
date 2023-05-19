@@ -5,10 +5,10 @@ import process from 'node:process';
 import { createRequire } from 'node:module';
 import { existsSync } from 'node:fs';
 import { assert as sinonAssert, spy as sinonSpy, stub as sinonStub } from 'sinon';
-import yeoman from 'yeoman-environment';
 import Generator from 'yeoman-generator';
 import { expect } from 'esmocha';
 import type Environment from 'yeoman-environment';
+import { createEnv } from '../src/default-environment.js';
 import helpers from '../src/helpers.js';
 import { TestAdapter } from '../src/adapter.js';
 import RunContext from '../src/run-context.js';
@@ -17,7 +17,7 @@ const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const { resolve, join } = path;
-const env = yeoman.createEnv(undefined, undefined, new TestAdapter() as any);
+const env = await createEnv({ adapter: new TestAdapter() });
 
 describe('yeoman-test', function () {
   beforeEach(function () {
@@ -28,19 +28,21 @@ describe('yeoman-test', function () {
 
   describe('.createGenerator()', function () {
     it('create a new generator', async function () {
-      const generator = await helpers.createGenerator('unicorn:app', [[this.StubGenerator, 'unicorn:app']]);
+      const generator = await helpers.createGenerator('unicorn:app', [[this.StubGenerator, { namespace: 'unicorn:app' }]]);
 
       assert.ok(generator instanceof this.StubGenerator);
     });
 
     it('pass args params to the generator', async function () {
-      const generator = await helpers.createGenerator('unicorn:app', [[this.StubGenerator, 'unicorn:app']], ['temp']);
+      const generator = await helpers.createGenerator('unicorn:app', [[this.StubGenerator, { namespace: 'unicorn:app' }]], ['temp']);
 
       assert.deepEqual(generator.args, ['temp']);
     });
 
     it('pass options param to the generator', async function () {
-      const generator = await helpers.createGenerator('unicorn:app', [[this.StubGenerator, 'unicorn:app']], ['temp'], { ui: 'tdd' });
+      const generator = await helpers.createGenerator('unicorn:app', [[this.StubGenerator, { namespace: 'unicorn:app' }]], ['temp'], {
+        ui: 'tdd',
+      });
 
       assert.equal(generator.options.ui, 'tdd');
     });
@@ -409,11 +411,11 @@ describe('yeoman-test', function () {
     });
     it('calls mocked createEnv with newErrorHandler option', async () => {
       assert.equal(await helpers.createTestEnv(), createEnvReturn);
-      assert.equal(mockedCreateEnv.getCall(0).args[1].newErrorHandler, true);
+      assert.equal(mockedCreateEnv.getCall(0).args[0].newErrorHandler, true);
     });
     it('calls mocked createEnv with sharedOptions.localConfigOnly option', async () => {
       assert.equal(await helpers.createTestEnv(), createEnvReturn);
-      assert.equal(mockedCreateEnv.getCall(0).args[1].sharedOptions.localConfigOnly, true);
+      assert.equal(mockedCreateEnv.getCall(0).args[0].sharedOptions.localConfigOnly, true);
     });
   });
   describe('.prepareTemporaryFolder', () => {

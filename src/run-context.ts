@@ -20,7 +20,7 @@ import type {
 import { create as createMemFsEditor, type MemFsEditorFile, type MemFsEditor } from 'mem-fs-editor';
 import type { DefaultGeneratorApi, DefaultEnvironmentApi } from '../types/type-helpers.js';
 import RunResult, { type RunResultOptions } from './run-result.js';
-import defaultHelpers, { type Dependency, type YeomanTest } from './helpers.js';
+import defaultHelpers, { type CreateEnv, type Dependency, type YeomanTest } from './helpers.js';
 import { type DummyPromptOptions } from './adapter.js';
 import testContext from './test-context.js';
 
@@ -62,7 +62,7 @@ type PromiseRunResult<GeneratorType extends BaseGenerator> = Promise<RunResult<G
 type MockedGeneratorFactory<GenParameter extends BaseGenerator = DefaultGeneratorApi> = (
   GeneratorClass?: GetGeneratorConstructor<GenParameter>,
 ) => GetGeneratorConstructor<GenParameter>;
-type EnvOptions = BaseEnvironmentOptions & { createEnv?: any };
+type EnvOptions = BaseEnvironmentOptions & { createEnv?: CreateEnv };
 
 export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGeneratorApi> extends EventEmitter {
   readonly mockedGenerators: Record<string, BaseGenerator> = {};
@@ -504,7 +504,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    */
   commitFiles(): this {
     return this.onTargetDirectory(async function () {
-      await (this.editor as any).commit();
+      await this.editor.commit();
     });
   }
 
@@ -632,7 +632,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       this.env.register(this.Generator, { namespace });
     } else if (typeof this.Generator !== 'string') {
       const { resolved } = this.settings;
-      this.env.register(this.Generator as any, { namespace, resolved });
+      this.env.register(this.Generator, { namespace, resolved });
     }
 
     this.generator = await this.env.create(namespace, {
