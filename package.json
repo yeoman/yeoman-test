@@ -52,7 +52,7 @@
     "coveralls": "^3.1.1",
     "esmocha": "^1.0.1",
     "husky": "^8.0.2",
-    "jsdoc": "^3.6.10",
+    "jsdoc": "^4.0.2",
     "lint-staged": "^13.0.3",
     "prettier": "^2.2.1",
     "prettier-plugin-packagejson": "^2.3.0",
