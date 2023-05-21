@@ -1,4 +1,3 @@
-/* eslint-disable max-params */
 import { mkdirSync, existsSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import process from 'node:process';
@@ -10,7 +9,7 @@ import type {
   BaseGenerator,
   BaseGeneratorOptions,
   GetGeneratorConstructor,
-  GetGeneratorOptions,
+  InstantiateOptions,
   PromptAnswers,
   PromptQuestion,
 } from '@yeoman/types';
@@ -218,12 +217,13 @@ export class YeomanTest {
    * var angular = createGenerator('angular:app', deps);
    */
   async createGenerator<GeneratorType extends BaseGenerator = DefaultGeneratorApi>(
-    name: string,
-    dependencies: Dependency[],
-    args?: string[],
-    options?: GetGeneratorOptions<GeneratorType>,
-    localConfigOnly = true,
+    name: string | GetGeneratorConstructor<GeneratorType>,
+    options: {
+      dependencies?: Dependency[];
+      localConfigOnly?: boolean;
+    } & InstantiateOptions<GeneratorType> = {},
   ): Promise<GeneratorType> {
+    const { dependencies = [], localConfigOnly = true, ...instantiateOptions } = options;
     const env = await this.createEnv({ sharedOptions: { localConfigOnly } });
     for (const dependency of dependencies) {
       if (typeof dependency === 'string') {
@@ -233,7 +233,7 @@ export class YeomanTest {
       }
     }
 
-    return env.create<GeneratorType>(name, { generatorArgs: args, generatorOptions: options });
+    return env.create<GeneratorType>(name, instantiateOptions);
   }
 
   /**

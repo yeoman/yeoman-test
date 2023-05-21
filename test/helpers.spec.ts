@@ -28,20 +28,29 @@ describe('yeoman-test', function () {
 
   describe('.createGenerator()', function () {
     it('create a new generator', async function () {
-      const generator = await helpers.createGenerator('unicorn:app', [[this.StubGenerator, { namespace: 'unicorn:app' }]]);
+      const generator = await helpers.createGenerator('unicorn:app', {
+        dependencies: [[this.StubGenerator, { namespace: 'unicorn:app' }]],
+      });
 
       assert.ok(generator instanceof this.StubGenerator);
     });
 
     it('pass args params to the generator', async function () {
-      const generator = await helpers.createGenerator('unicorn:app', [[this.StubGenerator, { namespace: 'unicorn:app' }]], ['temp']);
+      const generator = await helpers.createGenerator('unicorn:app', {
+        dependencies: [[this.StubGenerator, { namespace: 'unicorn:app' }]],
+        generatorArgs: ['temp'],
+      });
 
       assert.deepEqual(generator.args, ['temp']);
     });
 
     it('pass options param to the generator', async function () {
-      const generator = await helpers.createGenerator('unicorn:app', [[this.StubGenerator, { namespace: 'unicorn:app' }]], ['temp'], {
-        ui: 'tdd',
+      const generator = await helpers.createGenerator('unicorn:app', {
+        dependencies: [[this.StubGenerator, { namespace: 'unicorn:app' }]],
+        generatorArgs: ['temp'],
+        generatorOptions: {
+          ui: 'tdd',
+        },
       });
 
       assert.equal(generator.options.ui, 'tdd');
