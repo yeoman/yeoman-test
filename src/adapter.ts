@@ -89,7 +89,7 @@ export class TestAdapter implements InputOutputAdapter {
   diff: any;
   log: Logger;
 
-  constructor(mockedAnswers?: PromptAnswers) {
+  constructor({ mockedAnswers }: { mockedAnswers?: PromptAnswers } = {}) {
     this.promptModule = createPromptModule({
       input: new PassThrough() as any,
       output: new PassThrough() as any,
