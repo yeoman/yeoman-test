@@ -122,7 +122,7 @@ export class YeomanTest {
         name,
         class CustomDummyPrompt extends DummyPrompt {
           constructor(question: PromptQuestion, rl: any, answers: PromptAnswers) {
-            super(question, rl, answers, mockedAnswers, options);
+            super(question, rl, answers, { ...options, mockedAnswers });
           }
         } as any,
       );
@@ -288,7 +288,7 @@ export class YeomanTest {
       };
     }
 
-    return envContructor({ ...envOptions, adapter: new TestAdapter() });
+    return envContructor({ adapter: new TestAdapter(), ...envOptions });
   }
 
   /**

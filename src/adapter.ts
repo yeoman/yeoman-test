@@ -1,4 +1,3 @@
-/* eslint-disable max-params */
 import events from 'node:events';
 import { PassThrough } from 'node:stream';
 import { spy as sinonSpy, stub as sinonStub } from 'sinon';
@@ -6,6 +5,7 @@ import type { PromptAnswers, PromptQuestion, Logger, InputOutputAdapter, PromptQ
 import { createPromptModule, type PromptModule } from 'inquirer';
 
 export type DummyPromptOptions = {
+  mockedAnswers?: PromptAnswers;
   callback?: (answers: PromptAnswers) => PromptAnswers;
   throwOnMissingAnswer?: boolean;
 };
@@ -16,29 +16,13 @@ export class DummyPrompt {
   callback!: (answers: PromptAnswers) => PromptAnswers;
   throwOnMissingAnswer = false;
 
-  constructor(
-    question: PromptQuestion,
-    _rl: any,
-    answers: PromptAnswers,
-    mockedAnswers?: PromptAnswers,
-    options?: ((answers: PromptAnswers) => PromptAnswers) | DummyPromptOptions,
-  ) {
+  constructor(question: PromptQuestion, _rl: any, answers: PromptAnswers, options: DummyPromptOptions = {}) {
+    const { mockedAnswers, callback, throwOnMissingAnswer } = options;
     this.answers = { ...answers, ...mockedAnswers };
     this.question = question;
 
-    if (typeof options === 'function') {
-      this.callback = options;
-    } else if (options) {
-      if (options.callback) {
-        this.callback = options.callback;
-      }
-
-      if (options.throwOnMissingAnswer !== undefined) {
-        this.throwOnMissingAnswer = options.throwOnMissingAnswer;
-      }
-    }
-
-    this.callback = this.callback || (answers => answers);
+    this.callback = callback ?? (answers => answers);
+    this.throwOnMissingAnswer = throwOnMissingAnswer ?? false;
   }
 
   async run() {
@@ -89,7 +73,7 @@ export class TestAdapter implements InputOutputAdapter {
   diff: any;
   log: Logger;
 
-  constructor({ mockedAnswers }: { mockedAnswers?: PromptAnswers } = {}) {
+  constructor(promptOptions?: DummyPromptOptions) {
     this.promptModule = createPromptModule({
       input: new PassThrough() as any,
       output: new PassThrough() as any,
@@ -101,7 +85,7 @@ export class TestAdapter implements InputOutputAdapter {
         promptName,
         class CustomDummyPrompt extends DummyPrompt {
           constructor(question: PromptQuestion, rl: any, answers: PromptAnswers) {
-            super(question, rl, answers, mockedAnswers);
+            super(question, rl, answers, promptOptions);
           }
         } as any,
       );

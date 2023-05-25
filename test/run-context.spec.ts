@@ -503,7 +503,7 @@ describe('RunContext', function () {
     });
   });
 
-  describe('#withPrompts()', function () {
+  describe('#withAnswers()', function () {
     it('is call automatically', async function () {
       const askFor = sinonSpy();
       const prompt = sinonSpy();
@@ -540,7 +540,7 @@ describe('RunContext', function () {
       };
 
       return ctx
-        .withPrompts({ yeoman: 'yes please' })
+        .withAnswers({ yeoman: 'yes please' })
         .toPromise()
         .then(function () {
           sinonAssert.calledOnce(execSpy);
@@ -569,8 +569,8 @@ describe('RunContext', function () {
       };
 
       return ctx
-        .withPrompts({ yeoman: 'yes please' })
-        .withPrompts({ yo: 'yo man' })
+        .withAnswers({ yeoman: 'yes please' })
+        .withAnswers({ yo: 'yo man' })
         .toPromise()
         .then(function () {
           sinonAssert.calledOnce(execSpy);
@@ -592,7 +592,7 @@ describe('RunContext', function () {
       };
 
       return ctx
-        .withPrompts({ yeoman: 'no please' }, promptSpy)
+        .withAnswers({ yeoman: 'no please' }, { callback: promptSpy })
         .toPromise()
         .then(function () {
           sinonAssert.calledOnce(execSpy);

@@ -21,7 +21,7 @@ import { create as createMemFsEditor, type MemFsEditorFile, type MemFsEditor } f
 import type { DefaultGeneratorApi, DefaultEnvironmentApi } from '../types/type-helpers.js';
 import RunResult, { type RunResultOptions } from './run-result.js';
 import defaultHelpers, { type CreateEnv, type Dependency, type YeomanTest } from './helpers.js';
-import { type DummyPromptOptions } from './adapter.js';
+import { TestAdapter, type DummyPromptOptions } from './adapter.js';
 import testContext from './test-context.js';
 
 const { camelCase, kebabCase, merge: lodashMerge, set: lodashSet } = _;
@@ -81,6 +81,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
   private args: string[] = [];
   private options: Partial<Omit<GetGeneratorOptions<GeneratorType>, 'env' | 'namespace' | 'resolved'>> = {};
   private answers?: any;
+  private promptOptions?: Omit<DummyPromptOptions, 'mockedAnswers'>;
   private keepFsState?: boolean;
 
   private readonly onGeneratorCallbacks: Array<(this: this, generator: GeneratorType) => any> = [];
@@ -351,7 +352,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * @return {this}
    */
 
-  withPrompts(answers: PromptAnswers, options?: DummyPromptOptions) {
+  withPrompts(answers: PromptAnswers, options?: Omit<DummyPromptOptions, 'mockedAnswers'>) {
     return this.withAnswers(answers, options);
   }
 
@@ -361,13 +362,10 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * @param  options - Options or callback.
    * @return {this}
    */
-  withAnswers(answers: PromptAnswers, options?: DummyPromptOptions) {
-    const callbackSet = Boolean(this.answers);
+  withAnswers(answers: PromptAnswers, options?: Omit<DummyPromptOptions, 'mockedAnswers'>) {
     this.answers = { ...this.answers, ...answers };
-    if (callbackSet) return this;
-    return this.onEnvironment(env => {
-      this.helpers.mockPrompt(env, this.answers, options);
-    });
+    this.promptOptions = options;
+    return this;
   }
 
   /**
@@ -616,6 +614,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       force: true,
       skipCache: true,
       skipInstall: true,
+      adapter: new TestAdapter({ ...this.promptOptions, mockedAnswers: this.answers }),
       ...this.options,
       ...this.envOptions,
     });
