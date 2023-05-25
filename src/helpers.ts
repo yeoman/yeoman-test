@@ -115,17 +115,11 @@ export class YeomanTest {
       throw new Error('environment is not an Environment instance');
     }
 
-    const { promptModule } = environment.adapter as TestAdapter;
+    const testAdapter = environment.adapter as TestAdapter;
+    const { promptModule } = testAdapter;
 
     for (const name of Object.keys(promptModule.prompts)) {
-      promptModule.registerPrompt(
-        name,
-        class CustomDummyPrompt extends DummyPrompt {
-          constructor(question: PromptQuestion, rl: any, answers: PromptAnswers) {
-            super(question, rl, answers, { ...options, mockedAnswers });
-          }
-        } as any,
-      );
+      testAdapter.registerDummyPrompt(name, { ...options, mockedAnswers });
     }
   }
 

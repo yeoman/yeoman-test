@@ -77,6 +77,7 @@ export class TestAdapter implements InputOutputAdapter {
   promptModule: PromptModule;
   diff: any;
   log: Logger;
+  registerDummyPrompt: (promptName: string, customPromptOptions?: DummyPromptOptions) => PromptModule;
 
   constructor(options: TestAdapterOptions = {}) {
     const { log = createLogger(), ...promptOptions } = options;
@@ -86,15 +87,22 @@ export class TestAdapter implements InputOutputAdapter {
       skipTTYChecks: true,
     });
 
-    for (const promptName of Object.keys(this.promptModule.prompts)) {
-      this.promptModule.registerPrompt(
-        promptName,
+    const actualRegisterPrompt = this.promptModule.registerPrompt.bind(this.promptModule);
+
+    this.registerDummyPrompt = (promptModuleName: string, customPromptOptions?: DummyPromptOptions) =>
+      actualRegisterPrompt(
+        promptModuleName,
         class CustomDummyPrompt extends DummyPrompt {
           constructor(question: PromptQuestion, rl: any, answers: PromptAnswers) {
-            super(question, rl, answers, promptOptions);
+            super(question, rl, answers, customPromptOptions ?? promptOptions);
           }
         } as any,
       );
+
+    this.promptModule.registerPrompt = (name: string) => this.registerDummyPrompt(name);
+
+    for (const promptName of Object.keys(this.promptModule.prompts)) {
+      this.promptModule.registerPrompt(promptName, undefined as any);
     }
 
     this.diff = sinonSpy();
