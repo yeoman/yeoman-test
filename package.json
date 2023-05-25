@@ -36,6 +36,7 @@
     "doc_path": "../yeoman-test-doc"
   },
   "dependencies": {
+    "@yeoman/adapter": "^1.0.2",
     "inquirer": "^9.2.2",
     "lodash": "^4.17.21",
     "mem-fs": "^3.0.0",

@@ -21,7 +21,7 @@ import { create as createMemFsEditor, type MemFsEditorFile, type MemFsEditor } f
 import type { DefaultGeneratorApi, DefaultEnvironmentApi } from '../types/type-helpers.js';
 import RunResult, { type RunResultOptions } from './run-result.js';
 import defaultHelpers, { type CreateEnv, type Dependency, type YeomanTest } from './helpers.js';
-import { TestAdapter, type DummyPromptOptions } from './adapter.js';
+import { TestAdapter, type DummyPromptOptions, type TestAdapterOptions } from './adapter.js';
 import testContext from './test-context.js';
 
 const { camelCase, kebabCase, merge: lodashMerge, set: lodashSet } = _;
@@ -81,7 +81,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
   private args: string[] = [];
   private options: Partial<Omit<GetGeneratorOptions<GeneratorType>, 'env' | 'namespace' | 'resolved'>> = {};
   private answers?: any;
-  private promptOptions?: Omit<DummyPromptOptions, 'mockedAnswers'>;
+  private readonly adapterOptions?: Omit<TestAdapterOptions, 'mockedAnswers'> = {};
   private keepFsState?: boolean;
 
   private readonly onGeneratorCallbacks: Array<(this: this, generator: GeneratorType) => any> = [];
@@ -281,6 +281,14 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
   }
 
   /**
+   * TestAdapter options.
+   */
+  withAdapterOptions(options: Omit<TestAdapterOptions, 'mockedAnswers'>) {
+    Object.assign(this.adapterOptions as any, options);
+    return this;
+  }
+
+  /**
    * Create an environment
    *
    * This method is called automatically when creating a RunContext. Only use it if you need
@@ -364,7 +372,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    */
   withAnswers(answers: PromptAnswers, options?: Omit<DummyPromptOptions, 'mockedAnswers'>) {
     this.answers = { ...this.answers, ...answers };
-    this.promptOptions = options;
+    Object.assign(this.adapterOptions as any, options);
     return this;
   }
 
@@ -614,10 +622,9 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       force: true,
       skipCache: true,
       skipInstall: true,
-      adapter: new TestAdapter({ ...this.promptOptions, mockedAnswers: this.answers }),
-      ...this.options,
+      adapter: new TestAdapter({ ...this.adapterOptions, mockedAnswers: this.answers }),
       ...this.envOptions,
-    });
+    } as any);
     this.env = this.envCB ? (await this.envCB(testEnv)) ?? testEnv : testEnv;
 
     for (const onEnvironmentCallback of this.onEnvironmentCallbacks) {

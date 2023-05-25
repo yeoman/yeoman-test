@@ -1,19 +1,24 @@
 import events from 'node:events';
 import { PassThrough } from 'node:stream';
+import { createLogger } from '@yeoman/adapter';
 import { spy as sinonSpy, stub as sinonStub } from 'sinon';
 import type { PromptAnswers, PromptQuestion, Logger, InputOutputAdapter, PromptQuestions } from '@yeoman/types';
 import { createPromptModule, type PromptModule } from 'inquirer';
 
+export type DummyPromptCallback = (answer: any, { question, answers }: { question: PromptQuestion; answers: PromptAnswers }) => any;
+
 export type DummyPromptOptions = {
   mockedAnswers?: PromptAnswers;
-  callback?: (answers: PromptAnswers) => PromptAnswers;
+  callback?: DummyPromptCallback;
   throwOnMissingAnswer?: boolean;
 };
+
+export type TestAdapterOptions = DummyPromptOptions & { log?: any };
 
 export class DummyPrompt {
   answers: PromptAnswers;
   question: PromptQuestion;
-  callback!: (answers: PromptAnswers) => PromptAnswers;
+  callback!: DummyPromptCallback;
   throwOnMissingAnswer = false;
 
   constructor(question: PromptQuestion, _rl: any, answers: PromptAnswers, options: DummyPromptOptions = {}) {
@@ -64,7 +69,7 @@ export class DummyPrompt {
       }
     }
 
-    return this.callback(answer);
+    return this.callback(answer, { question: this.question, answers: this.answers });
   }
 }
 
@@ -73,7 +78,8 @@ export class TestAdapter implements InputOutputAdapter {
   diff: any;
   log: Logger;
 
-  constructor(promptOptions?: DummyPromptOptions) {
+  constructor(options: TestAdapterOptions = {}) {
+    const { log = createLogger(), ...promptOptions } = options;
     this.promptModule = createPromptModule({
       input: new PassThrough() as any,
       output: new PassThrough() as any,
@@ -95,22 +101,12 @@ export class TestAdapter implements InputOutputAdapter {
     this.log = sinonSpy() as any;
     Object.assign(this.log, events.EventEmitter.prototype);
 
+    const descriptors = Object.getOwnPropertyDescriptors(log);
     // Make sure all log methods are defined
-    const adapterMethods = [
-      'write',
-      'writeln',
-      'ok',
-      'error',
-      'skip',
-      'force',
-      'create',
-      'invoke',
-      'conflict',
-      'identical',
-      'info',
-      'table',
-    ];
-    for (const methodName of adapterMethods) {
+    const logMethods = Object.entries(descriptors)
+      .filter(([method, desc]) => typeof desc.value === 'function' && !Object.getOwnPropertyDescriptor(this.log, method))
+      .map(([method]) => method);
+    for (const methodName of logMethods) {
       (this.log as any)[methodName] = sinonStub().returns(this.log);
     }
   }
