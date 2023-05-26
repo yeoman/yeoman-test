@@ -11,11 +11,10 @@ import type {
   GetGeneratorConstructor,
   InstantiateOptions,
   PromptAnswers,
-  PromptQuestion,
 } from '@yeoman/types';
 import type { SinonSpiedInstance } from 'sinon';
 import type { DefaultEnvironmentApi, DefaultGeneratorApi } from '../types/type-helpers.js';
-import { DummyPrompt, type DummyPromptOptions, TestAdapter } from './adapter.js';
+import { type DummyPromptOptions, TestAdapter, type TestAdapterOptions } from './adapter.js';
 import RunContext, { BasicRunContext, type RunContextSettings } from './run-context.js';
 import testContext from './test-context.js';
 import { createEnv } from './default-environment.js';
@@ -44,6 +43,7 @@ export class YeomanTest {
   settings?: RunContextSettings;
   environmentOptions?: BaseEnvironmentOptions;
   generatorOptions?: BaseGeneratorOptions;
+  adapterOptions?: Omit<TestAdapterOptions, 'mockedAnswers'>;
 
   /**
    * @deprecated
@@ -282,7 +282,14 @@ export class YeomanTest {
       };
     }
 
-    return envContructor({ adapter: new TestAdapter(), ...envOptions });
+    return envContructor({ adapter: this.createTestAdapter(), ...envOptions });
+  }
+
+  /**
+   * Creates a TestAdapter using helpers default options.
+   */
+  createTestAdapter(options?: TestAdapterOptions) {
+    return new TestAdapter({ ...this.adapterOptions, ...options });
   }
 
   /**

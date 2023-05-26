@@ -622,7 +622,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       force: true,
       skipCache: true,
       skipInstall: true,
-      adapter: new TestAdapter({ ...this.adapterOptions, mockedAnswers: this.answers }),
+      adapter: this.helpers.createTestAdapter({ ...this.adapterOptions, mockedAnswers: this.answers }),
       ...this.envOptions,
     } as any);
     this.env = this.envCB ? (await this.envCB(testEnv)) ?? testEnv : testEnv;
