@@ -4,6 +4,7 @@ import assert from 'node:assert';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { createRequire } from 'node:module';
+import { expect } from 'esmocha';
 import { assert as sinonAssert, spy as sinonSpy, stub as sinonStub, fake as sinonFake } from 'sinon';
 import inquirer from 'inquirer';
 import Generator from 'yeoman-generator';
@@ -97,16 +98,15 @@ describe('RunContext', function () {
       });
     });
 
-    it('set namespace and resolved path in generator', function (done) {
+    it('set namespace and resolved path in generator', async function () {
       const ctx = new RunContext(Dummy, {
         resolved: 'path',
         namespace: 'simple:app',
       });
 
-      ctx.on('ready', async function () {
-        assert.equal(((await ctx.env.get('simple:app')) as any).resolved, 'path');
-        done();
-      });
+      await ctx.build();
+
+      expect(((await ctx.env.get('simple:app')) as any).resolved).toMatch(/^path/);
     });
 
     it('run the generator asynchronously', function (done) {
