@@ -1,8 +1,8 @@
 import events from 'node:events';
 import { PassThrough } from 'node:stream';
-import { createLogger } from '@yeoman/adapter';
+import { createLogger, type AdapterWithProgress } from '@yeoman/adapter';
 import { spy as sinonSpy, stub as sinonStub } from 'sinon';
-import type { PromptAnswers, PromptQuestion, Logger, InputOutputAdapter, PromptQuestions } from '@yeoman/types';
+import type { PromptAnswers, PromptQuestion, Logger, QueuedAdapter, PromptQuestions, Task } from '@yeoman/types';
 import { createPromptModule, type PromptModule } from 'inquirer';
 
 export type DummyPromptCallback = (answer: any, { question, answers }: { question: PromptQuestion; answers: PromptAnswers }) => any;
@@ -73,7 +73,7 @@ export class DummyPrompt {
   }
 }
 
-export class TestAdapter implements InputOutputAdapter {
+export class TestAdapter implements AdapterWithProgress {
   promptModule: PromptModule;
   diff: any;
   log: Logger;
@@ -117,6 +117,18 @@ export class TestAdapter implements InputOutputAdapter {
     for (const methodName of logMethods) {
       (this.log as any)[methodName] = sinonStub().returns(this.log);
     }
+  }
+
+  async queue<TaskResultType>(fn: Task<TaskResultType>): Promise<void | TaskResultType> {
+    return fn(this);
+  }
+
+  async progress<ReturnType>(
+    fn: (progress: { step: (prefix: string, message: string, ...args: any[]) => void }) => ReturnType,
+    _options?: { disabled?: boolean | undefined; name?: string | undefined } | undefined,
+  ): Promise<void | ReturnType> {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    return fn({ step() {} });
   }
 
   close(): void {
