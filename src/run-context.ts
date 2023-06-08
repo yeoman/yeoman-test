@@ -4,7 +4,7 @@ import path, { resolve, isAbsolute, join as pathJoin } from 'node:path';
 import assert from 'node:assert';
 import { EventEmitter } from 'node:events';
 import process from 'node:process';
-import _ from 'lodash';
+import { camelCase, kebabCase, merge as lodashMerge, set as lodashSet } from 'lodash-es';
 // eslint-disable-next-line n/file-extension-in-import
 import { resetFileCommitStates } from 'mem-fs-editor/state';
 import { create as createMemFs, type Store } from 'mem-fs';
@@ -21,10 +21,8 @@ import { create as createMemFsEditor, type MemFsEditorFile, type MemFsEditor } f
 import type { DefaultGeneratorApi, DefaultEnvironmentApi } from '../types/type-helpers.js';
 import RunResult, { type RunResultOptions } from './run-result.js';
 import defaultHelpers, { type CreateEnv, type Dependency, type YeomanTest } from './helpers.js';
-import { TestAdapter, type DummyPromptOptions, type TestAdapterOptions } from './adapter.js';
+import { type DummyPromptOptions, type TestAdapterOptions } from './adapter.js';
 import testContext from './test-context.js';
-
-const { camelCase, kebabCase, merge: lodashMerge, set: lodashSet } = _;
 
 /**
  * Provides settings for creating a `RunContext`.

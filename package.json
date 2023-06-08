@@ -38,7 +38,7 @@
   "dependencies": {
     "@yeoman/adapter": "^1.0.4",
     "inquirer": "^9.2.2",
-    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
     "mem-fs": "^3.0.0",
     "mem-fs-editor": "^10.0.2",
     "sinon": "^15.1.0",
@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "@types/inquirer": "^9.0.3",
+    "@types/lodash": "^4.14.195",
     "@types/node": "^16.18.19",
     "@types/sinon": "^10.0.13",
     "c8": "^7.13.0",
