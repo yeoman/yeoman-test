@@ -41,7 +41,7 @@
     "lodash-es": "^4.17.21",
     "mem-fs": "^3.0.0",
     "mem-fs-editor": "^10.0.2",
-    "sinon": "^15.1.0",
+    "sinon": "^16.0.0",
     "temp-dir": "^3.0.0",
     "type-fest": "^3.10.0"
   },
