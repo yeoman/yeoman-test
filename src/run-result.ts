@@ -55,6 +55,8 @@ export type RunResultOptions<GeneratorType extends BaseGenerator> = {
    */
   mockedGenerators: Record<string, BaseGenerator>;
 
+  spawnStub?: any;
+
   settings: RunContextSettings;
 
   helpers: YeomanTest;
@@ -73,6 +75,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
   fs: MemFsEditor;
   mockedGenerators: any;
   options: RunResultOptions<GeneratorType>;
+  spawnStub?: any;
 
   constructor(options: RunResultOptions<GeneratorType>) {
     if (options.memFs && !options.cwd) {
@@ -86,6 +89,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
     this.memFs = options.memFs;
     this.fs = this.memFs && createMemFsEditor(this.memFs);
     this.mockedGenerators = options.mockedGenerators || {};
+    this.spawnStub = options.spawnStub;
     this.options = options;
   }
 
@@ -110,6 +114,14 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
       },
       { ...this.options.envOptions, ...envOptions },
     );
+  }
+
+  getSpawnArgsUsingDefaultImplementation() {
+    if (!this.spawnStub) {
+      throw new Error('Spawn stub was not found');
+    }
+
+    return this.spawnStub.getCalls().map(call => call.args);
   }
 
   /**
