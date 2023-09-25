@@ -9,6 +9,7 @@ import { camelCase, kebabCase, merge as lodashMerge, set as lodashSet } from 'lo
 import { resetFileCommitStates } from 'mem-fs-editor/state';
 import { create as createMemFs, type Store } from 'mem-fs';
 import tempDirectory from 'temp-dir';
+import { stub as sinonStub } from 'sinon';
 import type {
   BaseEnvironmentOptions,
   BaseGenerator,
@@ -72,6 +73,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
   targetDirectory?: string;
   editor!: MemFsEditor;
   memFs: Store<MemFsEditorFile>;
+  spawnStub?: any;
   mockedGeneratorFactory: MockedGeneratorFactory;
 
   protected environmentPromise?: PromiseRunResult<GeneratorType>;
@@ -404,6 +406,27 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     });
   }
 
+  withSpawnMock(stub = sinonStub()): this {
+    if (this.spawnStub) {
+      throw new Error('Multiple withSpawnMock calls');
+    }
+
+    this.spawnStub = stub;
+    return this.onEnvironment(env => {
+      env.on('compose', (_namespace, generator) => {
+        const createCallback = method =>
+          function (this: any, ...args) {
+            stub.call(this, method, ...args);
+          };
+
+        generator.spawnCommand = createCallback('spawnCommand');
+        generator.spawnCommandSync = createCallback('spawnCommandSync');
+        generator.spawn = createCallback('spawn');
+        generator.spawnSync = createCallback('spawnSync');
+      });
+    });
+  }
+
   withMockedGeneratorFactory(mockedGeneratorFactory: MockedGeneratorFactory): this {
     this.mockedGeneratorFactory = mockedGeneratorFactory;
     return this;
@@ -671,6 +694,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       settings: {
         ...this.settings,
       },
+      spawnStub: this.spawnStub,
       oldCwd: this.oldCwd!,
       cwd: this.targetDirectory!,
       envOptions: this.envOptions,

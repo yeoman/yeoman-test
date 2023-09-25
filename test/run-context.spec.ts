@@ -68,8 +68,8 @@ describe('RunContext', function () {
       const ctx = new RunContext(require.resolve('./fixtures/generator-simple/app'));
 
       ctx
-        .on('ready', function () {
-          assert(ctx.env.get('simple:app'));
+        .on('ready', async function () {
+          assert(await ctx.env.get('simple:app'));
         })
         .on('end', done);
     });
@@ -92,8 +92,8 @@ describe('RunContext', function () {
     });
 
     it('accept generator constructor parameter (and assign gen:test as namespace)', function (done) {
-      ctx.on('ready', function () {
-        assert(ctx.env.get('gen:test'));
+      ctx.on('ready', async function () {
+        assert(await ctx.env.get('gen:test'));
         done();
       });
     });
@@ -606,27 +606,27 @@ describe('RunContext', function () {
   describe('#withMockedGenerators()', function () {
     it('creates mocked generator', async function () {
       await ctx.withMockedGenerators(['foo:bar']).build();
-      assert(ctx.env.get('foo:bar'));
+      assert(await ctx.env.get('foo:bar'));
       assert(ctx.mockedGenerators['foo:bar']);
     });
   });
 
   describe('#withGenerators()', function () {
     it('register paths', function (done) {
-      ctx.withGenerators([require.resolve('./fixtures/generator-simple/app')]).on('ready', function () {
-        assert(ctx.env.get('simple:app'));
+      ctx.withGenerators([require.resolve('./fixtures/generator-simple/app')]).on('ready', async function () {
+        assert(await ctx.env.get('simple:app'));
         done();
       });
     });
 
     it('register paths with namespaces', async function () {
       await ctx.withGenerators([[require.resolve('./fixtures/generator-simple/app'), { namespace: 'foo:bar' }]]).build();
-      assert(ctx.env.get('foo:bar'));
+      assert(await ctx.env.get('foo:bar'));
     });
 
     it('register mocked generator', function (done) {
-      ctx.withGenerators([[helpers.createDummyGenerator(), { namespace: 'dummy:gen' }]]).on('ready', function () {
-        assert(ctx.env.get('dummy:gen'));
+      ctx.withGenerators([[helpers.createDummyGenerator(), { namespace: 'dummy:gen' }]]).on('ready', async function () {
+        assert(await ctx.env.get('dummy:gen'));
         done();
       });
     });
@@ -635,11 +635,29 @@ describe('RunContext', function () {
       ctx
         .withGenerators([require.resolve('./fixtures/generator-simple/app')])
         .withGenerators([[helpers.createDummyGenerator(), { namespace: 'dummy:gen' }]])
-        .on('ready', function () {
-          assert(ctx.env.get('dummy:gen'));
-          assert(ctx.env.get('simple:app'));
+        .on('ready', async function () {
+          assert(await ctx.env.get('dummy:gen'));
+          assert(await ctx.env.get('simple:app'));
           done();
         });
+    });
+  });
+
+  describe('#withSpawnMock()', function () {
+    it('provide arguments to the generator when passed as String', async function () {
+      ctx.withSpawnMock();
+      Dummy.prototype.mockTask = async function () {
+        await this.spawnCommand('foo');
+        this.spawnCommandSync('foo');
+        await this.spawn('foo');
+        this.spawnSync('foo');
+      };
+
+      const result = await ctx.toPromise();
+      assert.deepStrictEqual(result.getSpawnArgsUsingDefaultImplementation()[0], ['spawnCommand', 'foo']);
+      assert.deepStrictEqual(result.getSpawnArgsUsingDefaultImplementation()[1], ['spawnCommandSync', 'foo']);
+      assert.deepStrictEqual(result.getSpawnArgsUsingDefaultImplementation()[2], ['spawn', 'foo']);
+      assert.deepStrictEqual(result.getSpawnArgsUsingDefaultImplementation()[3], ['spawnSync', 'foo']);
     });
   });
 
@@ -650,8 +668,8 @@ describe('RunContext', function () {
           env.register(require.resolve('./fixtures/generator-simple/app'));
           return env;
         })
-        .on('ready', function () {
-          assert(ctx.env.get('simple:app'));
+        .on('ready', async function () {
+          assert(await ctx.env.get('simple:app'));
           done();
         });
     });
