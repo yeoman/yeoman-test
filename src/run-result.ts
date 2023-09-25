@@ -369,7 +369,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    * result.assertTextEqual('I have a yellow cat', 'I have a yellow cat');
    */
   assertTextEqual(value: string, expected: string): void {
-    const eol = string => string.replace(/\r\n/g, '\n');
+    const eol = string => string.replaceAll('\r\n', '\n');
 
     assert.equal(eol(value), eol(expected));
   }

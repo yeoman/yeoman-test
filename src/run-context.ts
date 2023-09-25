@@ -63,6 +63,7 @@ type MockedGeneratorFactory<GenParameter extends BaseGenerator = DefaultGenerato
 ) => GetGeneratorConstructor<GenParameter>;
 type EnvOptions = BaseEnvironmentOptions & { createEnv?: CreateEnv };
 
+// eslint-disable-next-line unicorn/prefer-event-target
 export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGeneratorApi> extends EventEmitter {
   readonly mockedGenerators: Record<string, BaseGenerator> = {};
   env!: DefaultEnvironmentApi;
