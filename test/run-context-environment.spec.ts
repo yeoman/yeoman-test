@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { createRequire } from 'node:module';
 import { fake as sinonFake, replace as sinonReplace } from 'sinon';
-import { type LookupOptions } from 'yeoman-environment';
+import { type LookupOptions } from '@yeoman/types';
 import helpers from '../src/helpers.js';
 import RunContext from '../src/run-context.js';
 import RunResult from '../src/run-result.js';
