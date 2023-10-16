@@ -39,7 +39,7 @@
     "@yeoman/adapter": "^1.4.0",
     "inquirer": "^9.2.2",
     "lodash-es": "^4.17.21",
-    "mem-fs-editor": "^10.0.2",
+    "mem-fs-editor": "^10.0.3",
     "sinon": "^16.0.0",
     "temp-dir": "^3.0.0",
     "type-fest": "^4.3.1"
