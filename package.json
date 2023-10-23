@@ -60,13 +60,13 @@
     "tui-jsdoc-template": "^1.2.2",
     "typescript": "~5.2.2",
     "xo": "0.56.0",
-    "yeoman-environment": "^3.18.3",
+    "yeoman-environment": "^4.0.0",
     "yeoman-generator": "^5.9.0"
   },
   "peerDependencies": {
     "@yeoman/types": "^1.1.0",
     "mem-fs": "^3.0.0",
-    "yeoman-environment": "^3.18.3",
+    "yeoman-environment": "^4.0.0",
     "yeoman-generator": "^5.9.0 || >=6.0.0"
   },
   "acceptDependencies": {
