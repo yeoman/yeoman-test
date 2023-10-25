@@ -417,7 +417,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       env.on('compose', (_namespace, generator) => {
         const createCallback = method =>
           function (this: any, ...args) {
-            stub.call(this, method, ...args);
+            return stub.call(this, method, ...args);
           };
 
         generator.spawnCommand = createCallback('spawnCommand');
