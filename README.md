@@ -22,17 +22,16 @@ $ npm install --save-dev yeoman-generator@xxx yeoman-environment@xxx
 
 ## Usage
 
-Usage:
+Usage using the convenience last RunResult instance:
 
 ```js
-import helpers from 'yeoman-test';
+import helpers, { result } from 'yeoman-test';
 
 describe('generator test', () => {
   describe('test', () => {
-    let runResult;
     beforeEach(async () => {
-      runResult = await helpers
-        .create(                   // instantiates RunContext
+      await helpers
+        .run(                   // instantiates RunContext
           'namespace',             // namespace or generator
           {},                      // test options
           {}                       // environment options
@@ -57,39 +56,21 @@ describe('generator test', () => {
         [.build(runContext => {     // instantiates Environment/Generator
           [runContext.env...]       // does something with the environment
           [runContext.generator...] // does something with the generator
-        })]
-        .run();                     // runs the environment, promises a RunResult
-      [result.create().run()] // instantiates a new RunContext at the same directory
+        })];
+
+      [await result.create('another-generator').run();] // instantiates a new RunContext at the same directory
     );
-    afterEach(() => {
-      if (runResult) {
-        // Optional if context is executed at a temporary folder
-        runResult.restore();
-      }
-    });
+
     it('runs correctly', () => {
       // runs assertions using mem-fs.
-      [runResult.assertFile('file.txt');]
-      [runResult.assertNoFile('file.txt');]
-      [runResult.assertFileContent('file.txt', 'content');]
-      [runResult.assertEqualsFileContent('file.txt', 'content');]
-      [runResult.assertNoFileContent('file.txt', 'content');]
-      [runResult.assertJsonFileContent('file.txt', {});]
-      [runResult.assertNoJsonFileContent('file.txt', {});]
+      [result.assertFile('file.txt');]
+      [result.assertNoFile('file.txt');]
+      [result.assertFileContent('file.txt', 'content');]
+      [result.assertEqualsFileContent('file.txt', 'content');]
+      [result.assertNoFileContent('file.txt', 'content');]
+      [result.assertJsonFileContent('file.txt', {});]
+      [result.assertNoJsonFileContent('file.txt', {});]
     });
-  });
-});
-```
-
-Convenience last RunResult instance:
-
-```js
-import helpers, { result } from 'yeoman-test';
-
-describe('generator test', () => {
-  before(() => helpers.run('namespace'));
-  it('test', () => {
-    result.assert...;
   });
 });
 ```
