@@ -9,7 +9,7 @@ import { camelCase, kebabCase, merge as lodashMerge, set as lodashSet } from 'lo
 import { resetFileCommitStates } from 'mem-fs-editor/state';
 import { create as createMemFs, type Store } from 'mem-fs';
 import tempDirectory from 'temp-dir';
-import { stub as sinonStub } from 'sinon';
+import { stub as sinonStub, type SinonStub } from 'sinon';
 import type {
   BaseEnvironmentOptions,
   BaseGenerator,
@@ -407,9 +407,35 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     });
   }
 
-  withSpawnMock(stub = sinonStub()): this {
+  withSpawnMock(
+    options?: ((...args) => any) | { stub?: (...args) => any; registerSinonDefaults?: boolean; callback?: (stub) => void | Promise<void> },
+  ): this {
     if (this.spawnStub) {
       throw new Error('Multiple withSpawnMock calls');
+    }
+
+    const stub = typeof options === 'function' ? options : options?.stub ?? sinonStub();
+    const registerSinonDefaults = typeof options === 'function' ? false : options?.registerSinonDefaults ?? true;
+    const callback = typeof options === 'function' ? undefined : options?.callback;
+
+    if (registerSinonDefaults) {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      const defaultChild = { stdout: { on() {} }, stderr: { on() {} } };
+      const defaultReturn = { exitCode: 0, stdout: '', stderr: '' };
+      const stubFn = stub as SinonStub;
+
+      // eslint-disable-next-line @typescript-eslint/promise-function-async
+      stubFn.withArgs('spawnCommand').callsFake(() => Object.assign(Promise.resolve({ ...defaultReturn }), defaultChild));
+      // eslint-disable-next-line @typescript-eslint/promise-function-async
+      stubFn.withArgs('spawn').callsFake(() => Object.assign(Promise.resolve({ ...defaultReturn }), defaultChild));
+      stubFn.withArgs('spawnCommandSync').callsFake(() => ({ ...defaultReturn }));
+      stubFn.withArgs('spawnSync').callsFake(() => ({ ...defaultReturn }));
+    }
+
+    if (callback) {
+      this.onBeforePrepare(async () => {
+        await callback(stub);
+      });
     }
 
     this.spawnStub = stub;

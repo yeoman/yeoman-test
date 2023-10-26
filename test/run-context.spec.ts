@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { createRequire } from 'node:module';
 import { expect } from 'esmocha';
-import { assert as sinonAssert, spy as sinonSpy, stub as sinonStub, fake as sinonFake } from 'sinon';
+import { assert as sinonAssert, spy as sinonSpy, stub as sinonStub, fake as sinonFake, type SinonStub } from 'sinon';
 import inquirer from 'inquirer';
 import Generator from 'yeoman-generator';
 import tempDirectory from 'temp-dir';
@@ -647,10 +647,17 @@ describe('RunContext', function () {
     it('provide arguments to the generator when passed as String', async function () {
       ctx.withSpawnMock();
       Dummy.prototype.mockTask = async function () {
-        await this.spawnCommand('foo');
-        this.spawnCommandSync('foo');
-        await this.spawn('foo');
-        this.spawnSync('foo');
+        const spawnCommandFoo = this.spawnCommand('foo');
+        expect(spawnCommandFoo).toMatchObject({ stderr: expect.any(Object), stdout: expect.any(Object) });
+        await expect(spawnCommandFoo).resolves.toMatchObject({ exitCode: 0, stderr: '', stdout: '' });
+
+        expect(this.spawnCommandSync('foo')).toMatchObject({ exitCode: 0, stderr: '', stdout: '' });
+
+        const spawnFoo = this.spawn('foo');
+        expect(spawnFoo).toMatchObject({ stderr: expect.any(Object), stdout: expect.any(Object) });
+        await expect(spawnFoo).resolves.toMatchObject({ exitCode: 0, stderr: '', stdout: '' });
+
+        expect(this.spawnSync('foo')).toMatchObject({ exitCode: 0, stderr: '', stdout: '' });
       };
 
       const result = await ctx.toPromise();
@@ -658,6 +665,36 @@ describe('RunContext', function () {
       assert.deepStrictEqual(result.getSpawnArgsUsingDefaultImplementation()[1], ['spawnCommandSync', 'foo']);
       assert.deepStrictEqual(result.getSpawnArgsUsingDefaultImplementation()[2], ['spawn', 'foo']);
       assert.deepStrictEqual(result.getSpawnArgsUsingDefaultImplementation()[3], ['spawnSync', 'foo']);
+    });
+
+    it('with callback', async function () {
+      ctx.withSpawnMock({
+        stub: sinonStub(),
+        registerSinonDefaults: true,
+        callback(stub: SinonStub) {
+          stub.withArgs('spawnCommandSync', 'foo').returns('bar');
+        },
+      });
+
+      Dummy.prototype.mockTask = async function () {
+        expect(this.spawnCommandSync()).toMatchObject({ exitCode: 0, stderr: '', stdout: '' });
+        expect(this.spawnCommandSync('foo')).toBe('bar');
+      };
+
+      await ctx.toPromise();
+    });
+
+    it('without defaults', async function () {
+      ctx.withSpawnMock({
+        stub: sinonStub(),
+        registerSinonDefaults: false,
+      });
+
+      Dummy.prototype.mockTask = async function () {
+        expect(this.spawnCommandSync()).toBeUndefined();
+      };
+
+      await ctx.toPromise();
     });
   });
 
