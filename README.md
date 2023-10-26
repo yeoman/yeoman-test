@@ -52,11 +52,7 @@ describe('generator test', () => {
         [.withYoRcConfig('generator-foo.bar', { : {} })] // same as above
         [.commitFiles()]            // commit mem-fs files to disk
         [.onGenerator(gen => {})]   // do something with the generator
-        [.onEnvironment(env => {})] // do something with the environment
-        [.build(runContext => {     // instantiates Environment/Generator
-          [runContext.env...]       // does something with the environment
-          [runContext.generator...] // does something with the generator
-        })];
+        [.onEnvironment(env => {})]; // do something with the environment
 
       [await result.create('another-generator').run();] // instantiates a new RunContext at the same directory
     );
