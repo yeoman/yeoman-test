@@ -1,4 +1,3 @@
-// eslint-disable-next-line n/file-extension-in-import
 import { TestAdapter as BaseTestAdapter, type TestAdapterOptions } from '@yeoman/adapter/testing';
 import { spy as sinonSpy, stub as sinonStub } from 'sinon';
 
@@ -11,5 +10,6 @@ export class TestAdapter extends BaseTestAdapter {
   }
 }
 
-// eslint-disable-next-line n/file-extension-in-import
 export { DummyPrompt, type DummyPromptOptions, type DummyPromptCallback, type TestAdapterOptions } from '@yeoman/adapter/testing';
+
+export type AskedQuestions = Array<{ name: string; answer: any }>;

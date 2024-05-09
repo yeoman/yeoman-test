@@ -5,7 +5,6 @@ import assert from 'node:assert';
 import { EventEmitter } from 'node:events';
 import process from 'node:process';
 import { camelCase, kebabCase, merge as lodashMerge, set as lodashSet } from 'lodash-es';
-// eslint-disable-next-line n/file-extension-in-import
 import { resetFileCommitStates } from 'mem-fs-editor/state';
 import { create as createMemFs, type Store } from 'mem-fs';
 import tempDirectory from 'temp-dir';
@@ -22,7 +21,7 @@ import { create as createMemFsEditor, type MemFsEditorFile, type MemFsEditor } f
 import type { DefaultGeneratorApi, DefaultEnvironmentApi } from '../types/type-helpers.js';
 import RunResult, { type RunResultOptions } from './run-result.js';
 import defaultHelpers, { type CreateEnv, type Dependency, type YeomanTest } from './helpers.js';
-import { type DummyPromptOptions, type TestAdapterOptions } from './adapter.js';
+import { type AskedQuestions, type DummyPromptCallback, type DummyPromptOptions, type TestAdapterOptions } from './adapter.js';
 import testContext from './test-context.js';
 
 /**
@@ -76,6 +75,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
   memFs: Store<MemFsEditorFile>;
   spawnStub?: any;
   mockedGeneratorFactory: MockedGeneratorFactory;
+  readonly askedQuestions: AskedQuestions = [];
 
   protected environmentPromise?: PromiseRunResult<GeneratorType>;
 
@@ -664,13 +664,23 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
   async build(): Promise<void> {
     await this.prepare();
 
+    const { askedQuestions, adapterOptions } = this;
+    const promptCallback: DummyPromptCallback = function (this, answer: any, options) {
+      const { question } = options;
+      if (question.name) {
+        askedQuestions.push({ name: question.name, answer });
+      }
+
+      return adapterOptions?.callback ? adapterOptions.callback.call(this, answer, options) : answer;
+    };
+
     const testEnv = await this.helpers.createTestEnv(this.envOptions.createEnv, {
       cwd: this.settings.forwardCwd ? this.targetDirectory : undefined,
       sharedFs: this.memFs,
       force: true,
       skipCache: true,
       skipInstall: true,
-      adapter: this.helpers.createTestAdapter({ ...this.adapterOptions, mockedAnswers: this.answers }),
+      adapter: this.helpers.createTestAdapter({ ...this.adapterOptions, mockedAnswers: this.answers, callback: promptCallback }),
       ...this.envOptions,
     } as any);
     this.env = this.envCB ? (await this.envCB(testEnv)) ?? testEnv : testEnv;
@@ -727,6 +737,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       envOptions: this.envOptions,
       mockedGenerators: this.mockedGenerators,
       helpers: this.helpers,
+      askedQuestions: this.askedQuestions,
     };
   }
 

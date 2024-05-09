@@ -601,6 +601,30 @@ describe('RunContext', function () {
           assert.ok(promptSpy.getCall(0).thisValue instanceof DummyPrompt);
         });
     });
+
+    it('sets askedQuestions', async function () {
+      Dummy.prototype.askFor = function () {
+        return this.prompt([
+          {
+            name: 'yeoman',
+            type: 'input',
+            message: 'Hey!',
+          },
+          {
+            name: 'yeoman2',
+            type: 'input',
+            message: 'Hey!',
+          },
+        ]);
+      };
+
+      const result = await ctx.withAnswers({ yeoman: 'no please' }).toPromise();
+
+      assert.deepEqual(result.askedQuestions, [
+        { name: 'yeoman', answer: 'no please' },
+        { name: 'yeoman2', answer: undefined },
+      ]);
+    });
   });
 
   describe('#withMockedGenerators()', function () {
