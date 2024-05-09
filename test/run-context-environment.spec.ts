@@ -212,10 +212,12 @@ describe('RunContext running environment', function () {
 
     describe('with composing generator', () => {
       before(() => {
+        lookups = [{ packagePaths: [path.resolve('./fixtures/generator-simple')] }];
         gen = 'simple:composing';
         build = false;
       });
       after(() => {
+        lookups = [];
         gen = undefined;
         build = true;
       });
