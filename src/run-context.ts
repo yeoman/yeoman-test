@@ -5,7 +5,6 @@ import assert from 'node:assert';
 import { EventEmitter } from 'node:events';
 import process from 'node:process';
 import { camelCase, kebabCase, merge as lodashMerge, set as lodashSet } from 'lodash-es';
-// eslint-disable-next-line n/file-extension-in-import
 import { resetFileCommitStates } from 'mem-fs-editor/state';
 import { create as createMemFs, type Store } from 'mem-fs';
 import tempDirectory from 'temp-dir';
