@@ -13,3 +13,5 @@ export class TestAdapter extends BaseTestAdapter {
 
 // eslint-disable-next-line n/file-extension-in-import
 export { DummyPrompt, type DummyPromptOptions, type DummyPromptCallback, type TestAdapterOptions } from '@yeoman/adapter/testing';
+
+export type AskedQuestions = Array<{ name: string; answer: any }>;

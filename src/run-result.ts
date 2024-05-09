@@ -8,6 +8,7 @@ import type { BaseEnvironmentOptions, BaseGenerator, GetGeneratorConstructor } f
 import type { DefaultEnvironmentApi, DefaultGeneratorApi } from '../types/type-helpers.js';
 import { type RunContextSettings } from './run-context.js';
 import { type YeomanTest } from './helpers.js';
+import { type AskedQuestions } from './adapter.js';
 
 const isObject = object => typeof object === 'object' && object !== null && object !== undefined;
 
@@ -60,6 +61,8 @@ export type RunResultOptions<GeneratorType extends BaseGenerator> = {
   settings: RunContextSettings;
 
   helpers: YeomanTest;
+
+  askedQuestions: AskedQuestions;
 };
 
 /**
@@ -76,6 +79,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
   mockedGenerators: any;
   options: RunResultOptions<GeneratorType>;
   spawnStub?: any;
+  readonly askedQuestions: AskedQuestions;
 
   constructor(options: RunResultOptions<GeneratorType>) {
     if (options.memFs && !options.cwd) {
@@ -90,6 +94,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
     this.fs = this.memFs && createMemFsEditor(this.memFs);
     this.mockedGenerators = options.mockedGenerators || {};
     this.spawnStub = options.spawnStub;
+    this.askedQuestions = options.askedQuestions;
     this.options = options;
   }
 
