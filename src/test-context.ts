@@ -15,7 +15,7 @@ class TestContext {
       if (this.autoCleanup) {
         this.runContext?.cleanupTemporaryDir();
       } else if (this.autoRestore) {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+         
         this.runContext?.restore();
       }
     }
