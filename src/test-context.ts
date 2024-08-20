@@ -1,13 +1,31 @@
 import process from 'node:process';
+import onExit from 'when-exit';
 import type RunContext from './run-context.js';
 import type RunResult from './run-result.js';
 
 class TestContext {
+  beforeCwd?: string;
+  autoRestore = true;
+  autoCleanup?: boolean;
   runResult?: RunResult;
   private runContext?: RunContext<any>;
 
-  startNewContext(runContext?: RunContext<any>) {
-    this.runContext?.cleanupTemporaryDir();
+  startNewContext(runContext?, autoCleanup = true) {
+    if (this.beforeCwd !== process.cwd()) {
+      if (this.autoCleanup) {
+        this.runContext?.cleanupTemporaryDir();
+      } else if (this.autoRestore) {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        this.runContext?.restore();
+      }
+    }
+
+    if (this.beforeCwd && this.beforeCwd !== process.cwd()) {
+      console.log('Test failed to restore context', this.beforeCwd, process.cwd());
+    }
+
+    this.autoCleanup = autoCleanup;
+    this.beforeCwd = runContext ? process.cwd() : undefined;
     this.runContext = runContext;
     this.runResult = undefined;
   }
@@ -15,13 +33,9 @@ class TestContext {
 
 const testContext = new TestContext();
 
-const cleanupTemporaryDir = () => {
+onExit(() => {
   testContext.startNewContext();
-};
-
-process.on('exit', cleanupTemporaryDir);
-process.on('SIGINT', cleanupTemporaryDir);
-process.on('SIGTERM', cleanupTemporaryDir);
+});
 
 export default testContext;
 
