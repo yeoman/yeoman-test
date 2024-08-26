@@ -49,7 +49,7 @@
     "@types/inquirer": "^9.0.3",
     "@types/lodash": "^4.14.195",
     "@types/node": "^16.18.19",
-    "@types/sinon": "^10.0.13",
+    "@types/sinon": "^17.0.3",
     "@yeoman/eslint": "0.1.2",
     "c8": "^10.1.2",
     "coveralls": "^3.1.1",
