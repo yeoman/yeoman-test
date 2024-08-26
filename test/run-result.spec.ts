@@ -171,7 +171,7 @@ describe('run-result', () => {
     beforeEach(() => {
       cwd = path.join(process.cwd(), 'fixtures', 'tmp');
       if (!fs.existsSync(cwd)) {
-        fs.mkdirSync(cwd);
+        fs.mkdirSync(cwd, { recursive: true });
       }
 
       runResult = new RunResult({
