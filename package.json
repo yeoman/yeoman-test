@@ -34,7 +34,7 @@
     "doc:prettier": "prettier $npm_package_config_doc_path --write --ignore-path .prettierignore-doc",
     "fix": "prettier . --write && eslint . --fix",
     "precommit": "lint-staged",
-    "prepare": "npm run build",
+    "prepare": "npm run build && husky",
     "pretest": "eslint .",
     "test": "c8 esmocha --forbid-only"
   },
@@ -60,7 +60,7 @@
     "c8": "^10.1.2",
     "coveralls": "^3.1.1",
     "esmocha": "^1.0.1",
-    "husky": "^8.0.2",
+    "husky": "^9.1.5",
     "jsdoc": "^4.0.2",
     "lint-staged": "^15.2.9",
     "prettier": "^3.3.3",
