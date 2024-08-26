@@ -1,4 +1,3 @@
-/* eslint-disable max-nested-callbacks */
 import assert from 'node:assert';
 import path, { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';

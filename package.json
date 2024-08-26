@@ -27,9 +27,10 @@
     "doc:fix": "sed -i -e 's:^[[:space:]]*<!--[[:space:]]*$::g' -e 's:^[[:space:]]*-->[[:space:]]*$::g' $npm_package_config_doc_path/global.html",
     "doc:generate": "jsdoc -c jsdoc.json -d $npm_package_config_doc_path",
     "doc:prettier": "prettier $npm_package_config_doc_path --write --ignore-path .prettierignore-doc",
+    "fix": "prettier . --write && eslint . --fix",
     "precommit": "lint-staged",
     "prepare": "npm run build",
-    "pretest": "xo",
+    "pretest": "eslint .",
     "test": "c8 esmocha --forbid-only"
   },
   "config": {
@@ -49,17 +50,17 @@
     "@types/lodash": "^4.14.195",
     "@types/node": "^16.18.19",
     "@types/sinon": "^10.0.13",
+    "@yeoman/eslint": "0.1.2",
     "c8": "^8.0.0",
     "coveralls": "^3.1.1",
     "esmocha": "^1.0.1",
     "husky": "^8.0.2",
     "jsdoc": "^4.0.2",
     "lint-staged": "^15.2.9",
-    "prettier": "^3.0.3",
+    "prettier": "^3.3.3",
     "prettier-plugin-packagejson": "^2.3.0",
     "tui-jsdoc-template": "^1.2.2",
     "typescript": "~5.2.2",
-    "xo": "0.56.0",
     "yeoman-environment": "^3.18.3",
     "yeoman-generator": "^5.9.0"
   },
@@ -68,11 +69,6 @@
     "mem-fs": "^3.0.0",
     "yeoman-environment": "^3.18.3",
     "yeoman-generator": "^5.9.0 || >=6.0.0"
-  },
-  "acceptDependencies": {
-    "mem-fs": "^4.0.0-beta.1",
-    "yeoman-environment": ">=4.0.0-beta.6",
-    "yeoman-generator": ">=6.0.0"
   },
   "peerDependenciesMeta": {
     "yeoman-environment": {
@@ -84,5 +80,10 @@
   },
   "engines": {
     "node": "^16.17.0 || >=18.12.0"
+  },
+  "acceptDependencies": {
+    "mem-fs": "^4.0.0-beta.1",
+    "yeoman-environment": ">=4.0.0-beta.6",
+    "yeoman-generator": ">=6.0.0"
   }
 }
