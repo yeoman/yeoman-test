@@ -3,7 +3,7 @@ import { existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import type { Store } from 'mem-fs';
-import { create as createMemFsEditor, type MemFsEditorFile, type MemFsEditor } from 'mem-fs-editor';
+import { type MemFsEditor, type MemFsEditorFile, create as createMemFsEditor } from 'mem-fs-editor';
 import type { BaseEnvironmentOptions, BaseGenerator, GetGeneratorConstructor } from '@yeoman/types';
 import type { DefaultEnvironmentApi, DefaultGeneratorApi } from '../types/type-helpers.js';
 import { type RunContextSettings } from './run-context.js';
@@ -17,7 +17,7 @@ function convertArgs(args) {
     return [[...args]];
   }
 
-  const arg = args[0];
+  const [arg] = args;
   return Array.isArray(arg) ? arg : [arg];
 }
 
@@ -287,8 +287,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
   assertFileContent(pairs: Array<[string, string | RegExp]>): void;
   assertFileContent(...args) {
     for (const pair of convertArgs(args)) {
-      const file = pair[0];
-      const regex = pair[1];
+      const [file, regex] = pair;
       this.assertFile(file);
       const body = this._readFile(file);
 
@@ -323,8 +322,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
   assertEqualsFileContent(pairs: Array<[string, string]>): void;
   assertEqualsFileContent(...args) {
     for (const pair of convertArgs(args)) {
-      const file = pair[0];
-      const expectedContent = pair[1];
+      const [file, expectedContent] = pair;
       this.assertFile(file);
       this.assertTextEqual(this._readFile(file), expectedContent);
     }
@@ -352,8 +350,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
   assertNoFileContent(pairs: Array<[string, string | RegExp]>): void;
   assertNoFileContent(...args) {
     for (const pair of convertArgs(args)) {
-      const file = pair[0];
-      const regex = pair[1];
+      const [file, regex] = pair;
       this.assertFile(file);
       const body = this._readFile(file);
 

@@ -1,4 +1,4 @@
-import { mkdirSync, existsSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import process from 'node:process';
 import { cloneDeep } from 'lodash-es';
@@ -23,7 +23,9 @@ let GeneratorImplementation;
 try {
   const GeneratorImport = await import('yeoman-generator');
   GeneratorImplementation = GeneratorImport.default ?? GeneratorImport;
-} catch {}
+} catch {
+  // Ignore error
+}
 
 export type CreateEnv = (options: BaseEnvironmentOptions) => Promise<BaseEnvironment>;
 

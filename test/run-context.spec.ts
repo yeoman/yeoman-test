@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { createRequire } from 'node:module';
 import { expect } from 'esmocha';
-import { assert as sinonAssert, spy as sinonSpy, stub as sinonStub, fake as sinonFake, type SinonStub } from 'sinon';
+import { type SinonStub, assert as sinonAssert, fake as sinonFake, spy as sinonSpy, stub as sinonStub } from 'sinon';
 import inquirer from 'inquirer';
 import Generator from 'yeoman-generator';
 import tempDirectory from 'temp-dir';
@@ -53,7 +53,9 @@ describe('RunContext', function () {
 
     try {
       ctx.on('end', done);
-    } catch {}
+    } catch {
+      // Ignore error
+    }
   });
 
   describe('constructor', function () {

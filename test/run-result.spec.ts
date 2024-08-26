@@ -1,4 +1,3 @@
-/* eslint-disable max-nested-callbacks */
 import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -260,7 +259,6 @@ describe('run-result', () => {
         testContext.runResult = runResult;
       });
       for (const method of Object.getOwnPropertyNames(RunResult.prototype)) {
-        // eslint-disable-next-line @typescript-eslint/no-loop-func
         it(`.${method}`, () => {
           assert.equal(result.assertFile, runResult.assertFile);
         });

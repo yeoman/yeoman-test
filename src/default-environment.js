@@ -9,7 +9,6 @@ export const createEnv = async options => {
   }
 
   if (typeof DynamicEnv.default === 'function') {
-    // eslint-disable-next-line new-cap
     return new DynamicEnv.default(options);
   }
 

@@ -1,24 +1,24 @@
 import crypto from 'node:crypto';
 import { existsSync, rmSync } from 'node:fs';
-import path, { resolve, isAbsolute, join as pathJoin } from 'node:path';
+import path, { isAbsolute, join as pathJoin, resolve } from 'node:path';
 import assert from 'node:assert';
 import { EventEmitter } from 'node:events';
 import process from 'node:process';
 import { camelCase, kebabCase, merge as lodashMerge, set as lodashSet } from 'lodash-es';
 import { resetFileCommitStates } from 'mem-fs-editor/state';
-import { create as createMemFs, type Store } from 'mem-fs';
+import { type Store, create as createMemFs } from 'mem-fs';
 import tempDirectory from 'temp-dir';
-import { stub as sinonStub, type SinonStub } from 'sinon';
+import { type SinonStub, stub as sinonStub } from 'sinon';
 import type {
   BaseEnvironmentOptions,
   BaseGenerator,
   GetGeneratorConstructor,
   GetGeneratorOptions,
-  PromptAnswers,
   LookupOptions,
+  PromptAnswers,
 } from '@yeoman/types';
-import { create as createMemFsEditor, type MemFsEditorFile, type MemFsEditor } from 'mem-fs-editor';
-import type { DefaultGeneratorApi, DefaultEnvironmentApi } from '../types/type-helpers.js';
+import { type MemFsEditor, type MemFsEditorFile, create as createMemFsEditor } from 'mem-fs-editor';
+import type { DefaultEnvironmentApi, DefaultGeneratorApi } from '../types/type-helpers.js';
 import RunResult, { type RunResultOptions } from './run-result.js';
 import defaultHelpers, { type CreateEnv, type Dependency, type YeomanTest } from './helpers.js';
 import { type AskedQuestions, type DummyPromptCallback, type DummyPromptOptions, type TestAdapterOptions } from './adapter.js';
@@ -62,7 +62,6 @@ type MockedGeneratorFactory<GenParameter extends BaseGenerator = DefaultGenerato
 ) => GetGeneratorConstructor<GenParameter>;
 type EnvOptions = BaseEnvironmentOptions & { createEnv?: CreateEnv };
 
-// eslint-disable-next-line unicorn/prefer-event-target
 export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGeneratorApi> extends EventEmitter {
   readonly mockedGenerators: Record<string, BaseGenerator> = {};
   env!: DefaultEnvironmentApi;
@@ -168,7 +167,6 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     super.on(eventName, listener);
     // Don't setup emitters if on generator envent.
     if (eventName !== 'generator') {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.setupEventListeners();
     }
 
@@ -312,7 +310,6 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     return this.onEnvironment(async env => {
       lookups = Array.isArray(lookups) ? lookups : [lookups];
       for (const lookup of lookups) {
-        // eslint-disable-next-line no-await-in-loop
         await (env as any).lookup(lookup);
       }
     });
@@ -414,19 +411,17 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       throw new Error('Multiple withSpawnMock calls');
     }
 
-    const stub = typeof options === 'function' ? options : options?.stub ?? sinonStub();
-    const registerSinonDefaults = typeof options === 'function' ? false : options?.registerSinonDefaults ?? true;
+    const stub = typeof options === 'function' ? options : (options?.stub ?? sinonStub());
+    const registerSinonDefaults = typeof options === 'function' ? false : (options?.registerSinonDefaults ?? true);
     const callback = typeof options === 'function' ? undefined : options?.callback;
 
     if (registerSinonDefaults) {
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
       const defaultChild = { stdout: { on() {} }, stderr: { on() {} } };
       const defaultReturn = { exitCode: 0, stdout: '', stderr: '' };
       const stubFn = stub as SinonStub;
 
-      // eslint-disable-next-line @typescript-eslint/promise-function-async
       stubFn.withArgs('spawnCommand').callsFake(() => Object.assign(Promise.resolve({ ...defaultReturn }), defaultChild));
-      // eslint-disable-next-line @typescript-eslint/promise-function-async
+
       stubFn.withArgs('spawn').callsFake(() => Object.assign(Promise.resolve({ ...defaultReturn }), defaultChild));
       stubFn.withArgs('spawnCommandSync').callsFake(() => ({ ...defaultReturn }));
       stubFn.withArgs('spawnSync').callsFake(() => ({ ...defaultReturn }));
@@ -609,7 +604,6 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
   async prepare() {
     if (this.beforePrepareCallbacks.length > 0) {
       for (const cb of this.beforePrepareCallbacks) {
-        // eslint-disable-next-line no-await-in-loop
         await cb.call(this);
       }
     }
@@ -627,7 +621,6 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     if (this.inDirCallbacks.length > 0) {
       const targetDirectory = path.resolve(this.targetDirectory!);
       for (const cb of this.inDirCallbacks) {
-        // eslint-disable-next-line no-await-in-loop
         await cb(targetDirectory);
       }
     }
@@ -645,7 +638,6 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     this.editor = createMemFsEditor(this.memFs);
 
     for (const onTargetDirectory of this.onTargetDirectoryCallbacks) {
-      // eslint-disable-next-line no-await-in-loop
       await onTargetDirectory.call(this, this.targetDirectory);
     }
   }
@@ -660,7 +652,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * Build the generator and the environment.
    * @return {RunContext|false} this
    */
-  // eslint-disable-next-line @typescript-eslint/member-ordering
+
   async build(): Promise<void> {
     await this.prepare();
 
@@ -683,10 +675,9 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       adapter: this.helpers.createTestAdapter({ ...this.adapterOptions, mockedAnswers: this.answers, callback: promptCallback }),
       ...this.envOptions,
     } as any);
-    this.env = this.envCB ? (await this.envCB(testEnv)) ?? testEnv : testEnv;
+    this.env = this.envCB ? ((await this.envCB(testEnv)) ?? testEnv) : testEnv;
 
     for (const onEnvironmentCallback of this.onEnvironmentCallbacks) {
-      // eslint-disable-next-line no-await-in-loop
       await onEnvironmentCallback.call(this, this.env);
     }
 
@@ -710,7 +701,6 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     });
 
     for (const onGeneratorCallback of this.onGeneratorCallbacks) {
-      // eslint-disable-next-line no-await-in-loop
       await onGeneratorCallback.call(this, this.generator);
     }
   }
@@ -761,7 +751,6 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
           if (this.listenerCount('end') === 0 && this.listenerCount('error') === 0) {
             // When there is no listeners throw a unhandled rejection.
             setImmediate(async function () {
-              // eslint-disable-next-line @typescript-eslint/no-throw-literal
               throw error;
             });
           } else {
@@ -803,7 +792,6 @@ export default class RunContext<GeneratorType extends BaseGenerator = BaseGenera
   extends RunContextBase<GeneratorType>
   implements Promise<RunResult<GeneratorType>>
 {
-  // eslint-disable-next-line unicorn/no-thenable
   async then<TResult1 = RunResult<GeneratorType>, TResult2 = never>(
     onfulfilled?: ((value: RunResult<GeneratorType>) => TResult1 | PromiseLike<TResult1>) | undefined,
     onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined,
