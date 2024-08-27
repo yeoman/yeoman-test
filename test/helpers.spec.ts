@@ -7,7 +7,7 @@ import { existsSync } from 'node:fs';
 import { mock } from 'node:test';
 import { promisify as promisify_ } from 'node:util';
 import Generator from 'yeoman-generator';
-import { afterEach, beforeEach, describe, expect, it } from 'esmocha';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type Environment from 'yeoman-environment';
 import { createEnv as createEnvironment } from '../src/default-environment.js';
 import helpers from '../src/helpers.js';
