@@ -5,6 +5,7 @@ import process from 'node:process';
 import { createRequire } from 'node:module';
 import { mock } from 'node:test';
 import { type LookupOptions } from '@yeoman/types';
+import { afterEach, beforeEach, describe, it } from 'esmocha';
 import helpers from '../src/helpers.js';
 import RunContext from '../src/run-context.js';
 import RunResult from '../src/run-result.js';

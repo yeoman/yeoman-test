@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { createRequire } from 'node:module';
 import { mock } from 'node:test';
-import { expect } from 'esmocha';
+import { afterEach, beforeEach, describe, expect, it } from 'esmocha';
 import inquirer from 'inquirer';
 import Generator from 'yeoman-generator';
 import tempDirectory from 'temp-dir';
