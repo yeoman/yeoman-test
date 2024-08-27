@@ -6,7 +6,6 @@ import process from 'node:process';
 import { createRequire } from 'node:module';
 import { mock } from 'node:test';
 import { expect } from 'esmocha';
-import { assert as sinonAssert, fake as sinonFake, spy as sinonSpy, stub as sinonStub } from 'sinon';
 import inquirer from 'inquirer';
 import Generator from 'yeoman-generator';
 import tempDirectory from 'temp-dir';
@@ -30,7 +29,7 @@ describe('RunContext', function () {
     process.chdir(__dirname);
 
     defaultInput = inquirer.prompt.input;
-    execSpy = sinonSpy();
+    execSpy = mock.fn();
     Dummy = class extends Generator {
       exec(...args) {
         execSpy.apply(this, args);
@@ -80,16 +79,21 @@ describe('RunContext', function () {
     it('propagate generator error events', function (done) {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
-      const execSpy = sinonStub().throws(error);
-      const endSpy = sinonSpy();
+      const execSpy = mock.fn(
+        () => undefined,
+        () => {
+          throw error;
+        },
+      );
+      const endSpy = mock.fn();
       Dummy.prototype.test = execSpy;
       Dummy.prototype.end = execSpy;
       const ctx = new RunContext(Dummy);
 
       ctx.on('error', function (error_) {
-        sinonAssert.calledOnce(execSpy);
+        assert.strictEqual(execSpy.mock.callCount(), 1);
         assert.equal(error_, error);
-        sinonAssert.notCalled(endSpy);
+        assert.strictEqual(endSpy.mock.callCount(), 0);
         done();
       });
     });
@@ -113,9 +117,9 @@ describe('RunContext', function () {
     });
 
     it('run the generator asynchronously', function (done) {
-      assert(execSpy.notCalled);
+      assert.equal(execSpy.mock.callCount(), 0);
       ctx.on('end', function () {
-        sinonAssert.calledOnce(execSpy);
+        assert.strictEqual(execSpy.mock.callCount(), 1);
         done();
       });
     });
@@ -169,7 +173,7 @@ describe('RunContext', function () {
 
     it('only run a generator once', function (done) {
       ctx.on('end', () => {
-        sinonAssert.calledOnce(execSpy);
+        assert.strictEqual(execSpy.mock.callCount(), 1);
         done();
       });
 
@@ -179,21 +183,21 @@ describe('RunContext', function () {
 
     it('set --force by default', function (done) {
       ctx.on('end', function () {
-        assert.equal(execSpy.firstCall.thisValue.options.force, true);
+        assert.equal(execSpy.mock.calls[0].this.options.force, true);
         done();
       });
     });
 
     it('set --skip-install by default', function (done) {
       ctx.on('end', function () {
-        assert.equal(execSpy.firstCall.thisValue.options.skipInstall, true);
+        assert.equal(execSpy.mock.calls[0].this.options.skipInstall, true);
         done();
       });
     });
 
     it('set --skip-cache by default', function (done) {
       ctx.on('end', function () {
-        assert.equal(execSpy.firstCall.thisValue.options.skipCache, true);
+        assert.equal(execSpy.mock.calls[0].this.options.skipCache, true);
         done();
       });
     });
@@ -206,9 +210,14 @@ describe('RunContext', function () {
 
     it('throw an unhandledRejection when no listener is present', function (done) {
       const error = new Error('dummy exception');
-      const execSpy = sinonStub().throws(error);
+      const execSpy = mock.fn(
+        () => undefined,
+        () => {
+          throw error;
+        },
+      );
       const errorHandler = function (error_) {
-        sinonAssert.calledOnce(execSpy);
+        assert.strictEqual(execSpy.mock.callCount(), 1);
         assert.equal(error_, error);
         done();
       };
@@ -233,7 +242,12 @@ describe('RunContext', function () {
     it('returns a reject promise on error', async function () {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
-      const execSpy = sinonStub().throws(error);
+      const execSpy = mock.fn(
+        () => undefined,
+        () => {
+          throw error;
+        },
+      );
       Dummy.prototype.test = execSpy;
       const ctx = new RunContext(Dummy);
 
@@ -253,7 +267,12 @@ describe('RunContext', function () {
     it('handles errors', async function () {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
-      const execSpy = sinonStub().throws(error);
+      const execSpy = mock.fn(
+        () => undefined,
+        () => {
+          throw error;
+        },
+      );
       Dummy.prototype.test = execSpy;
       const ctx = new RunContext(Dummy);
 
@@ -270,7 +289,12 @@ describe('RunContext', function () {
     it('handles errors', async function () {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
-      const execSpy = sinonStub().throws(error);
+      const execSpy = mock.fn(
+        () => undefined,
+        () => {
+          throw error;
+        },
+      );
       Dummy.prototype.test = execSpy;
       const ctx = new RunContext(Dummy);
 
@@ -287,10 +311,10 @@ describe('RunContext', function () {
     });
 
     it('call helpers.testDirectory()', function () {
-      const spy = sinonSpy(helpers, 'testDirectory');
+      const spy = mock.method(helpers, 'testDirectory');
       ctx.inDir(this.tmp);
-      assert(spy.withArgs(this.tmp).calledOnce);
-      spy.restore();
+      assert.equal(spy.mock.calls[0].arguments[0], this.tmp);
+      spy.mock.restore();
     });
 
     it('is chainable', function () {
@@ -299,11 +323,11 @@ describe('RunContext', function () {
 
     it('accepts optional `cb` to be invoked with resolved `dir`', function (done) {
       const ctx = new RunContext(Dummy);
-      const cb = sinonSpy(
+      const cb = mock.fn(
         function () {
-          sinonAssert.calledOnce(cb);
-          sinonAssert.calledOn(cb, ctx);
-          sinonAssert.calledWith(cb, path.resolve(this.tmp));
+          assert.strictEqual(cb.mock.callCount(), 1);
+          assert.equal(cb.mock.calls[0].this, ctx);
+          assert.equal(cb.mock.calls[0].arguments[0], path.resolve(this.tmp));
         }.bind(this),
       );
 
@@ -371,10 +395,10 @@ describe('RunContext', function () {
     });
 
     it('do not call helpers.testDirectory()', function () {
-      const spy = sinonSpy(helpers, 'testDirectory');
+      const spy = mock.method(helpers, 'testDirectory');
       ctx.cd(this.tmp);
-      assert(!spy.calledOnce);
-      spy.restore();
+      assert.strictEqual(spy.mock.callCount(), 0);
+      spy.mock.restore();
     });
 
     it('is chainable', function () {
@@ -388,10 +412,10 @@ describe('RunContext', function () {
     });
 
     it('should cd into created directory', function () {
-      const spy = sinonSpy(process, 'chdir');
+      const spy = mock.method(process, 'chdir');
       ctx.cd(this.tmp);
-      assert(spy.calledWith(this.tmp));
-      spy.restore();
+      assert.equal(spy.mock.calls[0].arguments[0], this.tmp);
+      spy.mock.restore();
     });
 
     it('should throw error if directory do not exist', function () {
@@ -406,10 +430,10 @@ describe('RunContext', function () {
 
   describe('#inTmpDir', function () {
     it('call helpers.testDirectory()', function () {
-      const spy = sinonSpy(helpers, 'testDirectory');
+      const spy = mock.method(helpers, 'testDirectory');
       ctx.inTmpDir();
-      sinonAssert.calledOnce(spy);
-      spy.restore();
+      assert.strictEqual(spy.mock.callCount(), 1);
+      spy.mock.restore();
     });
 
     it('is chainable', function () {
@@ -417,7 +441,7 @@ describe('RunContext', function () {
     });
 
     it('accepts optional `cb` to be invoked with resolved `dir`', function (done) {
-      const cb = sinonSpy(function (dir) {
+      const cb = mock.fn(function (dir) {
         assert.equal(this, ctx);
         assert(dir.includes(tempDirectory));
       });
@@ -430,7 +454,7 @@ describe('RunContext', function () {
     it('provide arguments to the generator when passed as Array', function (done) {
       ctx.withArguments(['one', 'two']);
       ctx.on('end', function () {
-        assert.deepEqual(execSpy.firstCall.thisValue.arguments, ['one', 'two']);
+        assert.deepEqual(execSpy.mock.calls[0].this.arguments, ['one', 'two']);
         done();
       });
     });
@@ -438,7 +462,7 @@ describe('RunContext', function () {
     it('provide arguments to the generator when passed as String', function (done) {
       ctx.withArguments('foo bar');
       ctx.on('end', function () {
-        assert.deepEqual(execSpy.firstCall.thisValue.arguments, ['foo', 'bar']);
+        assert.deepEqual(execSpy.mock.calls[0].this.arguments, ['foo', 'bar']);
         done();
       });
     });
@@ -450,7 +474,7 @@ describe('RunContext', function () {
     it('is chainable', function (done) {
       ctx.withArguments('foo').withArguments('bar');
       ctx.on('end', function () {
-        assert.deepEqual(execSpy.firstCall.thisValue.arguments, ['foo', 'bar']);
+        assert.deepEqual(execSpy.mock.calls[0].this.arguments, ['foo', 'bar']);
         done();
       });
     });
@@ -460,7 +484,7 @@ describe('RunContext', function () {
     it('provide options to the generator', function (done) {
       ctx.withOptions({ foo: 'bar' });
       ctx.on('end', function () {
-        assert.equal(execSpy.firstCall.thisValue.options.foo, 'bar');
+        assert.equal(execSpy.mock.calls[0].this.options.foo, 'bar');
         done();
       });
     });
@@ -471,8 +495,8 @@ describe('RunContext', function () {
         force: false,
       });
       ctx.on('end', function () {
-        assert.equal(execSpy.firstCall.thisValue.options.skipInstall, false);
-        assert.equal(execSpy.firstCall.thisValue.options.force, false);
+        assert.equal(execSpy.mock.calls[0].this.options.skipInstall, false);
+        assert.equal(execSpy.mock.calls[0].this.options.force, false);
         done();
       });
     });
@@ -480,8 +504,8 @@ describe('RunContext', function () {
     it('camel case options', function (done) {
       ctx.withOptions({ 'foo-bar': false });
       ctx.on('end', function () {
-        assert.equal(execSpy.firstCall.thisValue.options['foo-bar'], false);
-        assert.equal(execSpy.firstCall.thisValue.options.fooBar, false);
+        assert.equal(execSpy.mock.calls[0].this.options['foo-bar'], false);
+        assert.equal(execSpy.mock.calls[0].this.options.fooBar, false);
         done();
       });
     });
@@ -489,8 +513,8 @@ describe('RunContext', function () {
     it('kebab case options', function (done) {
       ctx.withOptions({ barFoo: false });
       ctx.on('end', function () {
-        assert.equal(execSpy.firstCall.thisValue.options['bar-foo'], false);
-        assert.equal(execSpy.firstCall.thisValue.options.barFoo, false);
+        assert.equal(execSpy.mock.calls[0].this.options['bar-foo'], false);
+        assert.equal(execSpy.mock.calls[0].this.options.barFoo, false);
         done();
       });
     });
@@ -498,7 +522,7 @@ describe('RunContext', function () {
     it('is chainable', function (done) {
       ctx.withOptions({ foo: 'bar' }).withOptions({ john: 'doe' });
       ctx.on('end', function () {
-        const { options } = execSpy.firstCall.thisValue;
+        const { options } = execSpy.mock.calls[0].this;
         assert.equal(options.foo, 'bar');
         assert.equal(options.john, 'doe');
         done();
@@ -508,8 +532,8 @@ describe('RunContext', function () {
 
   describe('#withAnswers()', function () {
     it('is call automatically', async function () {
-      const askFor = sinonSpy();
-      const prompt = sinonSpy();
+      const askFor = mock.fn();
+      const prompt = mock.fn();
       Dummy.prototype.askFor = function () {
         askFor();
         return this.prompt({
@@ -524,13 +548,13 @@ describe('RunContext', function () {
       };
 
       return ctx.toPromise().then(function () {
-        sinonAssert.calledOnce(askFor);
-        sinonAssert.calledOnce(prompt);
+        assert.strictEqual(askFor.mock.callCount(), 1);
+        assert.strictEqual(prompt.mock.callCount(), 1);
       });
     });
 
     it('mock the prompt', async function () {
-      const execSpy = sinonSpy();
+      const execSpy = mock.fn();
       Dummy.prototype.askFor = function () {
         return this.prompt({
           name: 'yeoman',
@@ -546,12 +570,12 @@ describe('RunContext', function () {
         .withAnswers({ yeoman: 'yes please' })
         .toPromise()
         .then(function () {
-          sinonAssert.calledOnce(execSpy);
+          assert.strictEqual(execSpy.mock.callCount(), 1);
         });
     });
 
     it('is chainable', async function () {
-      const execSpy = sinonSpy();
+      const execSpy = mock.fn();
       Dummy.prototype.askFor = function () {
         return this.prompt([
           {
@@ -576,13 +600,16 @@ describe('RunContext', function () {
         .withAnswers({ yo: 'yo man' })
         .toPromise()
         .then(function () {
-          sinonAssert.calledOnce(execSpy);
+          assert.strictEqual(execSpy.mock.callCount(), 1);
         });
     });
 
     it('calls the callback', async function () {
-      const execSpy = sinonSpy();
-      const promptSpy = sinonFake.returns('yes please');
+      const execSpy = mock.fn();
+      const promptSpy = mock.fn(
+        () => undefined,
+        () => 'yes please',
+      );
       Dummy.prototype.askFor = function () {
         return this.prompt({
           name: 'yeoman',
@@ -598,10 +625,10 @@ describe('RunContext', function () {
         .withAnswers({ yeoman: 'no please' }, { callback: promptSpy })
         .toPromise()
         .then(function () {
-          sinonAssert.calledOnce(execSpy);
-          sinonAssert.calledOnce(promptSpy);
-          assert.equal(promptSpy.getCall(0).args[0], 'no please');
-          assert.ok(promptSpy.getCall(0).thisValue instanceof DummyPrompt);
+          assert.strictEqual(execSpy.mock.callCount(), 1);
+          assert.strictEqual(promptSpy.mock.callCount(), 1);
+          assert.equal(promptSpy.mock.calls[0].arguments[0], 'no please');
+          assert.ok(promptSpy.mock.calls[0].this instanceof DummyPrompt);
         });
     });
 
@@ -720,8 +747,8 @@ describe('RunContext', function () {
 
     it('without defaults', async function () {
       ctx.withSpawnMock({
-        stub: sinonStub(),
-        registerSinonDefaults: false,
+        stub: mock.fn(),
+        registerNodeMockDefaults: false,
       });
 
       Dummy.prototype.mockTask = async function () {
