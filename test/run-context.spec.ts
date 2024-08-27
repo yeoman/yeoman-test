@@ -305,20 +305,22 @@ describe('RunContext', () => {
   });
 
   describe('#inDir()', () => {
-    beforeEach(function () {
+    let temporaryDirectory;
+
+    beforeEach(() => {
       process.chdir(__dirname);
-      this.tmp = tmpdir;
+      temporaryDirectory = tmpdir;
     });
 
-    it('call helpers.testDirectory()', function () {
+    it('call helpers.testDirectory()', () => {
       const spy = mock.method(helpers, 'testDirectory');
-      context.inDir(this.tmp);
-      assert.equal(spy.mock.calls[0].arguments[0], this.tmp);
+      context.inDir(temporaryDirectory);
+      assert.equal(spy.mock.calls[0].arguments[0], temporaryDirectory);
       spy.mock.restore();
     });
 
-    it('is chainable', function () {
-      assert.equal(context.inDir(this.tmp), context);
+    it('is chainable', () => {
+      assert.equal(context.inDir(temporaryDirectory), context);
     });
 
     it('accepts optional `cb` to be invoked with resolved `dir`', function (done) {
@@ -326,16 +328,16 @@ describe('RunContext', () => {
       const callback = mock.fn(() => {
         assert.strictEqual(callback.mock.callCount(), 1);
         assert.equal(callback.mock.calls[0].this, context);
-        assert.equal(callback.mock.calls[0].arguments[0], path.resolve(this.tmp));
+        assert.equal(callback.mock.calls[0].arguments[0], path.resolve(temporaryDirectory));
       });
 
-      context.inDir(this.tmp, callback).on('end', done);
+      context.inDir(temporaryDirectory, callback).on('end', done);
     });
 
-    it('throws error at additional calls with dirPath', function () {
-      assert(context.inDir(this.tmp));
+    it('throws error at additional calls with dirPath', () => {
+      assert(context.inDir(temporaryDirectory));
       try {
-        context.inDir(this.tmp);
+        context.inDir(temporaryDirectory);
         assert.fail();
       } catch (error) {
         assert(error.message.includes('Test directory has already been set.'));
@@ -344,18 +346,20 @@ describe('RunContext', () => {
   });
 
   describe('#doInDir()', () => {
-    beforeEach(function () {
+    let temporaryDirectory;
+
+    beforeEach(() => {
       process.chdir(__dirname);
-      this.tmp = tmpdir;
+      temporaryDirectory = tmpdir;
     });
 
     it('accepts `cb` to be invoked with resolved `dir`', function (done) {
       let callbackCalled = false;
       context
-        .inDir(this.tmp)
+        .inDir(temporaryDirectory)
         .doInDir(dirPath => {
           callbackCalled = true;
-          assert.equal(dirPath, this.tmp);
+          assert.equal(dirPath, temporaryDirectory);
         })
         .on('end', () => {
           if (callbackCalled) {
@@ -368,14 +372,14 @@ describe('RunContext', () => {
       let callbackCalled1 = false;
       let callbackCalled2 = false;
       context
-        .inDir(this.tmp)
+        .inDir(temporaryDirectory)
         .doInDir(dirPath => {
           callbackCalled1 = true;
-          assert.equal(dirPath, this.tmp);
+          assert.equal(dirPath, temporaryDirectory);
         })
         .doInDir(dirPath => {
           callbackCalled2 = true;
-          assert.equal(dirPath, this.tmp);
+          assert.equal(dirPath, temporaryDirectory);
         })
         .on('end', () => {
           if (callbackCalled1 && callbackCalled2) {
@@ -386,42 +390,44 @@ describe('RunContext', () => {
   });
 
   describe('#cd()', () => {
-    beforeEach(function () {
+    let temporaryDirectory;
+
+    beforeEach(() => {
       process.chdir(__dirname);
-      this.tmp = tmpdir;
+      temporaryDirectory = tmpdir;
       fs.mkdirSync(tmpdir, { recursive: true });
     });
 
-    it('do not call helpers.testDirectory()', function () {
+    it('do not call helpers.testDirectory()', () => {
       const spy = mock.method(helpers, 'testDirectory');
-      context.cd(this.tmp);
+      context.cd(temporaryDirectory);
       assert.strictEqual(spy.mock.callCount(), 0);
       spy.mock.restore();
     });
 
-    it('is chainable', function () {
-      assert.equal(context.cd(this.tmp), context);
+    it('is chainable', () => {
+      assert.equal(context.cd(temporaryDirectory), context);
     });
 
-    it('should set inDirSet & targetDirectory', function () {
+    it('should set inDirSet & targetDirectory', () => {
       assert(!context.targetDirectory);
-      context.cd(this.tmp);
-      assert.equal(context.targetDirectory, this.tmp);
+      context.cd(temporaryDirectory);
+      assert.equal(context.targetDirectory, temporaryDirectory);
     });
 
-    it('should cd into created directory', function () {
+    it('should cd into created directory', () => {
       const spy = mock.method(process, 'chdir');
-      context.cd(this.tmp);
-      assert.equal(spy.mock.calls[0].arguments[0], this.tmp);
+      context.cd(temporaryDirectory);
+      assert.equal(spy.mock.calls[0].arguments[0], temporaryDirectory);
       spy.mock.restore();
     });
 
-    it('should throw error if directory do not exist', function () {
+    it('should throw error if directory do not exist', () => {
       try {
-        context.cd(path.join(this.tmp, 'NOT_EXIST'));
+        context.cd(path.join(temporaryDirectory, 'NOT_EXIST'));
         assert.fail();
       } catch (error) {
-        assert(error.message.includes(this.tmp));
+        assert(error.message.includes(temporaryDirectory));
       }
     });
   });
