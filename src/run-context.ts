@@ -20,7 +20,7 @@ import type {
 import { type MemFsEditor, type MemFsEditorFile, create as createMemFsEditor } from 'mem-fs-editor';
 import type { DefaultEnvironmentApi, DefaultGeneratorApi } from '../types/type-helpers.js';
 import RunResult, { type RunResultOptions } from './run-result.js';
-import defaultHelpers, { type CreateEnv, type Dependency, type YeomanTest } from './helpers.js';
+import defaultHelpers, { type CreateEnv as CreateEnvironment, type Dependency, type YeomanTest } from './helpers.js';
 import { type AskedQuestions, type DummyPromptCallback, type DummyPromptOptions, type TestAdapterOptions } from './adapter.js';
 import testContext from './test-context.js';
 
@@ -60,14 +60,14 @@ type PromiseRunResult<GeneratorType extends BaseGenerator> = Promise<RunResult<G
 type MockedGeneratorFactory<GenParameter extends BaseGenerator = DefaultGeneratorApi> = (
   GeneratorClass?: GetGeneratorConstructor<GenParameter>,
 ) => GetGeneratorConstructor<GenParameter>;
-type EnvOptions = BaseEnvironmentOptions & { createEnv?: CreateEnv };
+type EnvironmentOptions = BaseEnvironmentOptions & { createEnv?: CreateEnvironment };
 
 export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGeneratorApi> extends EventEmitter {
   readonly mockedGenerators: Record<string, BaseGenerator> = {};
   env!: DefaultEnvironmentApi;
   generator!: GeneratorType;
   readonly settings: RunContextSettings;
-  readonly envOptions: EnvOptions;
+  readonly envOptions: EnvironmentOptions;
   completed = false;
   targetDirectory?: string;
   editor!: MemFsEditor;
@@ -88,7 +88,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
 
   private readonly onTargetDirectoryCallbacks: Array<(this: this, targetDirectory: string) => any> = [];
 
-  private readonly onEnvironmentCallbacks: Array<(this: this, env: DefaultEnvironmentApi) => any> = [];
+  private readonly onEnvironmentCallbacks: Array<(this: this, environment: DefaultEnvironmentApi) => any> = [];
 
   private readonly inDirCallbacks: any[] = [];
   private readonly Generator?: string | GetGeneratorConstructor<GeneratorType>;
@@ -118,7 +118,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
   constructor(
     generatorType?: string | GetGeneratorConstructor<GeneratorType>,
     settings?: RunContextSettings,
-    envOptions: EnvOptions = {},
+    environmentOptions: EnvironmentOptions = {},
     helpers = defaultHelpers,
   ) {
     super();
@@ -127,7 +127,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     };
     this.Generator = generatorType;
 
-    this.envOptions = envOptions;
+    this.envOptions = environmentOptions;
 
     this.oldCwd = this.settings.oldCwd;
     if (this.settings.cwd) {
@@ -163,7 +163,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
   }
 
   // If any event listeners is added, setup event listeners emitters
-  on(eventName: string | symbol, listener: (...args: any[]) => void): this {
+  on(eventName: string | symbol, listener: (...arguments_: any[]) => void): this {
     super.on(eventName, listener);
     // Don't setup emitters if on generator envent.
     if (eventName !== 'generator') {
@@ -181,9 +181,9 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * @param [cb] - callback who'll receive the folder path as argument
    * @return run context instance
    */
-  inDir(dirPath: string, cb?: (folderPath: string) => void): this {
+  inDir(dirPath: string, callback?: (folderPath: string) => void): this {
     this.setDir(dirPath, true);
-    this.helpers.testDirectory(dirPath, () => cb?.call(this, path.resolve(dirPath)));
+    this.helpers.testDirectory(dirPath, () => callback?.call(this, path.resolve(dirPath)));
     return this;
   }
 
@@ -192,8 +192,8 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * @param [cb]  - callback who'll receive the folder path as argument
    * @return this - run context instance
    */
-  doInDir(cb: (folderPath: string) => void): this {
-    this.inDirCallbacks.push(cb);
+  doInDir(callback: (folderPath: string) => void): this {
+    this.inDirCallbacks.push(callback);
     return this;
   }
 
@@ -226,8 +226,8 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * @param [cb]  - callback who'll receive the folder path as argument
    * @return this - run context instance
    */
-  inTmpDir(cb?: (folderPath: string) => void): this {
-    return this.inDir(this.temporaryDir, cb);
+  inTmpDir(callback?: (folderPath: string) => void): this {
+    return this.inDir(this.temporaryDir, callback);
   }
 
   /**
@@ -296,8 +296,8 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * @param {Function} [cb] - callback who'll receive the folder path as argument
    * @return {this} run context instance
    */
-  withEnvironment(cb: any) {
-    this.envCB = cb;
+  withEnvironment(callback: any) {
+    this.envCB = callback;
     return this;
   }
 
@@ -307,10 +307,10 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * @param lookups - lookup to run.
    */
   withLookups(lookups: LookupOptions | LookupOptions[]): this {
-    return this.onEnvironment(async env => {
+    return this.onEnvironment(async environment => {
       lookups = Array.isArray(lookups) ? lookups : [lookups];
       for (const lookup of lookups) {
-        await (env as any).lookup(lookup);
+        await (environment as any).lookup(lookup);
       }
     });
   }
@@ -319,10 +319,10 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * Provide arguments to the run context
    * @param  args - command line arguments as Array or space separated string
    */
-  withArguments(args: string | string[]): this {
-    const argsArray = typeof args === 'string' ? args.split(' ') : args;
-    assert(Array.isArray(argsArray), 'args should be either a string separated by spaces or an array');
-    this.args = this.args.concat(argsArray);
+  withArguments(arguments_: string | string[]): this {
+    const argumentsArray = typeof arguments_ === 'string' ? arguments_.split(' ') : arguments_;
+    assert(Array.isArray(argumentsArray), 'args should be either a string separated by spaces or an array');
+    this.args = [...this.args, ...argumentsArray];
     return this;
   }
 
@@ -393,12 +393,12 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
 
   withGenerators(dependencies: Dependency[]): this {
     assert(Array.isArray(dependencies), 'dependencies should be an array');
-    return this.onEnvironment(async env => {
+    return this.onEnvironment(async environment => {
       for (const dependency of dependencies) {
         if (typeof dependency === 'string') {
-          env.register(dependency);
+          environment.register(dependency);
         } else {
-          env.register(...dependency);
+          environment.register(...dependency);
         }
       }
     });
@@ -406,9 +406,9 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
 
   withSpawnMock<StubType = ReturnType<typeof mock.fn>>(
     options?:
-      | ((...args) => any)
+      | ((...arguments_) => any)
       | {
-          stub?: (...args) => any;
+          stub?: (...arguments_) => any;
           registerNodeMockDefaults?: boolean;
           callback?: ({ stub, implementation }: { stub: StubType; implementation: any }) => void | Promise<void>;
         },
@@ -423,8 +423,8 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       const defaultChild = { stdout: { on() {} }, stderr: { on() {} } };
       const defaultReturn = { exitCode: 0, stdout: '', stderr: '' };
 
-      implementation = (...args) => {
-        const [methodName] = args;
+      implementation = (...arguments_) => {
+        const [methodName] = arguments_;
         if (methodName === 'spawnCommand' || methodName === 'spawn') {
           return Object.assign(Promise.resolve({ ...defaultReturn }), defaultChild);
         }
@@ -434,7 +434,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       };
     }
 
-    const stub = typeof options === 'function' ? options : (options?.stub ?? mock.fn(() => undefined, implementation));
+    const stub = typeof options === 'function' ? options : (options?.stub ?? mock.fn(() => {}, implementation));
     const callback = typeof options === 'function' ? undefined : options?.callback;
 
     if (callback) {
@@ -444,11 +444,11 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     }
 
     this.spawnStub = stub;
-    return this.onEnvironment(env => {
-      env.on('compose', (_namespace, generator) => {
+    return this.onEnvironment(environment => {
+      environment.on('compose', (_namespace, generator) => {
         const createCallback = method =>
-          function (this: any, ...args) {
-            return stub.call(this, method, ...args);
+          function (this: any, ...arguments_) {
+            return stub.call(this, method, ...arguments_);
           };
 
         generator.spawnCommand = createCallback('spawnCommand');
@@ -605,7 +605,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * @param callback
    * @returns
    */
-  onEnvironment(callback: (this: this, env: DefaultEnvironmentApi) => any): this {
+  onEnvironment(callback: (this: this, environment: DefaultEnvironmentApi) => any): this {
     this.assertNotBuild();
     this.onEnvironmentCallbacks.push(callback);
     return this;
@@ -613,8 +613,8 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
 
   async prepare() {
     if (this.beforePrepareCallbacks.length > 0) {
-      for (const cb of this.beforePrepareCallbacks) {
-        await cb.call(this);
+      for (const callback of this.beforePrepareCallbacks) {
+        await callback.call(this);
       }
     }
 
@@ -630,8 +630,8 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
 
     if (this.inDirCallbacks.length > 0) {
       const targetDirectory = path.resolve(this.targetDirectory!);
-      for (const cb of this.inDirCallbacks) {
-        await cb(targetDirectory);
+      for (const callback of this.inDirCallbacks) {
+        await callback(targetDirectory);
       }
     }
 
@@ -676,7 +676,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       return adapterOptions?.callback ? adapterOptions.callback.call(this, answer, options) : answer;
     };
 
-    const testEnv = await this.helpers.createTestEnv(this.envOptions.createEnv, {
+    const testEnvironment = await this.helpers.createTestEnv(this.envOptions.createEnv, {
       cwd: this.settings.forwardCwd ? this.targetDirectory : undefined,
       sharedFs: this.memFs,
       force: true,
@@ -685,7 +685,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       adapter: this.helpers.createTestAdapter({ ...this.adapterOptions, mockedAnswers: this.answers, callback: promptCallback }),
       ...this.envOptions,
     } as any);
-    this.env = this.envCB ? ((await this.envCB(testEnv)) ?? testEnv) : testEnv;
+    this.env = this.envCB ? ((await this.envCB(testEnvironment)) ?? testEnvironment) : testEnvironment;
 
     for (const onEnvironmentCallback of this.onEnvironmentCallbacks) {
       await onEnvironmentCallback.call(this, this.env);

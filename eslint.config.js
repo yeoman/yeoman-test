@@ -1,5 +1,12 @@
 // @ts-check
 import configs from '@yeoman/eslint';
-import tseslint from 'typescript-eslint';
+import { config } from 'typescript-eslint';
 
-export default tseslint.config(...configs);
+export default config(...configs, {
+  rules: {
+    'unicorn/prevent-abbreviations': 'off',
+    'unicorn/no-thenable': 'off',
+    'unicorn/prefer-event-target': 'off',
+    'unicorn/no-object-as-default-parameter': 'off',
+  },
+});

@@ -7,7 +7,7 @@ export class TestAdapter extends BaseTestAdapter {
       spyFactory: ({ returns }) =>
         returns
           ? mock.fn(
-              () => undefined,
+              () => {},
               () => returns,
             )
           : mock.fn(),

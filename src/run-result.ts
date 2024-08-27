@@ -13,13 +13,13 @@ import { type AskedQuestions } from './adapter.js';
 
 const isObject = object => typeof object === 'object' && object !== null && object !== undefined;
 
-function convertArgs(args) {
-  if (args.length > 1) {
-    return [[...args]];
+function convertArguments(arguments_) {
+  if (arguments_.length > 1) {
+    return [[...arguments_]];
   }
 
-  const [arg] = args;
-  return Array.isArray(arg) ? arg : [arg];
+  const [argument] = arguments_;
+  return Array.isArray(argument) ? argument : [argument];
 }
 
 /**
@@ -106,7 +106,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
   create<GeneratorType extends BaseGenerator = DefaultGeneratorApi>(
     GeneratorOrNamespace: string | GetGeneratorConstructor<GeneratorType>,
     settings?: RunContextSettings,
-    envOptions?: BaseEnvironmentOptions,
+    environmentOptions?: BaseEnvironmentOptions,
   ) {
     return this.options.helpers.create(
       GeneratorOrNamespace,
@@ -118,7 +118,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
         ...settings,
         autoCleanup: false,
       },
-      { ...this.options.envOptions, ...envOptions },
+      { ...this.options.envOptions, ...environmentOptions },
     );
   }
 
@@ -239,7 +239,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    * result.assertFile(['templates/user.hbs', 'templates/user/edit.hbs']);
    */
   assertFile(path: string | string[]): void {
-    for (const file of convertArgs([path])) {
+    for (const file of convertArguments([path])) {
       const here = this._exists(file);
       assert.ok(here, `${file}, no such file or directory`);
     }
@@ -259,7 +259,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    * result.assertNoFile(['templates/user.hbs', 'templates/user/edit.hbs']);
    */
   assertNoFile(files: string | string[]): void {
-    for (const file of convertArgs([files])) {
+    for (const file of convertArguments([files])) {
       const here = this._exists(file);
       assert.ok(!here, `${file} exists`);
     }
@@ -286,8 +286,8 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    */
   assertFileContent(file: string, reg: string | RegExp): void;
   assertFileContent(pairs: Array<[string, string | RegExp]>): void;
-  assertFileContent(...args) {
-    for (const pair of convertArgs(args)) {
+  assertFileContent(...arguments_) {
+    for (const pair of convertArguments(arguments_)) {
       const [file, regex] = pair;
       this.assertFile(file);
       const body = this._readFile(file);
@@ -321,8 +321,8 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    */
   assertEqualsFileContent(file: string, expectedContent: string): void;
   assertEqualsFileContent(pairs: Array<[string, string]>): void;
-  assertEqualsFileContent(...args) {
-    for (const pair of convertArgs(args)) {
+  assertEqualsFileContent(...arguments_) {
+    for (const pair of convertArguments(arguments_)) {
       const [file, expectedContent] = pair;
       this.assertFile(file);
       this.assertTextEqual(this._readFile(file), expectedContent);
@@ -349,8 +349,8 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    */
   assertNoFileContent(file: string, reg: RegExp | string): void;
   assertNoFileContent(pairs: Array<[string, string | RegExp]>): void;
-  assertNoFileContent(...args) {
-    for (const pair of convertArgs(args)) {
+  assertNoFileContent(...arguments_) {
+    for (const pair of convertArguments(arguments_)) {
       const [file, regex] = pair;
       this.assertFile(file);
       const body = this._readFile(file);

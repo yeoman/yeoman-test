@@ -14,13 +14,13 @@ const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 describe('RunContext running environment', function () {
-  const defaultEnvOptions = { foo: 'bar' };
+  const defaultEnvironmentOptions = { foo: 'bar' };
   const defaultRunContextOptions = {};
 
   let gen;
-  const ctxOptions = {};
-  let ctx;
-  const envOptions = {};
+  const contextOptions = {};
+  let context;
+  const environmentOptions = {};
   let build = true;
   let lookups: LookupOptions[] = [];
 
@@ -31,15 +31,17 @@ describe('RunContext running environment', function () {
       throw new Error('Generator is required');
     }
 
-    ctx = helpers.create(gen, { ...defaultRunContextOptions, ...ctxOptions }, { ...defaultEnvOptions, envOptions }).withLookups(lookups);
+    context = helpers
+      .create(gen, { ...defaultRunContextOptions, ...contextOptions }, { ...defaultEnvironmentOptions, envOptions: environmentOptions })
+      .withLookups(lookups);
     if (build) {
-      await ctx.build();
+      await context.build();
     }
   });
 
   afterEach(function () {
     process.chdir(__dirname);
-    ctx.cleanTestDirectory();
+    context.cleanTestDirectory();
   });
 
   describe('with string', () => {
@@ -51,30 +53,30 @@ describe('RunContext running environment', function () {
     });
 
     it('returns instanceof RunContext', () => {
-      assert(ctx instanceof RunContext);
+      assert(context instanceof RunContext);
     });
 
     it('promises a RunResult', () => {
-      return ctx.run().then(runResult => {
+      return context.run().then(runResult => {
         assert(runResult instanceof RunResult);
       });
     });
 
     it('forwards envOptions to the environment', () => {
-      return ctx.run().then(() => {
-        assert.equal(ctx.env.options.foo, defaultEnvOptions.foo);
+      return context.run().then(() => {
+        assert.equal(context.env.options.foo, defaultEnvironmentOptions.foo);
       });
     });
 
     it('forwards the mem-fs to the environment', () => {
-      return ctx.run().then(() => {
-        assert.equal(ctx.memFs, ctx.env.sharedFs);
+      return context.run().then(() => {
+        assert.equal(context.memFs, context.env.sharedFs);
       });
     });
 
     it('passes newErrorHandler to the environment', () => {
-      return ctx.run().then(() => {
-        assert(ctx.env.options.newErrorHandler);
+      return context.run().then(() => {
+        assert(context.env.options.newErrorHandler);
       });
     });
   });
@@ -88,8 +90,8 @@ describe('RunContext running environment', function () {
     });
 
     it('runs the generator', () => {
-      return ctx.run().then(() => {
-        assert(ctx.env.generatorTestExecuted);
+      return context.run().then(() => {
+        assert(context.env.generatorTestExecuted);
       });
     });
   });
@@ -100,9 +102,9 @@ describe('RunContext running environment', function () {
       build = false;
     });
     beforeEach(() => {
-      ctx.withEnvironment(env => {
+      context.withEnvironment(environment => {
         const FakeGenerator = helpers.createDummyGenerator();
-        mock.method(env, 'create', () => Promise.resolve(new FakeGenerator([], { env })));
+        mock.method(environment, 'create', () => Promise.resolve(new FakeGenerator([], { env: environment })));
       });
     });
     after(() => {
@@ -111,8 +113,8 @@ describe('RunContext running environment', function () {
     });
 
     it('runs the generator', () => {
-      return ctx.run().then(() => {
-        assert(ctx.generator.shouldRun);
+      return context.run().then(() => {
+        assert(context.generator.shouldRun);
       });
     });
   });
@@ -126,14 +128,14 @@ describe('RunContext running environment', function () {
     });
 
     it('registers the generator on the environment', () => {
-      return ctx.run().then(async () => {
-        assert((await ctx.env.get('simple:app')) === SimpleApp);
+      return context.run().then(async () => {
+        assert((await context.env.get('simple:app')) === SimpleApp);
       });
     });
 
     it('runs the generator', () => {
-      return ctx.run().then(() => {
-        assert(ctx.env.generatorTestExecuted);
+      return context.run().then(() => {
+        assert(context.env.generatorTestExecuted);
       });
     });
   });
@@ -149,14 +151,14 @@ describe('RunContext running environment', function () {
     });
 
     it('registers every generator', () => {
-      assert(ctx.env.get('simple:app'));
-      assert(ctx.env.get('simple:composing'));
-      assert(ctx.env.get('simple:throwing'));
+      assert(context.env.get('simple:app'));
+      assert(context.env.get('simple:composing'));
+      assert(context.env.get('simple:throwing'));
     });
 
     it('runs the generator', () => {
-      return ctx.run().then(() => {
-        assert(ctx.env.generatorTestExecuted);
+      return context.run().then(() => {
+        assert(context.env.generatorTestExecuted);
       });
     });
   });
@@ -178,14 +180,14 @@ describe('RunContext running environment', function () {
       });
 
       it('registers every generator', () => {
-        assert(ctx.env.get('simple:app'));
-        assert(ctx.env.get('simple:composing'));
-        assert(ctx.env.get('simple:throwing'));
+        assert(context.env.get('simple:app'));
+        assert(context.env.get('simple:composing'));
+        assert(context.env.get('simple:throwing'));
       });
 
       it('runs the generator', () => {
-        return ctx.run().then(() => {
-          assert(ctx.env.generatorTestExecuted);
+        return context.run().then(() => {
+          assert(context.env.generatorTestExecuted);
         });
       });
     });
@@ -199,7 +201,7 @@ describe('RunContext running environment', function () {
       });
 
       it('rejects with the error', () => {
-        return ctx.run().then(
+        return context.run().then(
           () => assert.fail(),
           error => {
             assert(/throwing error/.test(error.message));
@@ -221,16 +223,16 @@ describe('RunContext running environment', function () {
       });
 
       it('runs the composed generator', () => {
-        return ctx
+        return context
           .withArguments('simple:app')
           .run()
           .then(() => {
-            assert(ctx.env.generatorTestExecuted);
+            assert(context.env.generatorTestExecuted);
           });
       });
 
       it('rejects with the error', () => {
-        return ctx
+        return context
           .withArguments('simple:throwing')
           .run()
           .then(

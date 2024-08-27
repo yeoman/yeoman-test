@@ -188,8 +188,8 @@ describe('run-result', () => {
   });
   describe('#create', () => {
     const newSettings = { newOnly: 'foo', overrided: 'newOverrided' };
-    const newEnvOptions = { newOnlyEnv: 'bar', overridedEnv: 'newOverridedEnv' };
-    const originalEnvOptions = {
+    const newEnvironmentOptions = { newOnlyEnv: 'bar', overridedEnv: 'newOverridedEnv' };
+    const originalEnvironmentOptions = {
       originalOnlyEnv: 'originalOnlyEnv',
       overridedEnv: 'originalOverridedEnv',
     };
@@ -207,10 +207,10 @@ describe('run-result', () => {
         memFs,
         cwd,
         oldCwd,
-        envOptions: originalEnvOptions,
+        envOptions: originalEnvironmentOptions,
         settings: originalSetting,
         helpers,
-      } as any).create('foo', newSettings, newEnvOptions);
+      } as any).create('foo', newSettings, newEnvironmentOptions);
     });
     it('returns a RunContext instance', () => {
       assert.ok(runContext instanceof RunContext);

@@ -39,12 +39,12 @@ onExit(() => {
 export default testContext;
 
 const handler2: ProxyHandler<RunResult> = {
-  get(_target: RunResult, prop: string, receiver: any) {
+  get(_target: RunResult, property: string, receiver: any) {
     if (testContext.runResult === undefined) {
       throw new Error('Last result is missing.');
     }
 
-    return Reflect.get(testContext.runResult, prop, receiver);
+    return Reflect.get(testContext.runResult, property, receiver);
   },
 };
 

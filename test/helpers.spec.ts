@@ -8,7 +8,7 @@ import { mock } from 'node:test';
 import Generator from 'yeoman-generator';
 import { expect } from 'esmocha';
 import type Environment from 'yeoman-environment';
-import { createEnv } from '../src/default-environment.js';
+import { createEnv as createEnvironment } from '../src/default-environment.js';
 import helpers from '../src/helpers.js';
 import { TestAdapter } from '../src/adapter.js';
 import RunContext from '../src/run-context.js';
@@ -17,7 +17,7 @@ const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const { resolve, join } = path;
-const env = await createEnv({ adapter: new TestAdapter() });
+const environment = await createEnvironment({ adapter: new TestAdapter() });
 
 describe('yeoman-test', function () {
   beforeEach(function () {
@@ -59,7 +59,7 @@ describe('yeoman-test', function () {
 
   describe('.mockPrompt()', function () {
     beforeEach(async function () {
-      this.generator = await env.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      this.generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
       helpers.mockPrompt(this.generator, { answer: 'foo' });
     });
 
@@ -70,7 +70,7 @@ describe('yeoman-test', function () {
     });
 
     it('uses default values when no answer is passed', async function () {
-      const generator = await env.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      const generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
       helpers.mockPrompt(generator);
       return generator.prompt([{ name: 'respuesta', message: 'foo', type: 'input', default: 'bar' }]).then(function (answers) {
         assert.equal(answers.respuesta, 'bar');
@@ -78,7 +78,7 @@ describe('yeoman-test', function () {
     });
 
     it('supports `null` answer for `list` type', async function () {
-      const generator = await env.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      const generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
 
       helpers.mockPrompt(generator, {
         respuesta: null,
@@ -90,7 +90,7 @@ describe('yeoman-test', function () {
     });
 
     it('treats `null` as no answer for `input` type', async function () {
-      const generator = await env.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      const generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
 
       helpers.mockPrompt(generator, {
         respuesta: null,
@@ -102,7 +102,7 @@ describe('yeoman-test', function () {
     });
 
     it('uses `true` as the default value for `confirm` type', async function () {
-      const generator = await env.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      const generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
       helpers.mockPrompt(generator, {});
 
       return generator.prompt([{ name: 'respuesta', message: 'foo', type: 'confirm' }]).then(function (answers) {
@@ -111,7 +111,7 @@ describe('yeoman-test', function () {
     });
 
     it('supports `false` answer for `confirm` type', async function () {
-      const generator = await env.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      const generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
       helpers.mockPrompt(generator, { respuesta: false });
 
       return generator.prompt([{ name: 'respuesta', message: 'foo', type: 'confirm' }]).then(function (answers) {
@@ -126,7 +126,7 @@ describe('yeoman-test', function () {
     });
 
     it('can be call multiple time on the same generator', async function () {
-      const generator = await env.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      const generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
       helpers.mockPrompt(generator, { foo: 1 });
       helpers.mockPrompt(generator, { foo: 2 });
       return generator.prompt({ message: 'bar', name: 'foo' }).then(function (answers) {
@@ -135,7 +135,7 @@ describe('yeoman-test', function () {
     });
 
     it('throws if answer is not provided', async function () {
-      const generator = await env.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      const generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
       helpers.mockPrompt(generator, { foo: 1 }, { throwOnMissingAnswer: true });
       return this.generator.prompt([{ message: 'bar', name: 'notFound' }]).then(
         () => assert.fail(),
@@ -168,8 +168,8 @@ describe('yeoman-test', function () {
 
     describe('with a namespace', function () {
       it('return a RunContext object', function (done) {
-        const context = helpers.run('simple:app').withEnvironment(env => {
-          env.register(require.resolve('./fixtures/generator-simple/app'));
+        const context = helpers.run('simple:app').withEnvironment(environment => {
+          environment.register(require.resolve('./fixtures/generator-simple/app'));
         });
         assert(context instanceof RunContext);
         context.on('end', done);
@@ -184,9 +184,9 @@ describe('yeoman-test', function () {
     });
 
     it('pass envOptions to RunContext', function () {
-      const envOptions = { foo: 2 };
-      const runContext = helpers.run(helpers.createDummyGenerator(), undefined, envOptions);
-      assert.equal(runContext.envOptions, envOptions);
+      const environmentOptions = { foo: 2 };
+      const runContext = helpers.run(helpers.createDummyGenerator(), undefined, environmentOptions);
+      assert.equal(runContext.envOptions, environmentOptions);
     });
 
     it('catch env errors', function (done) {
@@ -372,14 +372,14 @@ describe('yeoman-test', function () {
             assert.strictEqual(this.generator, generator);
             order.push('onGenerator 1');
           })
-          .onEnvironment(function (env) {
+          .onEnvironment(function (environment) {
             assert.strictEqual(this, runContext);
-            assert.strictEqual(this.env, env);
+            assert.strictEqual(this.env, environment);
             order.push('onEnvironment 0');
           })
-          .onEnvironment(function (env) {
+          .onEnvironment(function (environment) {
             assert.strictEqual(this, runContext);
-            assert.strictEqual(this.env, env);
+            assert.strictEqual(this.env, environment);
             order.push('onEnvironment 1');
           })
           .onTargetDirectory(function (targetDirectory) {
@@ -406,25 +406,25 @@ describe('yeoman-test', function () {
   });
 
   describe('.createTestEnv', () => {
-    let mockedCreateEnv: ReturnType<typeof mock.method>;
-    const createEnvReturn = {};
+    let mockedCreateEnvironment: ReturnType<typeof mock.method>;
+    const createEnvironmentReturn = {};
     beforeEach(() => {
-      mockedCreateEnv = mock.method(helpers, 'createEnv', () => Promise.resolve(createEnvReturn) as Promise<Environment>);
+      mockedCreateEnvironment = mock.method(helpers, 'createEnv', () => Promise.resolve(createEnvironmentReturn) as Promise<Environment>);
     });
     afterEach(() => {
-      mockedCreateEnv.mock.restore();
+      mockedCreateEnvironment.mock.restore();
     });
     it('calls mocked createEnv', async () => {
-      assert.equal(await helpers.createTestEnv(), createEnvReturn);
-      assert.strictEqual(mockedCreateEnv.mock.callCount(), 1);
+      assert.equal(await helpers.createTestEnv(), createEnvironmentReturn);
+      assert.strictEqual(mockedCreateEnvironment.mock.callCount(), 1);
     });
     it('calls mocked createEnv with newErrorHandler option', async () => {
-      assert.equal(await helpers.createTestEnv(), createEnvReturn);
-      assert.equal((mockedCreateEnv.mock.calls[0].arguments[0] as any).newErrorHandler, true);
+      assert.equal(await helpers.createTestEnv(), createEnvironmentReturn);
+      assert.equal((mockedCreateEnvironment.mock.calls[0].arguments[0] as any).newErrorHandler, true);
     });
     it('calls mocked createEnv with sharedOptions.localConfigOnly option', async () => {
-      assert.equal(await helpers.createTestEnv(), createEnvReturn);
-      assert.equal((mockedCreateEnv.mock.calls[0].arguments[0] as any).sharedOptions.localConfigOnly, true);
+      assert.equal(await helpers.createTestEnv(), createEnvironmentReturn);
+      assert.equal((mockedCreateEnvironment.mock.calls[0].arguments[0] as any).sharedOptions.localConfigOnly, true);
     });
   });
   describe('.prepareTemporaryFolder', () => {

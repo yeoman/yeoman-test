@@ -16,7 +16,7 @@ import type { DefaultEnvironmentApi, DefaultGeneratorApi } from '../types/type-h
 import { type DummyPromptOptions, TestAdapter, type TestAdapterOptions } from './adapter.js';
 import RunContext, { BasicRunContext, type RunContextSettings } from './run-context.js';
 import testContext from './test-context.js';
-import { createEnv } from './default-environment.js';
+import { createEnv as createEnvironment } from './default-environment.js';
 
 let GeneratorImplementation;
 try {
@@ -72,7 +72,7 @@ export class YeomanTest {
    * });
    */
 
-  testDirectory(dir: string, cb?: (error?: any) => unknown) {
+  testDirectory(dir: string, callback?: (error?: any) => unknown) {
     if (!dir) {
       throw new Error('Missing directory');
     }
@@ -90,9 +90,9 @@ export class YeomanTest {
 
       mkdirSync(dir, { recursive: true });
       process.chdir(dir);
-      return cb?.();
+      return callback?.();
     } catch (error) {
-      return cb?.(error);
+      return callback?.(error);
     }
   }
 
@@ -108,8 +108,8 @@ export class YeomanTest {
    * mockPrompt(angular, {'bootstrap': 'Y', 'compassBoostrap': 'Y'});
    */
 
-  mockPrompt(envOrGenerator: BaseGenerator | DefaultEnvironmentApi, mockedAnswers?: PromptAnswers, options?: DummyPromptOptions) {
-    const environment = 'env' in envOrGenerator ? envOrGenerator.env : envOrGenerator;
+  mockPrompt(environmentOrGenerator: BaseGenerator | DefaultEnvironmentApi, mockedAnswers?: PromptAnswers, options?: DummyPromptOptions) {
+    const environment = 'env' in environmentOrGenerator ? environmentOrGenerator.env : environmentOrGenerator;
     if (!environment.adapter) {
       throw new Error('environment is not an Environment instance');
     }
@@ -127,8 +127,8 @@ export class YeomanTest {
    * Restore defaults prompts on a generator.
    * @param generator or environment
    */
-  restorePrompt(envOrGenerator: BaseGenerator | DefaultEnvironmentApi) {
-    const environment: DefaultEnvironmentApi = (envOrGenerator as BaseGenerator).env ?? envOrGenerator;
+  restorePrompt(environmentOrGenerator: BaseGenerator | DefaultEnvironmentApi) {
+    const environment: DefaultEnvironmentApi = (environmentOrGenerator as BaseGenerator).env ?? environmentOrGenerator;
     environment.adapter.close();
   }
 
@@ -162,27 +162,27 @@ export class YeomanTest {
    */
   createDummyGenerator<GenParameter extends BaseGenerator = DefaultGeneratorApi>(
     Generator: GetGeneratorConstructor<GenParameter> = GeneratorImplementation,
-    contents: Record<string, (...args: any[]) => void> = {
+    contents: Record<string, (...arguments_: any[]) => void> = {
       test(this: any) {
         this.shouldRun = true;
       },
     },
-  ): new (...args: any[]) => GenParameter {
+  ): new (...arguments_: any[]) => GenParameter {
     class DummyGenerator extends Generator {
-      constructor(...args: any[]) {
-        const optIndex = Array.isArray(args[0]) ? 1 : 0;
-        args[optIndex] = args[optIndex] ?? {};
-        const options = args[optIndex];
+      constructor(...arguments_: any[]) {
+        const optIndex = Array.isArray(arguments_[0]) ? 1 : 0;
+        arguments_[optIndex] = arguments_[optIndex] ?? {};
+        const options = arguments_[optIndex];
         options.namespace = options.namespace ?? 'dummy';
         options.resolved = options.resolved ?? 'dummy';
 
-        super(...args);
+        super(...arguments_);
       }
     }
 
-    for (const [propName, propValue] of Object.entries(contents)) {
-      Object.defineProperty(DummyGenerator.prototype, propName, {
-        value: propValue ?? Object.create(null),
+    for (const [propertyName, propertyValue] of Object.entries(contents)) {
+      Object.defineProperty(DummyGenerator.prototype, propertyName, {
+        value: propertyValue ?? Object.create(null),
         writable: true,
       });
     }
@@ -217,16 +217,16 @@ export class YeomanTest {
     } & InstantiateOptions<GeneratorType> = {},
   ): Promise<GeneratorType> {
     const { dependencies = [], localConfigOnly = true, ...instantiateOptions } = options;
-    const env = await this.createEnv({ sharedOptions: { localConfigOnly } });
+    const environment = await this.createEnv({ sharedOptions: { localConfigOnly } });
     for (const dependency of dependencies) {
       if (typeof dependency === 'string') {
-        env.register(dependency);
+        environment.register(dependency);
       } else {
-        env.register(...dependency);
+        environment.register(...dependency);
       }
     }
 
-    return env.create<GeneratorType>(name, instantiateOptions);
+    return environment.create<GeneratorType>(name, instantiateOptions);
   }
 
   /**
@@ -246,7 +246,7 @@ export class YeomanTest {
    */
 
   async createEnv(options: BaseEnvironmentOptions): Promise<DefaultEnvironmentApi> {
-    return createEnv(options);
+    return createEnvironment(options);
   }
 
   /**
@@ -257,31 +257,31 @@ export class YeomanTest {
    * const env = createTestEnv(require('yeoman-environment').createEnv);
    */
 
-  async createTestEnv(envContructor: CreateEnv = this.createEnv, options: BaseEnvironmentOptions = { localConfigOnly: true }) {
-    let envOptions = cloneDeep(this.environmentOptions ?? {});
+  async createTestEnv(environmentContructor: CreateEnv = this.createEnv, options: BaseEnvironmentOptions = { localConfigOnly: true }) {
+    let environmentOptions = cloneDeep(this.environmentOptions ?? {});
     if (typeof options === 'boolean') {
-      envOptions = {
+      environmentOptions = {
         newErrorHandler: true,
-        ...envOptions,
+        ...environmentOptions,
         sharedOptions: {
           localConfigOnly: options,
-          ...envOptions.sharedOptions,
+          ...environmentOptions.sharedOptions,
         },
       } as any;
     } else {
-      envOptions.sharedOptions = {
+      environmentOptions.sharedOptions = {
         localConfigOnly: true,
-        ...envOptions.sharedOptions,
+        ...environmentOptions.sharedOptions,
         ...options.sharedOptions,
       };
-      envOptions = {
+      environmentOptions = {
         newErrorHandler: true,
-        ...envOptions,
+        ...environmentOptions,
         ...options,
       } as any;
     }
 
-    return envContructor({ adapter: this.createTestAdapter(), ...envOptions });
+    return environmentContructor({ adapter: this.createTestAdapter(), ...environmentOptions });
   }
 
   /**
@@ -308,7 +308,7 @@ export class YeomanTest {
   run<GeneratorType extends BaseGenerator = DefaultGeneratorApi>(
     GeneratorOrNamespace: string | GetGeneratorConstructor<GeneratorType>,
     settings?: RunContextSettings,
-    envOptions?: BaseEnvironmentOptions,
+    environmentOptions?: BaseEnvironmentOptions,
   ): RunContext<GeneratorType> {
     const contextSettings = cloneDeep(this.settings ?? {});
     const generatorOptions = cloneDeep(this.generatorOptions ?? {});
@@ -316,7 +316,7 @@ export class YeomanTest {
     const runContext = new RunContext<GeneratorType>(
       GeneratorOrNamespace,
       { ...contextSettings, ...settings },
-      envOptions,
+      environmentOptions,
       this,
     ).withOptions(generatorOptions as any);
     if (settings?.autoCleanup !== false) {
@@ -335,9 +335,9 @@ export class YeomanTest {
   create<GeneratorType extends BaseGenerator = DefaultGeneratorApi>(
     GeneratorOrNamespace: string | GetGeneratorConstructor<GeneratorType>,
     settings?: RunContextSettings,
-    envOptions?: BaseEnvironmentOptions,
+    environmentOptions?: BaseEnvironmentOptions,
   ) {
-    return this.run<GeneratorType>(GeneratorOrNamespace, settings, envOptions);
+    return this.run<GeneratorType>(GeneratorOrNamespace, settings, environmentOptions);
   }
 
   /**
