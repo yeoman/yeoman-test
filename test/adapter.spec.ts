@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { describe, expect, it } from 'esmocha';
+import { describe, expect, it } from 'vitest';
 import { TestAdapter } from '../src/adapter.js';
 
 describe('TestAdapter', () => {

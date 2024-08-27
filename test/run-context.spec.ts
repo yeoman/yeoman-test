@@ -6,7 +6,7 @@ import process from 'node:process';
 import { createRequire } from 'node:module';
 import { mock } from 'node:test';
 import { promisify as promisify_ } from 'node:util';
-import { afterEach, beforeEach, describe, expect, it } from 'esmocha';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import inquirer from 'inquirer';
 import Generator from 'yeoman-generator';
 import tempDirectory from 'temp-dir';
