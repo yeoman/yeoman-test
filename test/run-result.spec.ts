@@ -5,7 +5,7 @@ import process from 'node:process';
 import { mock } from 'node:test';
 import { create as createMemFs } from 'mem-fs';
 import { create as createMemFsEditor } from 'mem-fs-editor';
-import { afterEach, beforeEach, describe, it } from 'esmocha';
+import { afterEach, before as beforeAll, beforeEach, describe, it } from 'esmocha';
 import RunContext from '../src/run-context.js';
 import RunResult from '../src/run-result.js';
 import helpers from '../src/helpers.js';
@@ -28,7 +28,7 @@ describe('run-result', () => {
       const cwd = {};
       const options = { memFs, cwd };
       let runResult;
-      before(() => {
+      beforeAll(() => {
         runResult = new RunResult(options as any);
       });
       it('loads memFs option', () => {
@@ -43,7 +43,7 @@ describe('run-result', () => {
         const optionValue = {};
         const options = {};
         let runResult;
-        before(() => {
+        beforeAll(() => {
           options[optionName] = optionValue;
           runResult = new RunResult(options as any);
         });
@@ -202,7 +202,7 @@ describe('run-result', () => {
     let cwd;
     const oldCwd = {};
     let runContext;
-    before(() => {
+    beforeAll(() => {
       cwd = process.cwd();
       runContext = new RunResult({
         memFs,
