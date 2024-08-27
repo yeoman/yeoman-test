@@ -15,7 +15,6 @@ import Generator from 'yeoman-generator';
 
 export default class SimpleGenerator extends Generator {
   async exec(toCompose) {
-    console.log(toCompose);
     await this.composeWith(toCompose);
   }
 }

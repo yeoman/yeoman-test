@@ -4,8 +4,9 @@ import assert from 'node:assert';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { createRequire } from 'node:module';
+import { mock } from 'node:test';
 import { expect } from 'esmocha';
-import { type SinonStub, assert as sinonAssert, fake as sinonFake, spy as sinonSpy, stub as sinonStub } from 'sinon';
+import { assert as sinonAssert, fake as sinonFake, spy as sinonSpy, stub as sinonStub } from 'sinon';
 import inquirer from 'inquirer';
 import Generator from 'yeoman-generator';
 import tempDirectory from 'temp-dir';
@@ -694,11 +695,18 @@ describe('RunContext', function () {
     });
 
     it('with callback', async function () {
-      ctx.withSpawnMock({
-        stub: sinonStub(),
-        registerSinonDefaults: true,
-        callback(stub: SinonStub) {
-          stub.withArgs('spawnCommandSync', 'foo').returns('bar');
+      ctx.withSpawnMock<ReturnType<typeof mock.fn>>({
+        stub: mock.fn(),
+        registerNodeMockDefaults: true,
+        callback({ stub, implementation }) {
+          const newImplementation = (...args) => {
+            const [first, second] = args;
+            if (first === 'spawnCommandSync' && second === 'foo') {
+              return 'bar';
+            }
+            return implementation(...args);
+          };
+          stub.mock.mockImplementation(newImplementation);
         },
       });
 
