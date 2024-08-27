@@ -6,7 +6,7 @@ import { createRequire } from 'node:module';
 import { existsSync } from 'node:fs';
 import { mock } from 'node:test';
 import Generator from 'yeoman-generator';
-import { expect } from 'esmocha';
+import { afterEach, beforeEach, describe, expect, it } from 'esmocha';
 import type Environment from 'yeoman-environment';
 import { createEnv } from '../src/default-environment.js';
 import helpers from '../src/helpers.js';
