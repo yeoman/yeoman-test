@@ -13,14 +13,14 @@ import { type AskedQuestions } from './adapter.js';
 
 const isObject = object => typeof object === 'object' && object !== null && object !== undefined;
 
-function convertArguments(arguments_) {
+const convertArguments = arguments_ => {
   if (arguments_.length > 1) {
     return [[...arguments_]];
   }
 
   const [argument] = arguments_;
   return Array.isArray(argument) ? argument : [argument];
-}
+};
 
 /**
  * Provides options for `RunResult`s.

@@ -14,7 +14,7 @@ import SimpleApp from './fixtures/generator-simple/app/index.js';
 const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-describe('RunContext running environment', function () {
+describe('RunContext running environment', () => {
   const defaultEnvironmentOptions = { foo: 'bar' };
   const defaultRunContextOptions = {};
 
@@ -25,7 +25,7 @@ describe('RunContext running environment', function () {
   let build = true;
   let lookups: LookupOptions[] = [];
 
-  beforeEach(async function () {
+  beforeEach(async () => {
     process.chdir(__dirname);
 
     if (!gen) {
@@ -40,7 +40,7 @@ describe('RunContext running environment', function () {
     }
   });
 
-  afterEach(function () {
+  afterEach(() => {
     process.chdir(__dirname);
     context.cleanTestDirectory();
   });

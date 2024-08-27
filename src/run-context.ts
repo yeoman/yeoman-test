@@ -760,7 +760,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
         .catch(error => {
           if (this.listenerCount('end') === 0 && this.listenerCount('error') === 0) {
             // When there is no listeners throw a unhandled rejection.
-            setImmediate(async function () {
+            setImmediate(async () => {
               throw error;
             });
           } else {
