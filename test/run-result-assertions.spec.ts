@@ -88,19 +88,19 @@ describe('run-result-assertions', () => {
         });
 
         it("accept an array of file/regex pairs when each file's content matches the corresponding regex", () => {
-          const arg = [
+          const argument = [
             ['testFile', /Roses are red/],
             ['testFile2', /Violets are blue/],
           ];
-          assert.doesNotThrow(yoAssert.assertFileContent.bind(yoAssert, arg));
+          assert.doesNotThrow(yoAssert.assertFileContent.bind(yoAssert, argument));
         });
 
         it("reject an array of file/regex pairs when one file's content does not matches the corresponding regex", () => {
-          const arg = [
+          const argument = [
             ['testFile', /Roses are red/],
             ['testFile2', /Violets are orange/],
           ];
-          assert.throws(yoAssert.assertFileContent.bind(yoAssert, arg));
+          assert.throws(yoAssert.assertFileContent.bind(yoAssert, argument));
         });
       });
 
@@ -114,19 +114,19 @@ describe('run-result-assertions', () => {
         });
 
         it("accept an array of file/string pairs when each file's content equals the corresponding string", () => {
-          const arg = [
+          const argument = [
             ['testFile', 'Roses are red.\n'],
             ['testFile2', 'Violets are blue.\n'],
           ];
-          assert.doesNotThrow(yoAssert.assertEqualsFileContent.bind(yoAssert, arg));
+          assert.doesNotThrow(yoAssert.assertEqualsFileContent.bind(yoAssert, argument));
         });
 
         it("reject an array of file/string pairs when one file's content does not equal the corresponding string", () => {
-          const arg = [
+          const argument = [
             ['testFile', 'Roses are red.\n'],
             ['testFile2', 'Violets are green.\n'],
           ];
-          assert.throws(yoAssert.assertEqualsFileContent.bind(yoAssert, arg));
+          assert.throws(yoAssert.assertEqualsFileContent.bind(yoAssert, argument));
         });
       });
 
@@ -148,19 +148,19 @@ describe('run-result-assertions', () => {
         });
 
         it("accept an array of file/regex pairs when each file's content does not match its corresponding regex", () => {
-          const arg = [
+          const argument = [
             ['testFile', /Roses are green/],
             ['testFile2', /Violets are orange/],
           ];
-          assert.doesNotThrow(yoAssert.assertNoFileContent.bind(yoAssert, arg));
+          assert.doesNotThrow(yoAssert.assertNoFileContent.bind(yoAssert, argument));
         });
 
         it("reject an array of file/regex pairs when one file's content does matches its corresponding regex", () => {
-          const arg = [
+          const argument = [
             ['testFile', /Roses are red/],
             ['testFile2', /Violets are orange/],
           ];
-          assert.throws(yoAssert.assertNoFileContent.bind(yoAssert, arg));
+          assert.throws(yoAssert.assertNoFileContent.bind(yoAssert, argument));
         });
       });
 
