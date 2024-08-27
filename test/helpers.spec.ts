@@ -5,6 +5,7 @@ import process from 'node:process';
 import { createRequire } from 'node:module';
 import { existsSync } from 'node:fs';
 import { mock } from 'node:test';
+import { promisify as promisify_ } from 'node:util';
 import Generator from 'yeoman-generator';
 import { afterEach, beforeEach, describe, expect, it } from 'esmocha';
 import type Environment from 'yeoman-environment';
@@ -13,6 +14,8 @@ import helpers from '../src/helpers.js';
 import { TestAdapter } from '../src/adapter.js';
 import RunContext from '../src/run-context.js';
 
+/* Remove argument from promisify return */
+const promisify = function_ => () => promisify_(function_)();
 const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -162,21 +165,27 @@ describe('yeoman-test', () => {
 
   describe('.run()', () => {
     describe('with a generator', () => {
-      it('return a RunContext object', done => {
-        const context = helpers.run(helpers.createDummyGenerator());
-        assert(context instanceof RunContext);
-        context.on('end', done);
-      });
+      it(
+        'return a RunContext object',
+        promisify(done => {
+          const context = helpers.run(helpers.createDummyGenerator());
+          assert(context instanceof RunContext);
+          context.on('end', done);
+        }),
+      );
     });
 
     describe('with a namespace', () => {
-      it('return a RunContext object', done => {
-        const context = helpers.run('simple:app').withEnvironment(environment => {
-          environment.register(require.resolve('./fixtures/generator-simple/app'));
-        });
-        assert(context instanceof RunContext);
-        context.on('end', done);
-      });
+      it(
+        'return a RunContext object',
+        promisify(done => {
+          const context = helpers.run('simple:app').withEnvironment(environment => {
+            environment.register(require.resolve('./fixtures/generator-simple/app'));
+          });
+          assert(context instanceof RunContext);
+          context.on('end', done);
+        }),
+      );
     });
 
     it('pass settings to RunContext', () => {
@@ -192,55 +201,67 @@ describe('yeoman-test', () => {
       assert.equal(runContext.envOptions, environmentOptions);
     });
 
-    it('catch env errors', done => {
-      helpers
-        .run(
-          class extends helpers.createDummyGenerator() {
-            throws() {
-              this.env.emit('error', new Error('an error'));
-            }
-          },
-        )
-        .on('error', _ => {
-          done();
-        });
-    });
+    it(
+      'catch env errors',
+      promisify(done => {
+        helpers
+          .run(
+            class extends helpers.createDummyGenerator() {
+              throws() {
+                this.env.emit('error', new Error('an error'));
+              }
+            },
+          )
+          .on('error', _ => {
+            done();
+          });
+      }),
+    );
 
-    it('catch generator emitted errors', done => {
-      helpers
-        .run(
-          class extends helpers.createDummyGenerator() {
-            throws() {
-              this.emit('error', new Error('an error'));
-            }
-          },
-        )
-        .on('error', _ => {
-          done();
-        });
-    });
+    it(
+      'catch generator emitted errors',
+      promisify(done => {
+        helpers
+          .run(
+            class extends helpers.createDummyGenerator() {
+              throws() {
+                this.emit('error', new Error('an error'));
+              }
+            },
+          )
+          .on('error', _ => {
+            done();
+          });
+      }),
+    );
 
-    it('catch generator thrown errors', done => {
-      helpers
-        .run(
-          class extends helpers.createDummyGenerator() {
-            throws() {
-              throw new Error('Some error.');
-            }
-          },
-        )
-        .on('error', _ => {
-          done();
-        });
-    });
+    it(
+      'catch generator thrown errors',
+      promisify(done => {
+        helpers
+          .run(
+            class extends helpers.createDummyGenerator() {
+              throws() {
+                throw new Error('Some error.');
+              }
+            },
+          )
+          .on('error', _ => {
+            done();
+          });
+      }),
+    );
 
     // This is a workaround for corner case were an error is not correctly emitted
     // See https://github.com/yeoman/generator/pull/1155
-    it('catch run errors', done => {
-      helpers.run(class extends Generator {}, {}, { catchGeneratorError: true }).on('error', _ => {
-        done();
-      });
-    });
+    it(
+      'catch run errors',
+      promisify(done => {
+        helpers.run(class extends Generator {}, {}, { catchGeneratorError: true }).on('error', _ => {
+          done();
+        });
+      }),
+    );
 
     describe('with files', () => {
       it('write files to mem-fs', async () => {

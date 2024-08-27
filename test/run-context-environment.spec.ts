@@ -5,7 +5,7 @@ import process from 'node:process';
 import { createRequire } from 'node:module';
 import { mock } from 'node:test';
 import { type LookupOptions } from '@yeoman/types';
-import { afterEach, beforeEach, describe, it } from 'esmocha';
+import { after as afterAll, afterEach, before as beforeAll, beforeEach, describe, it } from 'esmocha';
 import helpers from '../src/helpers.js';
 import RunContext from '../src/run-context.js';
 import RunResult from '../src/run-result.js';
@@ -46,10 +46,10 @@ describe('RunContext running environment', () => {
   });
 
   describe('with string', () => {
-    before(() => {
+    beforeAll(() => {
       gen = require.resolve('./fixtures/generator-simple/app');
     });
-    after(() => {
+    afterAll(() => {
       gen = undefined;
     });
 
@@ -83,10 +83,10 @@ describe('RunContext running environment', () => {
   });
 
   describe('with generator', () => {
-    before(() => {
+    beforeAll(() => {
       gen = SimpleApp;
     });
-    after(() => {
+    afterAll(() => {
       gen = undefined;
     });
 
@@ -98,7 +98,7 @@ describe('RunContext running environment', () => {
   });
 
   describe('with promised generator', () => {
-    before(() => {
+    beforeAll(() => {
       gen = 'promised-generator';
       build = false;
     });
@@ -108,7 +108,7 @@ describe('RunContext running environment', () => {
         mock.method(environment, 'create', () => Promise.resolve(new FakeGenerator([], { env: environment })));
       });
     });
-    after(() => {
+    afterAll(() => {
       gen = undefined;
       build = true;
     });
@@ -121,10 +121,10 @@ describe('RunContext running environment', () => {
   });
 
   describe('with path', () => {
-    before(() => {
+    beforeAll(() => {
       gen = require.resolve('./fixtures/generator-simple/app');
     });
-    after(() => {
+    afterAll(() => {
       gen = undefined;
     });
 
@@ -142,11 +142,11 @@ describe('RunContext running environment', () => {
   });
 
   describe('with lookups with packagePaths', () => {
-    before(() => {
+    beforeAll(() => {
       lookups = [{ packagePaths: [path.resolve('./fixtures/generator-simple')] }];
       gen = 'simple:app';
     });
-    after(() => {
+    afterAll(() => {
       lookups = [];
       gen = undefined;
     });
@@ -165,18 +165,18 @@ describe('RunContext running environment', () => {
   });
 
   describe('with lookups with npmPaths', () => {
-    before(() => {
+    beforeAll(() => {
       lookups = [{ npmPaths: [path.resolve('./fixtures/')] }];
     });
-    after(() => {
+    afterAll(() => {
       lookups = [];
     });
 
     describe('and simple generator', () => {
-      before(() => {
+      beforeAll(() => {
         gen = 'simple:app';
       });
-      after(() => {
+      afterAll(() => {
         gen = undefined;
       });
 
@@ -194,10 +194,10 @@ describe('RunContext running environment', () => {
     });
 
     describe('and generator that throws', () => {
-      before(() => {
+      beforeAll(() => {
         gen = 'simple:throwing';
       });
-      after(() => {
+      afterAll(() => {
         gen = undefined;
       });
 
@@ -212,12 +212,12 @@ describe('RunContext running environment', () => {
     });
 
     describe('with composing generator', () => {
-      before(() => {
+      beforeAll(() => {
         lookups = [{ packagePaths: [path.resolve('./fixtures/generator-simple')] }];
         gen = 'simple:composing';
         build = false;
       });
-      after(() => {
+      afterAll(() => {
         lookups = [];
         gen = undefined;
         build = true;
