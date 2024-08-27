@@ -3,7 +3,7 @@ import path, { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { createRequire } from 'node:module';
-import { fake as sinonFake, replace as sinonReplace } from 'sinon';
+import { mock } from 'node:test';
 import { type LookupOptions } from '@yeoman/types';
 import helpers from '../src/helpers.js';
 import RunContext from '../src/run-context.js';
@@ -102,8 +102,7 @@ describe('RunContext running environment', function () {
     beforeEach(() => {
       ctx.withEnvironment(env => {
         const FakeGenerator = helpers.createDummyGenerator();
-        const fake = sinonFake.returns(Promise.resolve(new FakeGenerator([], { env })));
-        sinonReplace(env, 'create', fake);
+        mock.method(env, 'create', () => Promise.resolve(new FakeGenerator([], { env })));
       });
     });
     after(() => {

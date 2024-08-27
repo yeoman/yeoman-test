@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { createRequire } from 'node:module';
 import { existsSync } from 'node:fs';
-import { assert as sinonAssert, spy as sinonSpy, stub as sinonStub } from 'sinon';
+import { mock } from 'node:test';
 import Generator from 'yeoman-generator';
 import { expect } from 'esmocha';
 import type Environment from 'yeoman-environment';
@@ -146,10 +146,10 @@ describe('yeoman-test', function () {
     });
 
     it('keep prompt method asynchronous', function () {
-      const spy = sinonSpy();
+      const spy = mock.fn();
 
       const promise = this.generator.prompt({ name: 'answer', type: 'input' }).then(function () {
-        sinonAssert.called(spy);
+        assert.strictEqual(spy.mock.callCount(), 1);
       });
 
       spy();
@@ -406,25 +406,25 @@ describe('yeoman-test', function () {
   });
 
   describe('.createTestEnv', () => {
-    let mockedCreateEnv;
+    let mockedCreateEnv: ReturnType<typeof mock.method>;
     const createEnvReturn = {};
     beforeEach(() => {
-      mockedCreateEnv = sinonStub(helpers, 'createEnv').returns(Promise.resolve(createEnvReturn) as Promise<Environment>);
+      mockedCreateEnv = mock.method(helpers, 'createEnv', () => Promise.resolve(createEnvReturn) as Promise<Environment>);
     });
     afterEach(() => {
-      mockedCreateEnv.restore();
+      mockedCreateEnv.mock.restore();
     });
     it('calls mocked createEnv', async () => {
       assert.equal(await helpers.createTestEnv(), createEnvReturn);
-      assert.ok(mockedCreateEnv.calledOnce);
+      assert.strictEqual(mockedCreateEnv.mock.callCount(), 1);
     });
     it('calls mocked createEnv with newErrorHandler option', async () => {
       assert.equal(await helpers.createTestEnv(), createEnvReturn);
-      assert.equal(mockedCreateEnv.getCall(0).args[0].newErrorHandler, true);
+      assert.equal((mockedCreateEnv.mock.calls[0].arguments[0] as any).newErrorHandler, true);
     });
     it('calls mocked createEnv with sharedOptions.localConfigOnly option', async () => {
       assert.equal(await helpers.createTestEnv(), createEnvReturn);
-      assert.equal(mockedCreateEnv.getCall(0).args[0].sharedOptions.localConfigOnly, true);
+      assert.equal((mockedCreateEnv.mock.calls[0].arguments[0] as any).sharedOptions.localConfigOnly, true);
     });
   });
   describe('.prepareTemporaryFolder', () => {

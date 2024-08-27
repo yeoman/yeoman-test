@@ -2,9 +2,9 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { mock } from 'node:test';
 import { create as createMemFs } from 'mem-fs';
 import { create as createMemFsEditor } from 'mem-fs-editor';
-import { stub } from 'sinon';
 import RunContext from '../src/run-context.js';
 import RunResult from '../src/run-result.js';
 import helpers from '../src/helpers.js';
@@ -57,7 +57,7 @@ describe('run-result', () => {
   });
   describe('#dumpFiles', () => {
     let runResult;
-    let consoleMock;
+    let consoleMock: ReturnType<typeof mock.method>;
     beforeEach(() => {
       const memFs = createMemFs();
       const memFsEditor = createMemFsEditor(memFs);
@@ -66,33 +66,33 @@ describe('run-result', () => {
         fs: memFsEditor,
         cwd: process.cwd(),
       } as any);
-      consoleMock = stub(console, 'log');
+      consoleMock = mock.method(console, 'log');
       runResult.fs.write(path.resolve('test.txt'), 'test content');
       runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
     });
     afterEach(() => {
-      consoleMock.restore();
+      consoleMock.mock.restore();
     });
     it('dumps every file without an argument', () => {
       runResult.dumpFiles();
-      assert.equal(consoleMock.callCount, 4);
-      assert.equal(consoleMock.getCall(0).args[0], path.resolve('test.txt'));
-      assert.equal(consoleMock.getCall(1).args[0], 'test content');
-      assert.equal(consoleMock.getCall(2).args[0], path.resolve('test2.txt'));
-      assert.equal(consoleMock.getCall(3).args[0], 'test2 content');
+      assert.equal(consoleMock.mock.callCount(), 4);
+      assert.equal(consoleMock.mock.calls[0].arguments[0], path.resolve('test.txt'));
+      assert.equal(consoleMock.mock.calls[1].arguments[0], 'test content');
+      assert.equal(consoleMock.mock.calls[2].arguments[0], path.resolve('test2.txt'));
+      assert.equal(consoleMock.mock.calls[3].arguments[0], 'test2 content');
     });
     it('dumps a file with an argument', () => {
       runResult.dumpFiles(path.resolve('test.txt'));
-      assert.equal(consoleMock.callCount, 1);
-      assert.equal(consoleMock.getCall(0).args[0], 'test content');
+      assert.equal(consoleMock.mock.callCount(), 1);
+      assert.equal(consoleMock.mock.calls[0].arguments[0], 'test content');
       runResult.dumpFiles(path.resolve('test2.txt'));
-      assert.equal(consoleMock.callCount, 2);
-      assert.equal(consoleMock.getCall(1).args[0], 'test2 content');
+      assert.equal(consoleMock.mock.callCount(), 2);
+      assert.equal(consoleMock.mock.calls[1].arguments[0], 'test2 content');
     });
   });
   describe('#dumpFilenames', () => {
     let runResult;
-    let consoleMock;
+    let consoleMock: ReturnType<typeof mock.method>;
     beforeEach(() => {
       const memFs = createMemFs();
       const memFsEditor = createMemFsEditor(memFs);
@@ -101,18 +101,18 @@ describe('run-result', () => {
         fs: memFsEditor,
         cwd: process.cwd(),
       } as any);
-      consoleMock = stub(console, 'log');
+      consoleMock = mock.method(console, 'log');
       runResult.fs.write(path.resolve('test.txt'), 'test content');
       runResult.fs.write(path.resolve('test2.txt'), 'test2 content');
     });
     afterEach(() => {
-      consoleMock.restore();
+      consoleMock.mock.restore();
     });
     it('dumps every filename', () => {
       runResult.dumpFilenames();
-      assert.equal(consoleMock.callCount, 2);
-      assert.equal(consoleMock.getCall(0).args[0], path.resolve('test.txt'));
-      assert.equal(consoleMock.getCall(1).args[0], path.resolve('test2.txt'));
+      assert.equal(consoleMock.mock.callCount(), 2);
+      assert.equal(consoleMock.mock.calls[0].arguments[0], path.resolve('test.txt'));
+      assert.equal(consoleMock.mock.calls[1].arguments[0], path.resolve('test2.txt'));
     });
   });
   describe('#getSnapshot', () => {

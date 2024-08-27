@@ -267,7 +267,7 @@ export class YeomanTest {
           localConfigOnly: options,
           ...envOptions.sharedOptions,
         },
-      };
+      } as any;
     } else {
       envOptions.sharedOptions = {
         localConfigOnly: true,
@@ -278,7 +278,7 @@ export class YeomanTest {
         newErrorHandler: true,
         ...envOptions,
         ...options,
-      };
+      } as any;
     }
 
     return envContructor({ adapter: this.createTestAdapter(), ...envOptions });
@@ -318,7 +318,7 @@ export class YeomanTest {
       { ...contextSettings, ...settings },
       envOptions,
       this,
-    ).withOptions(generatorOptions);
+    ).withOptions(generatorOptions as any);
     if (settings?.autoCleanup !== false) {
       testContext.startNewContext(runContext);
     }
