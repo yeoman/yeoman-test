@@ -1,8 +1,8 @@
 import { existsSync, mkdirSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import process from 'node:process';
+import { mock } from 'node:test';
 import { cloneDeep } from 'lodash-es';
-import { spy as sinonSpy, stub as sinonStub } from 'sinon';
 import type {
   BaseEnvironment,
   BaseEnvironmentOptions,
@@ -12,7 +12,6 @@ import type {
   InstantiateOptions,
   PromptAnswers,
 } from '@yeoman/types';
-import type { SinonSpiedInstance } from 'sinon';
 import type { DefaultEnvironmentApi, DefaultGeneratorApi } from '../types/type-helpers.js';
 import { type DummyPromptOptions, TestAdapter, type TestAdapterOptions } from './adapter.js';
 import RunContext, { BasicRunContext, type RunContextSettings } from './run-context.js';
@@ -146,12 +145,12 @@ export class YeomanTest {
   /**
    * Create a mocked generator
    */
-  createMockedGenerator(GeneratorClass = GeneratorImplementation): SinonSpiedInstance<DefaultGeneratorApi> {
+  createMockedGenerator(GeneratorClass = GeneratorImplementation): ReturnType<typeof mock.fn> {
     class MockedGenerator extends GeneratorClass {}
-    const generator = sinonSpy(MockedGenerator);
+    const generator = mock.fn(MockedGenerator);
     for (const methodName of ['run', 'queueTasks', 'runWithOptions', 'queueOwnTasks']) {
       Object.defineProperty(MockedGenerator.prototype, methodName, {
-        value: sinonStub(),
+        value: mock.fn(),
       });
     }
 

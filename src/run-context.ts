@@ -4,11 +4,11 @@ import path, { isAbsolute, join as pathJoin, resolve } from 'node:path';
 import assert from 'node:assert';
 import { EventEmitter } from 'node:events';
 import process from 'node:process';
+import { mock } from 'node:test';
 import { camelCase, kebabCase, merge as lodashMerge, set as lodashSet } from 'lodash-es';
 import { resetFileCommitStates } from 'mem-fs-editor/state';
 import { type Store, create as createMemFs } from 'mem-fs';
 import tempDirectory from 'temp-dir';
-import { type SinonStub, stub as sinonStub } from 'sinon';
 import type {
   BaseEnvironmentOptions,
   BaseGenerator,
@@ -404,32 +404,42 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     });
   }
 
-  withSpawnMock(
-    options?: ((...args) => any) | { stub?: (...args) => any; registerSinonDefaults?: boolean; callback?: (stub) => void | Promise<void> },
+  withSpawnMock<StubType = ReturnType<typeof mock.fn>>(
+    options?:
+      | ((...args) => any)
+      | {
+          stub?: (...args) => any;
+          registerNodeMockDefaults?: boolean;
+          callback?: ({ stub, implementation }: { stub: StubType; implementation: any }) => void | Promise<void>;
+        },
   ): this {
     if (this.spawnStub) {
       throw new Error('Multiple withSpawnMock calls');
     }
 
-    const stub = typeof options === 'function' ? options : (options?.stub ?? sinonStub());
-    const registerSinonDefaults = typeof options === 'function' ? false : (options?.registerSinonDefaults ?? true);
-    const callback = typeof options === 'function' ? undefined : options?.callback;
-
-    if (registerSinonDefaults) {
+    const registerNodeMockDefaults = typeof options === 'function' ? false : (options?.registerNodeMockDefaults ?? true);
+    let implementation;
+    if (registerNodeMockDefaults) {
       const defaultChild = { stdout: { on() {} }, stderr: { on() {} } };
       const defaultReturn = { exitCode: 0, stdout: '', stderr: '' };
-      const stubFn = stub as SinonStub;
 
-      stubFn.withArgs('spawnCommand').callsFake(() => Object.assign(Promise.resolve({ ...defaultReturn }), defaultChild));
-
-      stubFn.withArgs('spawn').callsFake(() => Object.assign(Promise.resolve({ ...defaultReturn }), defaultChild));
-      stubFn.withArgs('spawnCommandSync').callsFake(() => ({ ...defaultReturn }));
-      stubFn.withArgs('spawnSync').callsFake(() => ({ ...defaultReturn }));
+      implementation = (...args) => {
+        const [methodName] = args;
+        if (methodName === 'spawnCommand' || methodName === 'spawn') {
+          return Object.assign(Promise.resolve({ ...defaultReturn }), defaultChild);
+        }
+        if (methodName === 'spawnCommandSync' || methodName === 'spawnSync') {
+          return { ...defaultReturn };
+        }
+      };
     }
+
+    const stub = typeof options === 'function' ? options : (options?.stub ?? mock.fn(() => undefined, implementation));
+    const callback = typeof options === 'function' ? undefined : options?.callback;
 
     if (callback) {
       this.onBeforePrepare(async () => {
-        await callback(stub);
+        await callback({ stub, implementation });
       });
     }
 

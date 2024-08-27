@@ -2,6 +2,7 @@ import assert from 'node:assert';
 import { existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { type mock } from 'node:test';
 import type { Store } from 'mem-fs';
 import { type MemFsEditor, type MemFsEditorFile, create as createMemFsEditor } from 'mem-fs-editor';
 import type { BaseEnvironmentOptions, BaseGenerator, GetGeneratorConstructor } from '@yeoman/types';
@@ -126,7 +127,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
       throw new Error('Spawn stub was not found');
     }
 
-    return this.spawnStub.getCalls().map(call => call.args);
+    return (this.spawnStub as ReturnType<typeof mock.fn>).mock.calls.map(call => call.arguments);
   }
 
   /**
