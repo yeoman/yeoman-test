@@ -20,33 +20,35 @@ const { resolve, join } = path;
 const environment = await createEnvironment({ adapter: new TestAdapter() });
 
 describe('yeoman-test', () => {
-  beforeEach(function () {
+  let StubGenerator;
+
+  beforeEach(() => {
     process.chdir(join(__dirname, './fixtures'));
 
-    this.StubGenerator = class extends Generator {};
+    StubGenerator = class extends Generator {};
   });
 
   describe('.createGenerator()', () => {
-    it('create a new generator', async function () {
+    it('create a new generator', async () => {
       const generator = await helpers.createGenerator('unicorn:app', {
-        dependencies: [[this.StubGenerator, { namespace: 'unicorn:app' }]],
+        dependencies: [[StubGenerator, { namespace: 'unicorn:app' }]],
       });
 
-      assert.ok(generator instanceof this.StubGenerator);
+      assert.ok(generator instanceof StubGenerator);
     });
 
-    it('pass args params to the generator', async function () {
+    it('pass args params to the generator', async () => {
       const generator = await helpers.createGenerator('unicorn:app', {
-        dependencies: [[this.StubGenerator, { namespace: 'unicorn:app' }]],
+        dependencies: [[StubGenerator, { namespace: 'unicorn:app' }]],
         generatorArgs: ['temp'],
       });
 
       assert.deepEqual(generator.args, ['temp']);
     });
 
-    it('pass options param to the generator', async function () {
+    it('pass options param to the generator', async () => {
       const generator = await helpers.createGenerator('unicorn:app', {
-        dependencies: [[this.StubGenerator, { namespace: 'unicorn:app' }]],
+        dependencies: [[StubGenerator, { namespace: 'unicorn:app' }]],
         generatorArgs: ['temp'],
         generatorOptions: {
           ui: 'tdd',
@@ -58,13 +60,14 @@ describe('yeoman-test', () => {
   });
 
   describe('.mockPrompt()', () => {
-    beforeEach(async function () {
-      this.generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
-      helpers.mockPrompt(this.generator, { answer: 'foo' });
+    let generator;
+    beforeEach(async () => {
+      generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      helpers.mockPrompt(generator, { answer: 'foo' });
     });
 
-    it('uses default values', function () {
-      return this.generator.prompt([{ name: 'respuesta', type: 'input', default: 'bar' }]).then(answers => {
+    it('uses default values', () => {
+      return generator.prompt([{ name: 'respuesta', type: 'input', default: 'bar' }]).then(answers => {
         assert.equal(answers.respuesta, 'bar');
       });
     });
@@ -119,8 +122,8 @@ describe('yeoman-test', () => {
       });
     });
 
-    it('prefers mocked values over defaults', function () {
-      return this.generator.prompt([{ name: 'answer', type: 'input', default: 'bar' }]).then(answers => {
+    it('prefers mocked values over defaults', () => {
+      return generator.prompt([{ name: 'answer', type: 'input', default: 'bar' }]).then(answers => {
         assert.equal(answers.answer, 'foo');
       });
     });
@@ -134,10 +137,10 @@ describe('yeoman-test', () => {
       });
     });
 
-    it('throws if answer is not provided', async function () {
+    it('throws if answer is not provided', async () => {
       const generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
       helpers.mockPrompt(generator, { foo: 1 }, { throwOnMissingAnswer: true });
-      return this.generator.prompt([{ message: 'bar', name: 'notFound' }]).then(
+      return generator.prompt([{ message: 'bar', name: 'notFound' }]).then(
         () => assert.fail(),
         error => {
           assert.equal(error.message, 'yeoman-test: question notFound was asked but answer was not provided');
@@ -145,10 +148,10 @@ describe('yeoman-test', () => {
       );
     });
 
-    it('keep prompt method asynchronous', function () {
+    it('keep prompt method asynchronous', () => {
       const spy = mock.fn();
 
-      const promise = this.generator.prompt({ name: 'answer', type: 'input' }).then(() => {
+      const promise = generator.prompt({ name: 'answer', type: 'input' }).then(() => {
         assert.strictEqual(spy.mock.callCount(), 1);
       });
 
@@ -362,14 +365,14 @@ describe('yeoman-test', () => {
 
         const runContext = helpers.run(helpers.createDummyGenerator());
         await runContext
-          .onGenerator(function (generator) {
+          .onGenerator(function (newGenerator) {
             assert.strictEqual(this, runContext);
-            assert.strictEqual(this.generator, generator);
+            assert.strictEqual(this.generator, newGenerator);
             order.push('onGenerator 0');
           })
-          .onGenerator(function (generator) {
+          .onGenerator(function (newGenerator) {
             assert.strictEqual(this, runContext);
-            assert.strictEqual(this.generator, generator);
+            assert.strictEqual(this.generator, newGenerator);
             order.push('onGenerator 1');
           })
           .onEnvironment(function (environment) {
