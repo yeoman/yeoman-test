@@ -2,27 +2,27 @@ import assert from 'node:assert';
 import { describe, expect, it } from 'esmocha';
 import { TestAdapter } from '../src/adapter.js';
 
-describe('TestAdapter', function () {
-  describe('#prompt()', function () {
-    it('allows pre-filled answers', async function () {
+describe('TestAdapter', () => {
+  describe('#prompt()', () => {
+    it('allows pre-filled answers', async () => {
       const adapter = new TestAdapter();
       return adapter
         .prompt([{ name: 'respuesta', message: 'foo', type: 'input', default: 'bar' }], {
           respuesta: 'foo',
         })
-        .then(function (answers) {
+        .then(answers => {
           assert.equal(answers.respuesta, 'foo');
         });
     });
   });
-  describe('#queue()', function () {
-    it('should execute the callback', async function () {
+  describe('#queue()', () => {
+    it('should execute the callback', async () => {
       const adapter = new TestAdapter();
       await expect(adapter.queue(() => 2)).resolves.toBe(2);
     });
   });
-  describe('#progress()', function () {
-    it('should execute the callback', async function () {
+  describe('#progress()', () => {
+    it('should execute the callback', async () => {
       const adapter = new TestAdapter();
       await expect(
         adapter.progress(({ step }) => {

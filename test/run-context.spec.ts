@@ -18,14 +18,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const tmpdir = path.join(tempDirectory, 'yeoman-run-context');
 
-describe('RunContext', function () {
+describe('RunContext', () => {
   const environmentOptions = { foo: 'bar' };
   let context: RunContext;
   let execSpy;
   let defaultInput;
   let Dummy;
 
-  beforeEach(function () {
+  beforeEach(() => {
     process.chdir(__dirname);
 
     defaultInput = inquirer.prompt.input;
@@ -39,7 +39,7 @@ describe('RunContext', function () {
     context = new RunContext(Dummy, undefined, environmentOptions);
   });
 
-  afterEach(function (done) {
+  afterEach(done => {
     process.chdir(__dirname);
 
     if (context.settings.tmpdir) {
@@ -58,25 +58,25 @@ describe('RunContext', function () {
     }
   });
 
-  describe('constructor', function () {
-    it('forwards envOptions to the environment', function (done) {
+  describe('constructor', () => {
+    it('forwards envOptions to the environment', done => {
       context.on('ready', function () {
         assert.equal(this.env.options.foo, environmentOptions.foo);
         done();
       });
     });
 
-    it('accept path parameter', function (done) {
+    it('accept path parameter', done => {
       const context = new RunContext(require.resolve('./fixtures/generator-simple/app'));
 
       context
-        .on('ready', async function () {
+        .on('ready', async () => {
           assert(await context.env.get('simple:app'));
         })
         .on('end', done);
     });
 
-    it('propagate generator error events', function (done) {
+    it('propagate generator error events', done => {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
       const execSpy = mock.fn(
@@ -90,7 +90,7 @@ describe('RunContext', function () {
       Dummy.prototype.end = execSpy;
       const context = new RunContext(Dummy);
 
-      context.on('error', function (error_) {
+      context.on('error', error_ => {
         assert.strictEqual(execSpy.mock.callCount(), 1);
         assert.equal(error_, error);
         assert.strictEqual(endSpy.mock.callCount(), 0);
@@ -98,14 +98,14 @@ describe('RunContext', function () {
       });
     });
 
-    it('accept generator constructor parameter (and assign gen:test as namespace)', function (done) {
-      context.on('ready', async function () {
+    it('accept generator constructor parameter (and assign gen:test as namespace)', done => {
+      context.on('ready', async () => {
         assert(await context.env.get('gen:test'));
         done();
       });
     });
 
-    it('set namespace and resolved path in generator', async function () {
+    it('set namespace and resolved path in generator', async () => {
       const context = new RunContext(Dummy, {
         resolved: 'path',
         namespace: 'simple:app',
@@ -116,39 +116,39 @@ describe('RunContext', function () {
       expect(((await context.env.get('simple:app')) as any).resolved).toMatch(/^path/);
     });
 
-    it('run the generator asynchronously', function (done) {
+    it('run the generator asynchronously', done => {
       assert.equal(execSpy.mock.callCount(), 0);
-      context.on('end', function () {
+      context.on('end', () => {
         assert.strictEqual(execSpy.mock.callCount(), 1);
         done();
       });
     });
 
-    it('reset mocked prompt after running', function (done) {
-      context.on('end', function () {
+    it('reset mocked prompt after running', done => {
+      context.on('end', () => {
         assert.equal(defaultInput, inquirer.prompt.input);
         done();
       });
     });
 
-    it('automatically run in a random tmpdir', function (done) {
-      context.on('end', function () {
+    it('automatically run in a random tmpdir', done => {
+      context.on('end', () => {
         assert.notEqual(process.cwd(), __dirname);
         assert.equal(tempDirectory, path.dirname(process.cwd()));
         done();
       });
     });
 
-    it('allows an option to not automatically run in tmpdir', function (done) {
+    it('allows an option to not automatically run in tmpdir', done => {
       const cwd = process.cwd();
       const context = new RunContext(Dummy, { cwd, tmpdir: false });
-      context.on('end', function () {
+      context.on('end', () => {
         assert.equal(cwd, process.cwd());
         done();
       });
     });
 
-    it('throws an error when calling cleanTestDirectory with not tmpdir settings', function () {
+    it('throws an error when calling cleanTestDirectory with not tmpdir settings', () => {
       const cwd = process.cwd();
       const context = new RunContext(Dummy, { cwd, tmpdir: false });
       try {
@@ -159,7 +159,7 @@ describe('RunContext', function () {
       }
     });
 
-    it('accepts settings', function () {
+    it('accepts settings', () => {
       const Dummy = helpers.createDummyGenerator();
       const context = new RunContext(Dummy, {
         tmpdir: false,
@@ -171,7 +171,7 @@ describe('RunContext', function () {
       assert.equal(context.settings.namespace, 'simple:app');
     });
 
-    it('only run a generator once', function (done) {
+    it('only run a generator once', done => {
       context.on('end', () => {
         assert.strictEqual(execSpy.mock.callCount(), 1);
         done();
@@ -181,34 +181,34 @@ describe('RunContext', function () {
       context.setupEventListeners();
     });
 
-    it('set --force by default', function (done) {
-      context.on('end', function () {
+    it('set --force by default', done => {
+      context.on('end', () => {
         assert.equal(execSpy.mock.calls[0].this.options.force, true);
         done();
       });
     });
 
-    it('set --skip-install by default', function (done) {
-      context.on('end', function () {
+    it('set --skip-install by default', done => {
+      context.on('end', () => {
         assert.equal(execSpy.mock.calls[0].this.options.skipInstall, true);
         done();
       });
     });
 
-    it('set --skip-cache by default', function (done) {
-      context.on('end', function () {
+    it('set --skip-cache by default', done => {
+      context.on('end', () => {
         assert.equal(execSpy.mock.calls[0].this.options.skipCache, true);
         done();
       });
     });
   });
 
-  describe('error handling', function () {
+  describe('error handling', () => {
     afterEach(() => {
       process.removeAllListeners('unhandledRejection');
     });
 
-    it('throw an unhandledRejection when no listener is present', function (done) {
+    it('throw an unhandledRejection when no listener is present', done => {
       const error = new Error('dummy exception');
       const execSpy = mock.fn(
         () => {},
@@ -227,19 +227,19 @@ describe('RunContext', function () {
       const Dummy = helpers.createDummyGenerator();
       Dummy.prototype.test = execSpy;
 
-      setImmediate(function () {
+      setImmediate(() => {
         return new RunContext(Dummy).on('end', () => {});
       });
     });
   });
 
-  describe('#toPromise()', function () {
-    it('return a resolved promise with the target directory on success', async function () {
+  describe('#toPromise()', () => {
+    it('return a resolved promise with the target directory on success', async () => {
       const runResult = await context.toPromise();
       assert.equal(context.targetDirectory, runResult.cwd);
     });
 
-    it('returns a reject promise on error', async function () {
+    it('returns a reject promise on error', async () => {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
       const execSpy = mock.fn(
@@ -251,20 +251,20 @@ describe('RunContext', function () {
       Dummy.prototype.test = execSpy;
       const context = new RunContext(Dummy);
 
-      return context.toPromise().catch(function (error_) {
+      return context.toPromise().catch(error_ => {
         assert.equal(error_, error);
       });
     });
   });
 
-  describe('#then()', function () {
-    it('handle success', async function () {
-      return context.toPromise().then(function (runResult) {
+  describe('#then()', () => {
+    it('handle success', async () => {
+      return context.toPromise().then(runResult => {
         assert.equal(context.targetDirectory, runResult.cwd);
       });
     });
 
-    it('handles errors', async function () {
+    it('handles errors', async () => {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
       const execSpy = mock.fn(
@@ -277,16 +277,16 @@ describe('RunContext', function () {
       const context = new RunContext(Dummy);
 
       return context.toPromise().then(
-        function () {},
-        function (error_) {
+        () => {},
+        error_ => {
           assert.equal(error_, error);
         },
       );
     });
   });
 
-  describe('#catch()', function () {
-    it('handles errors', async function () {
+  describe('#catch()', () => {
+    it('handles errors', async () => {
       const error = new Error('an error');
       const Dummy = helpers.createDummyGenerator();
       const execSpy = mock.fn(
@@ -298,13 +298,13 @@ describe('RunContext', function () {
       Dummy.prototype.test = execSpy;
       const context = new RunContext(Dummy);
 
-      return context.toPromise().catch(function (error_) {
+      return context.toPromise().catch(error_ => {
         assert.equal(error_, error);
       });
     });
   });
 
-  describe('#inDir()', function () {
+  describe('#inDir()', () => {
     beforeEach(function () {
       process.chdir(__dirname);
       this.tmp = tmpdir;
@@ -323,13 +323,11 @@ describe('RunContext', function () {
 
     it('accepts optional `cb` to be invoked with resolved `dir`', function (done) {
       const context = new RunContext(Dummy);
-      const callback = mock.fn(
-        function () {
-          assert.strictEqual(callback.mock.callCount(), 1);
-          assert.equal(callback.mock.calls[0].this, context);
-          assert.equal(callback.mock.calls[0].arguments[0], path.resolve(this.tmp));
-        }.bind(this),
-      );
+      const callback = mock.fn(() => {
+        assert.strictEqual(callback.mock.callCount(), 1);
+        assert.equal(callback.mock.calls[0].this, context);
+        assert.equal(callback.mock.calls[0].arguments[0], path.resolve(this.tmp));
+      });
 
       context.inDir(this.tmp, callback).on('end', done);
     });
@@ -345,7 +343,7 @@ describe('RunContext', function () {
     });
   });
 
-  describe('#doInDir()', function () {
+  describe('#doInDir()', () => {
     beforeEach(function () {
       process.chdir(__dirname);
       this.tmp = tmpdir;
@@ -387,7 +385,7 @@ describe('RunContext', function () {
     });
   });
 
-  describe('#cd()', function () {
+  describe('#cd()', () => {
     beforeEach(function () {
       process.chdir(__dirname);
       this.tmp = tmpdir;
@@ -428,19 +426,19 @@ describe('RunContext', function () {
     });
   });
 
-  describe('#inTmpDir', function () {
-    it('call helpers.testDirectory()', function () {
+  describe('#inTmpDir', () => {
+    it('call helpers.testDirectory()', () => {
       const spy = mock.method(helpers, 'testDirectory');
       context.inTmpDir();
       assert.strictEqual(spy.mock.callCount(), 1);
       spy.mock.restore();
     });
 
-    it('is chainable', function () {
+    it('is chainable', () => {
       assert.equal(context.inTmpDir(), context);
     });
 
-    it('accepts optional `cb` to be invoked with resolved `dir`', function (done) {
+    it('accepts optional `cb` to be invoked with resolved `dir`', done => {
       const callback = mock.fn(function (dir) {
         assert.equal(this, context);
         assert(dir.includes(tempDirectory));
@@ -450,78 +448,78 @@ describe('RunContext', function () {
     });
   });
 
-  describe('#withArguments()', function () {
-    it('provide arguments to the generator when passed as Array', function (done) {
+  describe('#withArguments()', () => {
+    it('provide arguments to the generator when passed as Array', done => {
       context.withArguments(['one', 'two']);
-      context.on('end', function () {
+      context.on('end', () => {
         assert.deepEqual(execSpy.mock.calls[0].this.arguments, ['one', 'two']);
         done();
       });
     });
 
-    it('provide arguments to the generator when passed as String', function (done) {
+    it('provide arguments to the generator when passed as String', done => {
       context.withArguments('foo bar');
-      context.on('end', function () {
+      context.on('end', () => {
         assert.deepEqual(execSpy.mock.calls[0].this.arguments, ['foo', 'bar']);
         done();
       });
     });
 
-    it('throws when arguments passed is neither a String or an Array', function () {
+    it('throws when arguments passed is neither a String or an Array', () => {
       assert.throws(context.withArguments.bind(context, { foo: 'bar' }));
     });
 
-    it('is chainable', function (done) {
+    it('is chainable', done => {
       context.withArguments('foo').withArguments('bar');
-      context.on('end', function () {
+      context.on('end', () => {
         assert.deepEqual(execSpy.mock.calls[0].this.arguments, ['foo', 'bar']);
         done();
       });
     });
   });
 
-  describe('#withOptions()', function () {
-    it('provide options to the generator', function (done) {
+  describe('#withOptions()', () => {
+    it('provide options to the generator', done => {
       context.withOptions({ foo: 'bar' });
-      context.on('end', function () {
+      context.on('end', () => {
         assert.equal(execSpy.mock.calls[0].this.options.foo, 'bar');
         done();
       });
     });
 
-    it('allow default settings to be overriden', function (done) {
+    it('allow default settings to be overriden', done => {
       context.withOptions({
         'skip-install': false,
         force: false,
       });
-      context.on('end', function () {
+      context.on('end', () => {
         assert.equal(execSpy.mock.calls[0].this.options.skipInstall, false);
         assert.equal(execSpy.mock.calls[0].this.options.force, false);
         done();
       });
     });
 
-    it('camel case options', function (done) {
+    it('camel case options', done => {
       context.withOptions({ 'foo-bar': false });
-      context.on('end', function () {
+      context.on('end', () => {
         assert.equal(execSpy.mock.calls[0].this.options['foo-bar'], false);
         assert.equal(execSpy.mock.calls[0].this.options.fooBar, false);
         done();
       });
     });
 
-    it('kebab case options', function (done) {
+    it('kebab case options', done => {
       context.withOptions({ barFoo: false });
-      context.on('end', function () {
+      context.on('end', () => {
         assert.equal(execSpy.mock.calls[0].this.options['bar-foo'], false);
         assert.equal(execSpy.mock.calls[0].this.options.barFoo, false);
         done();
       });
     });
 
-    it('is chainable', function (done) {
+    it('is chainable', done => {
       context.withOptions({ foo: 'bar' }).withOptions({ john: 'doe' });
-      context.on('end', function () {
+      context.on('end', () => {
         const { options } = execSpy.mock.calls[0].this;
         assert.equal(options.foo, 'bar');
         assert.equal(options.john, 'doe');
@@ -530,8 +528,8 @@ describe('RunContext', function () {
     });
   });
 
-  describe('#withAnswers()', function () {
-    it('is call automatically', async function () {
+  describe('#withAnswers()', () => {
+    it('is call automatically', async () => {
       const askFor = mock.fn();
       const prompt = mock.fn();
       Dummy.prototype.askFor = function () {
@@ -541,26 +539,26 @@ describe('RunContext', function () {
           type: 'input',
           message: 'Hey!',
           default: 'pass',
-        }).then(function (answers) {
+        }).then(answers => {
           assert.equal(answers.yeoman, 'pass');
           prompt();
         });
       };
 
-      return context.toPromise().then(function () {
+      return context.toPromise().then(() => {
         assert.strictEqual(askFor.mock.callCount(), 1);
         assert.strictEqual(prompt.mock.callCount(), 1);
       });
     });
 
-    it('mock the prompt', async function () {
+    it('mock the prompt', async () => {
       const execSpy = mock.fn();
       Dummy.prototype.askFor = function () {
         return this.prompt({
           name: 'yeoman',
           type: 'input',
           message: 'Hey!',
-        }).then(function (answers) {
+        }).then(answers => {
           assert.equal(answers.yeoman, 'yes please');
           execSpy();
         });
@@ -569,12 +567,12 @@ describe('RunContext', function () {
       return context
         .withAnswers({ yeoman: 'yes please' })
         .toPromise()
-        .then(function () {
+        .then(() => {
           assert.strictEqual(execSpy.mock.callCount(), 1);
         });
     });
 
-    it('is chainable', async function () {
+    it('is chainable', async () => {
       const execSpy = mock.fn();
       Dummy.prototype.askFor = function () {
         return this.prompt([
@@ -588,7 +586,7 @@ describe('RunContext', function () {
             type: 'input',
             message: 'Yo!',
           },
-        ]).then(function (answers) {
+        ]).then(answers => {
           execSpy();
           assert.equal(answers.yeoman, 'yes please');
           assert.equal(answers.yo, 'yo man');
@@ -599,12 +597,12 @@ describe('RunContext', function () {
         .withAnswers({ yeoman: 'yes please' })
         .withAnswers({ yo: 'yo man' })
         .toPromise()
-        .then(function () {
+        .then(() => {
           assert.strictEqual(execSpy.mock.callCount(), 1);
         });
     });
 
-    it('calls the callback', async function () {
+    it('calls the callback', async () => {
       const execSpy = mock.fn();
       const promptSpy = mock.fn(
         () => {},
@@ -615,7 +613,7 @@ describe('RunContext', function () {
           name: 'yeoman',
           type: 'input',
           message: 'Hey!',
-        }).then(function (answers) {
+        }).then(answers => {
           execSpy();
           assert.equal(answers.yeoman, 'yes please');
         });
@@ -624,7 +622,7 @@ describe('RunContext', function () {
       return context
         .withAnswers({ yeoman: 'no please' }, { callback: promptSpy })
         .toPromise()
-        .then(function () {
+        .then(() => {
           assert.strictEqual(execSpy.mock.callCount(), 1);
           assert.strictEqual(promptSpy.mock.callCount(), 1);
           assert.equal(promptSpy.mock.calls[0].arguments[0], 'no please');
@@ -632,7 +630,7 @@ describe('RunContext', function () {
         });
     });
 
-    it('sets askedQuestions', async function () {
+    it('sets askedQuestions', async () => {
       Dummy.prototype.askFor = function () {
         return this.prompt([
           {
@@ -657,39 +655,39 @@ describe('RunContext', function () {
     });
   });
 
-  describe('#withMockedGenerators()', function () {
-    it('creates mocked generator', async function () {
+  describe('#withMockedGenerators()', () => {
+    it('creates mocked generator', async () => {
       await context.withMockedGenerators(['foo:bar']).build();
       assert(await context.env.get('foo:bar'));
       assert(context.mockedGenerators['foo:bar']);
     });
   });
 
-  describe('#withGenerators()', function () {
-    it('register paths', function (done) {
-      context.withGenerators([require.resolve('./fixtures/generator-simple/app')]).on('ready', async function () {
+  describe('#withGenerators()', () => {
+    it('register paths', done => {
+      context.withGenerators([require.resolve('./fixtures/generator-simple/app')]).on('ready', async () => {
         assert(await context.env.get('simple:app'));
         done();
       });
     });
 
-    it('register paths with namespaces', async function () {
+    it('register paths with namespaces', async () => {
       await context.withGenerators([[require.resolve('./fixtures/generator-simple/app'), { namespace: 'foo:bar' }]]).build();
       assert(await context.env.get('foo:bar'));
     });
 
-    it('register mocked generator', function (done) {
-      context.withGenerators([[helpers.createDummyGenerator(), { namespace: 'dummy:gen' }]]).on('ready', async function () {
+    it('register mocked generator', done => {
+      context.withGenerators([[helpers.createDummyGenerator(), { namespace: 'dummy:gen' }]]).on('ready', async () => {
         assert(await context.env.get('dummy:gen'));
         done();
       });
     });
 
-    it('allow multiple calls', function (done) {
+    it('allow multiple calls', done => {
       context
         .withGenerators([require.resolve('./fixtures/generator-simple/app')])
         .withGenerators([[helpers.createDummyGenerator(), { namespace: 'dummy:gen' }]])
-        .on('ready', async function () {
+        .on('ready', async () => {
           assert(await context.env.get('dummy:gen'));
           assert(await context.env.get('simple:app'));
           done();
@@ -697,8 +695,8 @@ describe('RunContext', function () {
     });
   });
 
-  describe('#withSpawnMock()', function () {
-    it('provide arguments to the generator when passed as String', async function () {
+  describe('#withSpawnMock()', () => {
+    it('provide arguments to the generator when passed as String', async () => {
       context.withSpawnMock();
       Dummy.prototype.mockTask = async function () {
         const spawnCommandFoo = this.spawnCommand('foo');
@@ -721,7 +719,7 @@ describe('RunContext', function () {
       assert.deepStrictEqual(result.getSpawnArgsUsingDefaultImplementation()[3], ['spawnSync', 'foo']);
     });
 
-    it('with callback', async function () {
+    it('with callback', async () => {
       context.withSpawnMock<ReturnType<typeof mock.fn>>({
         stub: mock.fn(),
         registerNodeMockDefaults: true,
@@ -745,7 +743,7 @@ describe('RunContext', function () {
       await context.toPromise();
     });
 
-    it('without defaults', async function () {
+    it('without defaults', async () => {
       context.withSpawnMock({
         stub: mock.fn(),
         registerNodeMockDefaults: false,
@@ -759,28 +757,28 @@ describe('RunContext', function () {
     });
   });
 
-  describe('#withEnvironment()', function () {
-    it('register paths', function (done) {
+  describe('#withEnvironment()', () => {
+    it('register paths', done => {
       context
         .withEnvironment(environment => {
           environment.register(require.resolve('./fixtures/generator-simple/app'));
           return environment;
         })
-        .on('ready', async function () {
+        .on('ready', async () => {
           assert(await context.env.get('simple:app'));
           done();
         });
     });
   });
 
-  describe('#withLocalConfig()', function () {
-    it('provides config to the generator', function (done) {
+  describe('#withLocalConfig()', () => {
+    it('provides config to the generator', done => {
       context
         .withLocalConfig({
           some: true,
           data: 'here',
         })
-        .on('ready', function () {
+        .on('ready', () => {
           assert.equal(context.generator.config.get('some'), true);
           assert.equal(context.generator.config.get('data'), 'here');
           done();
@@ -788,14 +786,14 @@ describe('RunContext', function () {
     });
   });
 
-  describe('#_createRunResultOptions()', function () {
-    it('creates RunResult configuration', function (done) {
+  describe('#_createRunResultOptions()', () => {
+    it('creates RunResult configuration', done => {
       context
         .withLocalConfig({
           some: true,
           data: 'here',
         })
-        .on('ready', function () {
+        .on('ready', () => {
           const options = context._createRunResultOptions();
           assert.equal(options.env, context.env);
           assert.equal(options.memFs, context.env.sharedFs);
