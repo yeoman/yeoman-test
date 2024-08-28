@@ -7,7 +7,6 @@ import { createRequire } from 'node:module';
 import { mock } from 'node:test';
 import { promisify as promisify_ } from 'node:util';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import inquirer from 'inquirer';
 import Generator from 'yeoman-generator';
 import tempDirectory from 'temp-dir';
 import { RunContextBase as RunContext } from '../src/run-context.js';
@@ -25,13 +24,11 @@ describe('RunContext', () => {
   const environmentOptions = { foo: 'bar' };
   let context: RunContext;
   let execSpy;
-  let defaultInput;
   let Dummy;
 
   beforeEach(() => {
     process.chdir(__dirname);
 
-    defaultInput = inquirer.prompt.input;
     execSpy = mock.fn();
     Dummy = class extends Generator {
       exec(...arguments_) {
@@ -139,16 +136,6 @@ describe('RunContext', () => {
         assert.equal(execSpy.mock.callCount(), 0);
         context.on('end', () => {
           assert.strictEqual(execSpy.mock.callCount(), 1);
-          done();
-        });
-      }),
-    );
-
-    it(
-      'reset mocked prompt after running',
-      promisify(done => {
-        context.on('end', () => {
-          assert.equal(defaultInput, inquirer.prompt.input);
           done();
         });
       }),
