@@ -1,5 +1,5 @@
 import process from 'node:process';
-import onExit from 'when-exit';
+import { onExit } from 'signal-exit';
 import type RunContext from './run-context.js';
 import type RunResult from './run-result.js';
 
