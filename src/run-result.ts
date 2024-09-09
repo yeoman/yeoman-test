@@ -6,7 +6,7 @@ import { type mock } from 'node:test';
 import type { Store } from 'mem-fs';
 import { type MemFsEditor, type MemFsEditorFile, create as createMemFsEditor } from 'mem-fs-editor';
 import type { BaseEnvironmentOptions, BaseGenerator, GetGeneratorConstructor } from '@yeoman/types';
-import type { DefaultEnvironmentApi, DefaultGeneratorApi } from '../types/type-helpers.js';
+import type { DefaultEnvironmentApi } from '../types/type-helpers.js';
 import { type RunContextSettings } from './run-context.js';
 import { type YeomanTest } from './helpers.js';
 import { type AskedQuestions } from './adapter.js';
@@ -103,8 +103,8 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    * Create another RunContext reusing the settings.
    * See helpers.create api
    */
-  create<GeneratorType extends BaseGenerator = DefaultGeneratorApi>(
-    GeneratorOrNamespace: string | GetGeneratorConstructor<GeneratorType>,
+  create<G extends BaseGenerator = GeneratorType>(
+    GeneratorOrNamespace: string | GetGeneratorConstructor<G>,
     settings?: RunContextSettings,
     environmentOptions?: BaseEnvironmentOptions,
   ) {
