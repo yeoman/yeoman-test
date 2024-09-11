@@ -452,6 +452,15 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
   }
 
   /**
+   * Assert that a generator was composed
+   * @param generator - the namespace of the mocked generator
+   */
+  assertGeneratorNotComposed(generator: string): void {
+    const composeCount = this.getGeneratorComposeCount(generator);
+    assert.ok(composeCount === 0, `Generator ${generator} is composed ${composeCount}`);
+  }
+
+  /**
    * Assert that a generator was composed only once
    * @param generator - the namespace of the mocked generator
    */

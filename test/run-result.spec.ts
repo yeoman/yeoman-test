@@ -277,12 +277,14 @@ describe('run-result', () => {
           },
         }),
       )
-      .withMockedGenerators([mockedNamespace]);
+      .withMockedGenerators([mockedNamespace, 'another:gen']);
 
     result.assertGeneratorComposedOnce(mockedNamespace);
     result.assertGeneratorComposed(mockedNamespace);
     assert(result.getGeneratorComposeCount(mockedNamespace) === 1);
     assert.equal(result.getComposedGenerators().length, 1);
     assert(result.getComposedGenerators()[0] === mockedNamespace);
+
+    result.assertGeneratorNotComposed('another:gen');
   });
 });
