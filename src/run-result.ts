@@ -431,16 +431,25 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
   }
 
   /**
+   * Get the generator mock
+   * @param generator - the namespace of the mocked generator
+   * @returns the generator mock
+   */
+  getGeneratorMock(generator: string): ReturnType<typeof mock.fn>['mock'] {
+    const mockedGenerator: ReturnType<typeof mock.fn> = this.mockedGenerators[generator];
+    if (!mockedGenerator) {
+      throw new Error(`Generator ${generator} is not mocked`);
+    }
+    return mockedGenerator.mock;
+  }
+
+  /**
    * Get the number of times a mocked generator was composed
    * @param generator - the namespace of the mocked generator
    * @returns the number of times the generator was composed
    */
   getGeneratorComposeCount(generator: string): number {
-    const mockedGenerator = this.mockedGenerators[generator];
-    if (!mockedGenerator) {
-      throw new Error(`Generator ${generator} is not mocked`);
-    }
-    return mockedGenerator.mock.callCount();
+    return this.getGeneratorMock(generator).callCount();
   }
 
   /**
