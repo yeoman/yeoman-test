@@ -266,4 +266,25 @@ describe('run-result', () => {
       }
     });
   });
+
+  it('provides mocked generators check helpers', async () => {
+    const mockedNamespace = 'mocked:gen';
+    const result = await helpers
+      .run(
+        helpers.createDummyGenerator(undefined, {
+          async default() {
+            await this.composeWith(mockedNamespace);
+          },
+        }),
+      )
+      .withMockedGenerators([mockedNamespace, 'another:gen']);
+
+    result.assertGeneratorComposedOnce(mockedNamespace);
+    result.assertGeneratorComposed(mockedNamespace);
+    assert(result.getGeneratorComposeCount(mockedNamespace) === 1);
+    assert.equal(result.getComposedGenerators().length, 1);
+    assert(result.getComposedGenerators()[0] === mockedNamespace);
+
+    result.assertGeneratorNotComposed('another:gen');
+  });
 });
