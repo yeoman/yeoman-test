@@ -429,4 +429,43 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
   assertNoJsonFileContent(filename: string, content: Record<string, any>): void {
     this.assertNoObjectContent(this._readFile(filename, true), content);
   }
+
+  /**
+   * Get the number of times a mocked generator was composed
+   * @param generator - the namespace of the mocked generator
+   * @returns the number of times the generator was composed
+   */
+  getGeneratorComposeCount(generator: string): number {
+    const mockedGenerator = this.mockedGenerators[generator];
+    if (!mockedGenerator) {
+      throw new Error(`Generator ${generator} is not mocked`);
+    }
+    return mockedGenerator.mock.callCount();
+  }
+
+  /**
+   * Assert that a generator was composed
+   * @param generator - the namespace of the mocked generator
+   */
+  assertGeneratorComposed(generator: string): void {
+    assert.ok(this.getGeneratorComposeCount(generator) > 0, `Generator ${generator} is not composed`);
+  }
+
+  /**
+   * Assert that a generator was composed only once
+   * @param generator - the namespace of the mocked generator
+   */
+  assertGeneratorComposedOnce(generator: string): void {
+    assert.ok(this.getGeneratorComposeCount(generator) === 1, `Generator ${generator} is not composed`);
+  }
+
+  /**
+   * Assert that a generator was composed multiple times
+   * @returns an array of the names of the mocked generators that were composed
+   */
+  getComposedGenerators(): string[] {
+    return Object.entries(this.mockedGenerators)
+      .filter(([_generator, mockedGenerator]) => (mockedGenerator as any).mock.callCount() > 0)
+      .map(([generator]) => generator);
+  }
 }
