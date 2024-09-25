@@ -6,12 +6,13 @@ import process from 'node:process';
 import { createRequire } from 'node:module';
 import { mock } from 'node:test';
 import { promisify as promisify_ } from 'node:util';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import Generator from 'yeoman-generator';
 import tempDirectory from 'temp-dir';
 import { RunContextBase as RunContext } from '../src/run-context.js';
 import helpers from '../src/helpers.js';
 import { DummyPrompt } from '../src/adapter.js';
+import { BaseEnvironmentOptions } from '@yeoman/types';
 
 /* Remove argument from promisify return */
 const promisify = function_ => () => promisify_(function_)();
@@ -21,7 +22,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const tmpdir = path.join(tempDirectory, 'yeoman-run-context');
 
 describe('RunContext', () => {
-  const environmentOptions = { foo: 'bar' };
+  let environmentOptions: BaseEnvironmentOptions | undefined;
   let context: RunContext;
   let execSpy;
   let Dummy;
@@ -61,6 +62,9 @@ describe('RunContext', () => {
   );
 
   describe('constructor', () => {
+    beforeAll(() => {
+      environmentOptions = { foo: 'bar' };
+    });
     it(
       'forwards envOptions to the environment',
       promisify(done => {
@@ -854,6 +858,32 @@ describe('RunContext', () => {
           });
       }),
     );
+  });
+
+  describe('#withEnvironmentRun()', () => {
+    it('calls runGenerator by default', async () => {
+      let mockedRunGenerator: ReturnType<typeof mock.fn>;
+      await context
+        .withEnvironment(environment => {
+          mockedRunGenerator = mock.method(environment, 'runGenerator');
+        })
+        .toPromise();
+      expect(mockedRunGenerator!.mock.callCount()).toBe(1);
+    });
+
+    it('calls custom environment run method', async () => {
+      let mockedRunGenerator: ReturnType<typeof mock.fn>;
+      const mockedEnvironmentRun = mock.fn();
+      await context
+        .withEnvironment(environment => {
+          mockedRunGenerator = mock.method(environment, 'runGenerator');
+        })
+        .withEnvironmentRun(mockedEnvironmentRun)
+        .toPromise();
+
+      expect(mockedRunGenerator!.mock.callCount()).toBe(0);
+      expect(mockedEnvironmentRun!.mock.callCount()).toBe(1);
+    });
   });
 
   describe('#withLocalConfig()', () => {

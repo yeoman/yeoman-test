@@ -103,6 +103,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
   private ran = false;
   private errored = false;
   private readonly beforePrepareCallbacks: Array<(this: this) => void | Promise<void>> = [];
+  private environmentRun?: (this: this, env: DefaultEnvironmentApi, gen: GeneratorType) => void;
 
   /**
    * This class provide a run context object to façade the complexity involved in setting
@@ -151,7 +152,8 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     }
 
     try {
-      await this.env.runGenerator(this.generator as any);
+      const environmentRun = this.environmentRun ?? ((env, generator) => env.runGenerator(generator));
+      await environmentRun.call(this, this.env, this.generator);
     } finally {
       this.helpers.restorePrompt(this.env);
       this.completed = true;
@@ -298,6 +300,17 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    */
   withEnvironment(callback: any) {
     this.envCB = callback;
+    return this;
+  }
+
+  /**
+   * Customize enviroment run method.
+   *
+   * @param callback
+   * @return {this} run context instance
+   */
+  withEnvironmentRun(callback: (this: this, env: DefaultEnvironmentApi, gen: GeneratorType) => void) {
+    this.environmentRun = callback;
     return this;
   }
 
