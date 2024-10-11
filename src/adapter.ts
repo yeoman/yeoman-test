@@ -16,6 +16,6 @@ export class TestAdapter extends BaseTestAdapter {
   }
 }
 
-export { DummyPrompt, type DummyPromptOptions, type DummyPromptCallback, type TestAdapterOptions } from '@yeoman/adapter/testing';
+export { type DummyPromptOptions, type DummyPromptCallback, type TestAdapterOptions } from '@yeoman/adapter/testing';
 
 export type AskedQuestions = Array<{ name: string; answer: any }>;
