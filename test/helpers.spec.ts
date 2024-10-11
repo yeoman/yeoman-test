@@ -70,7 +70,7 @@ describe('yeoman-test', () => {
     });
 
     it('uses default values', () => {
-      return generator.prompt([{ name: 'respuesta', type: 'input', default: 'bar' }]).then(answers => {
+      return generator.prompt([{ name: 'respuesta', message: 'foo', type: 'input', default: 'bar' }]).then(answers => {
         assert.equal(answers.respuesta, 'bar');
       });
     });
@@ -126,7 +126,7 @@ describe('yeoman-test', () => {
     });
 
     it('prefers mocked values over defaults', () => {
-      return generator.prompt([{ name: 'answer', type: 'input', default: 'bar' }]).then(answers => {
+      return generator.prompt([{ name: 'answer', message: 'foo', type: 'input', default: 'bar' }]).then(answers => {
         assert.equal(answers.answer, 'foo');
       });
     });
@@ -154,7 +154,7 @@ describe('yeoman-test', () => {
     it('keep prompt method asynchronous', () => {
       const spy = mock.fn();
 
-      const promise = generator.prompt({ name: 'answer', type: 'input' }).then(() => {
+      const promise = generator.prompt({ name: 'answer', type: 'input', message: 'dummy' }).then(() => {
         assert.strictEqual(spy.mock.callCount(), 1);
       });
 

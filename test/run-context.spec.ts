@@ -11,7 +11,6 @@ import Generator from 'yeoman-generator';
 import tempDirectory from 'temp-dir';
 import { RunContextBase as RunContext } from '../src/run-context.js';
 import helpers from '../src/helpers.js';
-import { DummyPrompt } from '../src/adapter.js';
 import { BaseEnvironmentOptions } from '@yeoman/types';
 
 /* Remove argument from promisify return */
@@ -703,7 +702,6 @@ describe('RunContext', () => {
           assert.strictEqual(execSpy.mock.callCount(), 1);
           assert.strictEqual(promptSpy.mock.callCount(), 1);
           assert.equal(promptSpy.mock.calls[0].arguments[0], 'no please');
-          assert.ok(promptSpy.mock.calls[0].this instanceof DummyPrompt);
         });
     });
 

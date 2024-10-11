@@ -42,7 +42,6 @@
     "doc_path": "../yeoman-test-doc"
   },
   "dependencies": {
-    "@yeoman/adapter": "^1.6.0",
     "lodash-es": "^4.17.21",
     "mem-fs-editor": "^11.1.1",
     "signal-exit": "^4.1.0",
@@ -50,6 +49,7 @@
     "type-fest": "^4.25.0"
   },
   "devDependencies": {
+    "@yeoman/adapter": "^2.0.0",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^18.19.46",
     "@vitest/coverage-v8": "^2.0.5",
@@ -67,7 +67,8 @@
     "yeoman-generator": "^7.3.2"
   },
   "peerDependencies": {
-    "@yeoman/types": "^1.4.0",
+    "@yeoman/adapter": "^1.6.0 || ^2.0.0",
+    "@yeoman/types": "^1.5.0",
     "mem-fs": "^4.1.0",
     "yeoman-environment": "^4.0.0",
     "yeoman-generator": "^7.0.0"
