@@ -62,7 +62,7 @@
     "prettier-plugin-packagejson": "^2.3.0",
     "tui-jsdoc-template": "^1.2.2",
     "typescript": "^5.5.4",
-    "vitest": "^2.0.5",
+    "vitest": "^3.0.2",
     "yeoman-environment": "^4.4.1",
     "yeoman-generator": "^7.3.2"
   },
