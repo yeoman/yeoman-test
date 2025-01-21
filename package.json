@@ -52,7 +52,7 @@
     "@yeoman/adapter": "^2.0.0",
     "@types/lodash-es": "^4.17.12",
     "@types/node": ">=18.19.46",
-    "@vitest/coverage-v8": "^2.0.5",
+    "@vitest/coverage-v8": "^3.0.2",
     "@yeoman/eslint": "0.2.0",
     "coveralls": "^3.1.1",
     "husky": "^9.1.5",
