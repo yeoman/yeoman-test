@@ -11,21 +11,27 @@ on:
         description: 'Path to generate'
         required: false
 
+permissions:
+  contents: read
+
 jobs:
   build:
+    permissions:
+      contents: write  # for peter-evans/create-pull-request to create branch
+      pull-requests: write  # for peter-evans/create-pull-request to create a PR
     name: Update api docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 # v3.8.2
         with:
           cache: 'npm'
           node-version: '16.x'
       - run: npm install -g npm@7.11.2
         continue-on-error: true
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
           path: source
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
           ref: gh-pages
           path: yeoman-test-doc
@@ -46,7 +52,7 @@ jobs:
       - name: Create Pull Request
         if: always()
         id: cpr
-        uses: peter-evans/create-pull-request@v3.8.2
+        uses: peter-evans/create-pull-request@052fc72b4198ba9fbc81b818c6e1859f747d49a8 # v3.8.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: 'Update api for ${{github.event.release.name}}'
