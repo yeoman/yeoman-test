@@ -1,17 +1,19 @@
-import fs from 'node:fs';
+import fs, { realpathSync } from 'node:fs';
 import path, { dirname } from 'node:path';
 import assert from 'node:assert';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { createRequire } from 'node:module';
+import os from 'node:os';
 import { mock } from 'node:test';
 import { promisify as promisify_ } from 'node:util';
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import Generator from 'yeoman-generator';
-import tempDirectory from 'temp-dir';
 import { RunContextBase as RunContext } from '../src/run-context.js';
 import helpers from '../src/helpers.js';
 import { BaseEnvironmentOptions } from '@yeoman/types';
+
+const tempDirectory = realpathSync(os.tmpdir());
 
 /* Remove argument from promisify return */
 const promisify = function_ => () => promisify_(function_)();
