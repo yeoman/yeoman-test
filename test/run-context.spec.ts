@@ -10,7 +10,7 @@ import { promisify as promisify_ } from 'node:util';
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import Generator from 'yeoman-generator';
 import { RunContextBase as RunContext } from '../src/run-context.js';
-import helpers from '../src/helpers.js';
+import helpers from '../src/import.js';
 import { BaseEnvironmentOptions } from '@yeoman/types';
 
 const tempDirectory = realpathSync(os.tmpdir());

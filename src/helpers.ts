@@ -1,4 +1,5 @@
 import { existsSync, mkdirSync, rmSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 import process from 'node:process';
 import { mock } from 'node:test';
@@ -18,13 +19,15 @@ import RunContext, { BasicRunContext, type RunContextSettings } from './run-cont
 import testContext from './test-context.js';
 import { createEnv as createEnvironment } from './default-environment.js';
 
-let GeneratorImplementation;
-try {
-  const GeneratorImport = await import('yeoman-generator');
-  GeneratorImplementation = GeneratorImport.default ?? GeneratorImport;
-} catch {
-  // Ignore error
-}
+let dummyParentClass;
+export const setDefaultDummyParentClass = parentClass => {
+  dummyParentClass = parentClass;
+};
+
+const getDummyParentClass = () => {
+  dummyParentClass ??= createRequire(import.meta.url)('yeoman-generator').default;
+  return dummyParentClass;
+};
 
 export type CreateEnv = (options: BaseEnvironmentOptions) => Promise<BaseEnvironment>;
 
@@ -145,7 +148,7 @@ export class YeomanTest {
   /**
    * Create a mocked generator
    */
-  createMockedGenerator(GeneratorClass = GeneratorImplementation): ReturnType<typeof mock.fn> {
+  createMockedGenerator(GeneratorClass = getDummyParentClass()): ReturnType<typeof mock.fn> {
     class MockedGenerator extends GeneratorClass {}
     const generator = mock.fn(MockedGenerator);
     for (const methodName of ['run', 'queueTasks', 'runWithOptions', 'queueOwnTasks']) {
@@ -161,7 +164,7 @@ export class YeomanTest {
    * Create a simple, dummy generator
    */
   createDummyGenerator<GenParameter extends BaseGenerator = DefaultGeneratorApi>(
-    Generator: GetGeneratorConstructor<GenParameter> = GeneratorImplementation,
+    Generator: GetGeneratorConstructor<GenParameter> = getDummyParentClass(),
     contents: Record<string, (...arguments_: any[]) => void> = {
       test(this: any) {
         this.shouldRun = true;

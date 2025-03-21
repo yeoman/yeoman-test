@@ -8,5 +8,6 @@ export default config(...configs, {
     'unicorn/no-thenable': 'off',
     'unicorn/prefer-event-target': 'off',
     'unicorn/no-object-as-default-parameter': 'off',
+    'unicorn/prefer-top-level-await': 'off',
   },
 });

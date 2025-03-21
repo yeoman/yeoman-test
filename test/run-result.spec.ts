@@ -8,7 +8,7 @@ import { create as createMemFsEditor } from 'mem-fs-editor';
 import { afterEach, beforeAll, beforeEach, describe, it } from 'vitest';
 import RunContext from '../src/run-context.js';
 import RunResult from '../src/run-result.js';
-import helpers from '../src/helpers.js';
+import helpers from '../src/import.js';
 import testContext, { result } from '../src/test-context.js';
 
 describe('run-result', () => {
