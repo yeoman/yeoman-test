@@ -17,7 +17,8 @@
     },
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "require": "./dist/index.js",
+      "default": "./dist/import.js"
     }
   },
   "main": "./dist/index.js",
@@ -46,14 +47,13 @@
     "lodash-es": "^4.17.21",
     "mem-fs-editor": "^11.1.1",
     "signal-exit": "^4.1.0",
-    "temp-dir": "^3.0.0",
     "type-fest": "^4.25.0"
   },
   "devDependencies": {
-    "@yeoman/adapter": "^2.0.0",
     "@types/lodash-es": "^4.17.12",
     "@types/node": ">=18.19.46",
     "@vitest/coverage-v8": "^3.0.2",
+    "@yeoman/adapter": "^2.0.0",
     "@yeoman/eslint": "0.2.0",
     "coveralls": "^3.1.1",
     "husky": "^9.1.5",

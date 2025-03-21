@@ -6,7 +6,7 @@ import { createRequire } from 'node:module';
 import { mock } from 'node:test';
 import { type LookupOptions } from '@yeoman/types';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, it } from 'vitest';
-import helpers from '../src/helpers.js';
+import helpers from '../src/import.js';
 import RunContext from '../src/run-context.js';
 import RunResult from '../src/run-result.js';
 import SimpleApp from './fixtures/generator-simple/app/index.js';

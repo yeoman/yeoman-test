@@ -10,9 +10,11 @@ import Generator from 'yeoman-generator';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type Environment from 'yeoman-environment';
 import { createEnv as createEnvironment } from '../src/default-environment.js';
-import helpers from '../src/helpers.js';
+import helpers from '../src/import.js';
 import { TestAdapter } from '../src/adapter.js';
 import RunContext from '../src/run-context.js';
+
+const [major, minor] = process.versions.node.split('.').map(Number);
 
 /* Remove argument from promisify return */
 const promisify = function_ => () => promisify_(function_)();
@@ -29,6 +31,10 @@ describe('yeoman-test', () => {
     process.chdir(join(__dirname, './fixtures'));
 
     StubGenerator = class extends Generator {};
+  });
+
+  it.skipIf(major < 22 || (major == 22 && minor < 12))('yeoman-test should allow to be required', () => {
+    require('../').default.createMockedGenerator();
   });
 
   describe('.createGenerator()', () => {

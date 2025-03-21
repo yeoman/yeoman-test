@@ -1,14 +1,14 @@
 import crypto from 'node:crypto';
-import { existsSync, rmSync } from 'node:fs';
+import { existsSync, realpathSync, rmSync } from 'node:fs';
 import path, { isAbsolute, join as pathJoin, resolve } from 'node:path';
 import assert from 'node:assert';
 import { EventEmitter } from 'node:events';
+import { tmpdir } from 'node:os';
 import process from 'node:process';
 import { mock } from 'node:test';
 import { camelCase, kebabCase, merge as lodashMerge, set as lodashSet } from 'lodash-es';
 import { resetFileCommitStates } from 'mem-fs-editor/state';
 import { type Store, create as createMemFs } from 'mem-fs';
-import tempDirectory from 'temp-dir';
 import type {
   BaseEnvironmentOptions,
   BaseGenerator,
@@ -23,6 +23,8 @@ import RunResult, { type RunResultOptions } from './run-result.js';
 import defaultHelpers, { type CreateEnv as CreateEnvironment, type Dependency, type YeomanTest } from './helpers.js';
 import { type AskedQuestions, type DummyPromptCallback, type DummyPromptOptions, type TestAdapterOptions } from './adapter.js';
 import testContext from './test-context.js';
+
+const tempDirectory = realpathSync(tmpdir());
 
 /**
  * Provides settings for creating a `RunContext`.
