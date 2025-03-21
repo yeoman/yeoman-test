@@ -31,6 +31,10 @@ describe('yeoman-test', () => {
     StubGenerator = class extends Generator {};
   });
 
+  it('yeoman-test should allow to be required', () => {
+    createRequire(import.meta.url)('../');
+  });
+
   describe('.createGenerator()', () => {
     it('create a new generator', async () => {
       const generator = await helpers.createGenerator('unicorn:app', {
