@@ -71,8 +71,8 @@
     "@yeoman/adapter": "^1.6.0 || ^2.0.0",
     "@yeoman/types": "^1.5.0",
     "mem-fs": "^4.1.0",
-    "yeoman-environment": "^4.0.0",
-    "yeoman-generator": "^7.0.0"
+    "yeoman-environment": "^4.0.0 || ^5.0.0-beta.0",
+    "yeoman-generator": "^7.0.0 || ^8.0.0-beta.0"
   },
   "peerDependenciesMeta": {
     "yeoman-environment": {
