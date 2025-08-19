@@ -11,16 +11,16 @@ import { type RunContextSettings } from './run-context.js';
 import { type YeomanTest } from './helpers.js';
 import { type AskedQuestions } from './adapter.js';
 
-const isObject = object => typeof object === 'object' && object !== null && object !== undefined;
+const isObject = (object: any) => typeof object === 'object' && object !== null && object !== undefined;
 
-const convertArguments = arguments_ => {
+function convertArguments<T>(arguments_: T[] | T[][]): T[] {
   if (arguments_.length > 1) {
-    return [[...arguments_]];
+    return [[...arguments_]] as T[];
   }
 
   const [argument] = arguments_;
   return Array.isArray(argument) ? argument : [argument];
-};
+}
 
 /**
  * Provides options for `RunResult`s.
@@ -134,16 +134,15 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    * Return an object with fs changes.
    * @param {Function} filter - parameter forwarded to mem-fs-editor#dump
    */
-  getSnapshot(filter?): Record<string, { contents: string; stateCleared: string }> {
+  getSnapshot(filter?: Parameters<MemFsEditor['dump']>[1]): Record<string, { contents: string; stateCleared: string }> {
     return this.fs.dump(this.cwd, filter);
   }
 
   /**
    * Return an object with filenames with state.
    * @param {Function} filter - parameter forwarded to mem-fs-editor#dump
-   * @returns {Object}
    */
-  getStateSnapshot(filter?): Record<string, { stateCleared?: string; state?: string }> {
+  getStateSnapshot(filter?: Parameters<MemFsEditor['dump']>[1]): Record<string, { stateCleared?: string; state?: string }> {
     const snapshot: Record<string, { contents?: string; stateCleared?: string; state?: string }> = this.getSnapshot(filter);
     for (const dump of Object.values(snapshot)) {
       delete dump.contents;
@@ -201,7 +200,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
     return this;
   }
 
-  _fileName(filename) {
+  _fileName(filename: string) {
     if (path.isAbsolute(filename)) {
       return filename;
     }
@@ -209,14 +208,14 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
     return path.join(this.cwd, filename);
   }
 
-  _readFile(filename, json?: boolean) {
+  _readFile(filename: string, json?: boolean) {
     filename = this._fileName(filename);
     const file = (this.fs ? this.fs.read(filename) : undefined) ?? readFileSync(filename, 'utf8');
 
     return json ? JSON.parse(file) : file;
   }
 
-  _exists(filename) {
+  _exists(filename: string) {
     filename = this._fileName(filename);
     if (this.fs) {
       return this.fs.exists(filename);
@@ -239,7 +238,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    * result.assertFile(['templates/user.hbs', 'templates/user/edit.hbs']);
    */
   assertFile(path: string | string[]): void {
-    for (const file of convertArguments([path])) {
+    for (const file of Array.isArray(path) ? path : [path]) {
       const here = this._exists(file);
       assert.ok(here, `${file}, no such file or directory`);
     }
@@ -259,7 +258,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    * result.assertNoFile(['templates/user.hbs', 'templates/user/edit.hbs']);
    */
   assertNoFile(files: string | string[]): void {
-    for (const file of convertArguments([files])) {
+    for (const file of Array.isArray(files) ? files : [files]) {
       const here = this._exists(file);
       assert.ok(!here, `${file} exists`);
     }
@@ -286,7 +285,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    */
   assertFileContent(file: string, reg: string | RegExp): void;
   assertFileContent(pairs: Array<[string, string | RegExp]>): void;
-  assertFileContent(...arguments_) {
+  assertFileContent(...arguments_: any[]) {
     for (const pair of convertArguments(arguments_)) {
       const [file, regex] = pair;
       this.assertFile(file);
@@ -321,7 +320,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    */
   assertEqualsFileContent(file: string, expectedContent: string): void;
   assertEqualsFileContent(pairs: Array<[string, string]>): void;
-  assertEqualsFileContent(...arguments_) {
+  assertEqualsFileContent(...arguments_: any[]) {
     for (const pair of convertArguments(arguments_)) {
       const [file, expectedContent] = pair;
       this.assertFile(file);
@@ -349,7 +348,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    */
   assertNoFileContent(file: string, reg: RegExp | string): void;
   assertNoFileContent(pairs: Array<[string, string | RegExp]>): void;
-  assertNoFileContent(...arguments_) {
+  assertNoFileContent(...arguments_: any[]) {
     for (const pair of convertArguments(arguments_)) {
       const [file, regex] = pair;
       this.assertFile(file);
@@ -372,7 +371,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    * result.assertTextEqual('I have a yellow cat', 'I have a yellow cat');
    */
   assertTextEqual(value: string, expected: string): void {
-    const eol = string => string.replaceAll('\r\n', '\n');
+    const eol = (string: string) => string.replaceAll('\r\n', '\n');
 
     assert.equal(eol(value), eol(expected));
   }

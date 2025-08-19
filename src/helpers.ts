@@ -8,6 +8,7 @@ import type {
   BaseEnvironment,
   BaseEnvironmentOptions,
   BaseGenerator,
+  BaseGeneratorConstructor,
   BaseGeneratorOptions,
   GetGeneratorConstructor,
   InstantiateOptions,
@@ -20,11 +21,11 @@ import testContext from './test-context.js';
 import { createEnv as createEnvironment } from './default-environment.js';
 
 let dummyParentClass;
-export const setDefaultDummyParentClass = parentClass => {
+export const setDefaultDummyParentClass = (parentClass: any) => {
   dummyParentClass = parentClass;
 };
 
-const getDummyParentClass = () => {
+const getDummyParentClass = (): BaseGeneratorConstructor => {
   dummyParentClass ??= createRequire(import.meta.url)('yeoman-generator').default;
   return dummyParentClass;
 };
@@ -164,7 +165,7 @@ export class YeomanTest {
    * Create a simple, dummy generator
    */
   createDummyGenerator<GenParameter extends BaseGenerator = DefaultGeneratorApi>(
-    Generator: GetGeneratorConstructor<GenParameter> = getDummyParentClass(),
+    Generator: GetGeneratorConstructor<GenParameter> = getDummyParentClass() as GetGeneratorConstructor<GenParameter>,
     contents: Record<string, (...arguments_: any[]) => void> = {
       test(this: any) {
         this.shouldRun = true;

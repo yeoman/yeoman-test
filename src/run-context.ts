@@ -355,8 +355,8 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     // Add options as both kebab and camel case. This is to stay backward compatibles with
     // the switch we made to meow for options parsing.
     for (const key of Object.keys(options)) {
-      options[camelCase(key)] = options[key];
-      options[kebabCase(key)] = options[key];
+      (options as any)[camelCase(key)] = (options as any)[key];
+      (options as any)[kebabCase(key)] = (options as any)[key];
     }
 
     this.options = { ...this.options, ...options };
@@ -421,9 +421,9 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
 
   withSpawnMock<StubType = ReturnType<typeof mock.fn>>(
     options?:
-      | ((...arguments_) => any)
+      | ((...arguments_: any[]) => any)
       | {
-          stub?: (...arguments_) => any;
+          stub?: (...arguments_: any[]) => any;
           registerNodeMockDefaults?: boolean;
           callback?: ({ stub, implementation }: { stub: StubType; implementation: any }) => void | Promise<void>;
         },
@@ -433,12 +433,12 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     }
 
     const registerNodeMockDefaults = typeof options === 'function' ? false : (options?.registerNodeMockDefaults ?? true);
-    let implementation;
+    let implementation: any;
     if (registerNodeMockDefaults) {
       const defaultChild = { stdout: { on() {} }, stderr: { on() {} } };
       const defaultReturn = { exitCode: 0, stdout: '', stderr: '' };
 
-      implementation = (...arguments_) => {
+      implementation = (...arguments_: any[]) => {
         const [methodName] = arguments_;
         if (methodName === 'spawnCommand' || methodName === 'spawn') {
           return Object.assign(Promise.resolve({ ...defaultReturn }), defaultChild);
@@ -449,7 +449,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       };
     }
 
-    const stub = typeof options === 'function' ? options : (options?.stub ?? mock.fn(() => {}, implementation));
+    const stub: StubType = typeof options === 'function' ? options : ((options?.stub ?? mock.fn(() => {}, implementation)) as any);
     const callback = typeof options === 'function' ? undefined : options?.callback;
 
     if (callback) {
@@ -461,9 +461,9 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     this.spawnStub = stub;
     return this.onEnvironment(environment => {
       environment.on('compose', (_namespace, generator) => {
-        const createCallback = method =>
-          function (this: any, ...arguments_) {
-            return stub.call(this, method, ...arguments_);
+        const createCallback = (method: string) =>
+          function (this: any, ...arguments_: any[]) {
+            return (stub as (...args: any[]) => void).call(this, method, ...arguments_);
           };
 
         generator.spawnCommand = createCallback('spawnCommand');
@@ -682,13 +682,13 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     await this.prepare();
 
     const { askedQuestions, adapterOptions } = this;
-    const promptCallback: DummyPromptCallback = function (this, answer: any, options) {
+    const promptCallback: DummyPromptCallback = function (answer: any, options) {
       const { question } = options;
       if (question.name) {
         askedQuestions.push({ name: question.name, answer });
       }
 
-      return adapterOptions?.callback ? adapterOptions.callback.call(this, answer, options) : answer;
+      return adapterOptions?.callback ? adapterOptions.callback(answer, options) : answer;
     };
 
     const testEnvironment = await this.helpers.createTestEnv(this.envOptions.createEnv, {
