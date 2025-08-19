@@ -10,7 +10,7 @@ class TestContext {
   runResult?: RunResult;
   private runContext?: RunContext<any>;
 
-  startNewContext(runContext?, autoCleanup = true) {
+  startNewContext(runContext?: RunContext<any>, autoCleanup = true) {
     if (this.beforeCwd !== process.cwd()) {
       if (this.autoCleanup) {
         this.runContext?.cleanupTemporaryDir();

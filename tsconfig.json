@@ -23,7 +23,6 @@
     "allowJs": true,
 
     /* Type Checking */
-    "strict": true /* Enable all strict type-checking options. */,
-    "noImplicitAny": false
+    "strict": true /* Enable all strict type-checking options. */
   }
 }
