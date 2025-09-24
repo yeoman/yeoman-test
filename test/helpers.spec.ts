@@ -22,15 +22,16 @@ const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const { resolve, join } = path;
-const environment = await createEnvironment({ adapter: new TestAdapter() });
 
 describe('yeoman-test', () => {
   let StubGenerator;
+  let environment: ReturnType<typeof createEnvironment>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     process.chdir(join(__dirname, './fixtures'));
 
     StubGenerator = class extends Generator {};
+    environment = await createEnvironment({ adapter: new TestAdapter() });
   });
 
   it.skipIf(major < 22 || (major == 22 && minor < 12))('yeoman-test should allow to be required', () => {
