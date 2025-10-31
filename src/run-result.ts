@@ -384,7 +384,11 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
   assertObjectContent(object: Record<string, unknown>, content: Record<string, any>): void {
     for (const key of Object.keys(content)) {
       if (isObject(content[key])) {
-        this.assertObjectContent(object[key] as Record<string, unknown>, content[key]);
+        const actual = object[key] as Record<string, unknown>;
+        if (actual === undefined) {
+          assert.fail(`Key ${key} is undefined`);
+        }
+        this.assertObjectContent(actual, content[key]);
         continue;
       }
 

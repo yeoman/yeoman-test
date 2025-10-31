@@ -193,6 +193,20 @@ describe('run-result-assertions', () => {
           );
         });
 
+        it('fails on missing keys', () => {
+          assert.throws(
+            yoAssert.assertObjectContent.bind(
+              yoAssert,
+              {},
+              {
+                a: {
+                  b: 'foo',
+                },
+              },
+            ),
+          );
+        });
+
         it('pass if object contains nested objects and arrays', () => {
           assert.doesNotThrow(
             yoAssert.assertObjectContent.bind(
