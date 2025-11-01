@@ -382,17 +382,17 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    * @param content  An object of key/values the object should contains
    */
   assertObjectContent(object: Record<string, unknown>, content: Record<string, any>): void {
-    for (const key of Object.keys(content)) {
-      if (isObject(content[key])) {
-        const actual = object[key] as Record<string, unknown>;
+    for (const [key, value] of Object.entries(content)) {
+      const actual = object[key];
+      if (isObject(value)) {
         if (actual === undefined) {
           assert.fail(`Key ${key} is undefined`);
         }
-        this.assertObjectContent(actual, content[key]);
+        this.assertObjectContent(actual as Record<string, unknown>, value);
         continue;
       }
 
-      assert.equal(object[key], content[key]);
+      assert.equal(actual, value);
     }
   }
 
@@ -403,13 +403,16 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    */
 
   assertNoObjectContent(object: Record<string, unknown>, content: Record<string, any>): void {
-    for (const key of Object.keys(content)) {
-      if (isObject(content[key])) {
-        this.assertNoObjectContent(object[key] as Record<string, unknown>, content[key]);
+    for (const [key, value] of Object.entries(content)) {
+      const actual = object[key];
+      if (isObject(value)) {
+        if (actual !== undefined) {
+          this.assertNoObjectContent(actual as Record<string, unknown>, value);
+        }
         continue;
       }
 
-      assert.notEqual(object[key], content[key]);
+      assert.notEqual(actual, value);
     }
   }
 
