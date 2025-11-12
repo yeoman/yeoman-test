@@ -93,8 +93,8 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
   private readonly onEnvironmentCallbacks: Array<(this: this, environment: DefaultEnvironmentApi) => any> = [];
 
   private readonly inDirCallbacks: any[] = [];
-  private readonly Generator?: string | GetGeneratorConstructor<GeneratorType>;
-  private readonly helpers: YeomanTest;
+  protected readonly Generator?: string | GetGeneratorConstructor<GeneratorType>;
+  protected readonly helpers: YeomanTest;
   private readonly temporaryDir = path.join(tempDirectory, crypto.randomBytes(20).toString('hex'));
 
   private oldCwd?: string;
