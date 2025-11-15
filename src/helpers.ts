@@ -164,14 +164,14 @@ export class YeomanTest {
   /**
    * Create a simple, dummy generator
    */
-  createDummyGenerator<GenParameter extends BaseGenerator = DefaultGeneratorApi>(
-    Generator: GetGeneratorConstructor<GenParameter> = getDummyParentClass() as GetGeneratorConstructor<GenParameter>,
+  createDummyGenerator<const GenParameter extends new (...args: any[]) => BaseGenerator = BaseGeneratorConstructor>(
+    Generator: GenParameter = getDummyParentClass() as GenParameter,
     contents: Record<string, (...arguments_: any[]) => void> = {
       test(this: any) {
         this.shouldRun = true;
       },
     },
-  ): new (...arguments_: any[]) => GenParameter {
+  ): GenParameter {
     class DummyGenerator extends Generator {
       constructor(...arguments_: any[]) {
         const optIndex = Array.isArray(arguments_[0]) ? 1 : 0;
@@ -191,7 +191,7 @@ export class YeomanTest {
       });
     }
 
-    return DummyGenerator as any;
+    return DummyGenerator;
   }
 
   /**
