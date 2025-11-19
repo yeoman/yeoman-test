@@ -97,7 +97,7 @@ describe('yeoman-test', () => {
         respuesta: null,
       });
 
-      return generator.prompt([{ name: 'respuesta', message: 'foo', type: 'list', default: 'bar' }]).then(answers => {
+      return generator.prompt([{ name: 'respuesta', message: 'foo', type: 'select', default: 'bar' }]).then(answers => {
         assert.equal(answers.respuesta, null);
       });
     });
