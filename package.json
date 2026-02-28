@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "lodash-es": "^4.17.23",
-    "mem-fs-editor": "^11.1.4",
+    "mem-fs-editor": "^12.0.2",
     "signal-exit": "^4.1.0",
     "type-fest": "^5.4.4"
   },
