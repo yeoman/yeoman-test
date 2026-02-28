@@ -10,6 +10,11 @@ import type { DefaultEnvironmentApi } from '../types/type-helpers.js';
 import { type RunContextSettings } from './run-context.js';
 import { type YeomanTest } from './helpers.js';
 import { type AskedQuestions } from './adapter.js';
+import { ValueOf } from 'type-fest';
+
+type MemFsEditorDumpFile = ValueOf<ReturnType<MemFsEditor['dump']>>;
+
+type Optionalize<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 const isObject = (object: any) => typeof object === 'object' && object !== null && object !== undefined;
 
@@ -134,7 +139,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    * Return an object with fs changes.
    * @param {Function} filter - parameter forwarded to mem-fs-editor#dump
    */
-  getSnapshot(filter?: Parameters<MemFsEditor['dump']>[1]): Record<string, { contents: string; stateCleared: string }> {
+  getSnapshot(filter?: Parameters<MemFsEditor['dump']>[1]): Record<string, MemFsEditorDumpFile> {
     return this.fs.dump(this.cwd, filter);
   }
 
@@ -142,8 +147,8 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    * Return an object with filenames with state.
    * @param {Function} filter - parameter forwarded to mem-fs-editor#dump
    */
-  getStateSnapshot(filter?: Parameters<MemFsEditor['dump']>[1]): Record<string, { stateCleared?: string; state?: string }> {
-    const snapshot: Record<string, { contents?: string; stateCleared?: string; state?: string }> = this.getSnapshot(filter);
+  getStateSnapshot(filter?: Parameters<MemFsEditor['dump']>[1]): Record<string, Omit<MemFsEditorDumpFile, 'contents'>> {
+    const snapshot: Record<string, Optionalize<MemFsEditorDumpFile, 'contents'>> = this.getSnapshot(filter);
     for (const dump of Object.values(snapshot)) {
       delete dump.contents;
     }
