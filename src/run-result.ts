@@ -299,7 +299,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
       let match = false;
       match = typeof regex === 'string' ? body.includes(regex) : regex.test(body);
 
-      assert(match, `${file} did not match '${regex}'. Contained:\n\n${body}`);
+      assert.ok(match, `${file} did not match '${regex}'. Contained:\n\n${body}`);
     }
   }
 

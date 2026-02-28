@@ -176,7 +176,7 @@ describe('yeoman-test', () => {
         'return a RunContext object',
         promisify(done => {
           const context = helpers.run(helpers.createDummyGenerator());
-          assert(context instanceof RunContext);
+          assert.ok(context instanceof RunContext);
           context.on('end', done);
         }),
       );
@@ -189,7 +189,7 @@ describe('yeoman-test', () => {
           const context = helpers.run('simple:app').withEnvironment(environment => {
             environment.register(require.resolve('./fixtures/generator-simple/app'));
           });
-          assert(context instanceof RunContext);
+          assert.ok(context instanceof RunContext);
           context.on('end', done);
         }),
       );
@@ -382,8 +382,8 @@ describe('yeoman-test', () => {
           .run(helpers.createDummyGenerator())
           .withFiles({ 'foo.txt': 'foo', 'foo.json': { foo: 'bar' } })
           .commitFiles();
-        assert(existsSync(resolve(runResult.cwd, 'foo.txt')));
-        assert(existsSync(resolve(runResult.cwd, 'foo.json')));
+        assert.ok(existsSync(resolve(runResult.cwd, 'foo.txt')));
+        assert.ok(existsSync(resolve(runResult.cwd, 'foo.json')));
       });
     });
 

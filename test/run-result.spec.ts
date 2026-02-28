@@ -281,9 +281,9 @@ describe('run-result', () => {
 
     result.assertGeneratorComposedOnce(mockedNamespace);
     result.assertGeneratorComposed(mockedNamespace);
-    assert(result.getGeneratorComposeCount(mockedNamespace) === 1);
+    assert.ok(result.getGeneratorComposeCount(mockedNamespace) === 1);
     assert.equal(result.getComposedGenerators().length, 1);
-    assert(result.getComposedGenerators()[0] === mockedNamespace);
+    assert.ok(result.getComposedGenerators()[0] === mockedNamespace);
 
     result.assertGeneratorNotComposed('another:gen');
   });

@@ -336,7 +336,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    */
   withArguments(arguments_: string | string[]): this {
     const argumentsArray = typeof arguments_ === 'string' ? arguments_.split(' ') : arguments_;
-    assert(Array.isArray(argumentsArray), 'args should be either a string separated by spaces or an array');
+    assert.ok(Array.isArray(argumentsArray), 'args should be either a string separated by spaces or an array');
     this.args = [...this.args, ...argumentsArray];
     return this;
   }
@@ -407,7 +407,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    */
 
   withGenerators(dependencies: Dependency[]): this {
-    assert(Array.isArray(dependencies), 'dependencies should be an array');
+    assert.ok(Array.isArray(dependencies), 'dependencies should be an array');
     return this.onEnvironment(async environment => {
       for (const dependency of dependencies) {
         if (typeof dependency === 'string') {
@@ -497,7 +497,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    */
 
   withMockedGenerators(namespaces: string[]): this {
-    assert(Array.isArray(namespaces), 'namespaces should be an array');
+    assert.ok(Array.isArray(namespaces), 'namespaces should be an array');
     const mockedGenerators = Object.fromEntries(namespaces.map(namespace => [namespace, this.mockedGeneratorFactory()]));
     const dependencies: Dependency[] = Object.entries(mockedGenerators).map(([namespace, mock]) => [mock, { namespace }]);
     Object.assign(this.mockedGenerators, mockedGenerators);
@@ -509,7 +509,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * @param localConfig - should look just like if called config.getAll()
    */
   withLocalConfig(localConfig: any): this {
-    assert(typeof localConfig === 'object', 'config should be an object');
+    assert.ok(typeof localConfig === 'object', 'config should be an object');
     return this.onGenerator(generator => (generator as any).config.defaults(localConfig));
   }
 
