@@ -83,7 +83,7 @@ describe('RunContext', () => {
 
         context
           .on('ready', async () => {
-            assert(await context.env.get('simple:app'));
+            assert.ok(await context.env.get('simple:app'));
           })
           .on('end', done);
       }),
@@ -118,7 +118,7 @@ describe('RunContext', () => {
       'accept generator constructor parameter (and assign gen:test as namespace)',
       promisify(done => {
         context.on('ready', async () => {
-          assert(await context.env.get('gen:test'));
+          assert.ok(await context.env.get('gen:test'));
           done();
         });
       }),
@@ -176,7 +176,7 @@ describe('RunContext', () => {
         context.cleanTestDirectory();
         assert.fail();
       } catch (error) {
-        assert(error.message.includes('Cleanup test dir called with false tmpdir option.'));
+        assert.ok(error.message.includes('Cleanup test dir called with false tmpdir option.'));
       }
     });
 
@@ -374,12 +374,12 @@ describe('RunContext', () => {
     );
 
     it('throws error at additional calls with dirPath', () => {
-      assert(context.inDir(temporaryDirectory));
+      assert.ok(context.inDir(temporaryDirectory));
       try {
         context.inDir(temporaryDirectory);
         assert.fail();
       } catch (error) {
-        assert(error.message.includes('Test directory has already been set.'));
+        assert.ok(error.message.includes('Test directory has already been set.'));
       }
     });
   });
@@ -455,7 +455,7 @@ describe('RunContext', () => {
     });
 
     it('should set inDirSet & targetDirectory', () => {
-      assert(!context.targetDirectory);
+      assert.ok(!context.targetDirectory);
       context.cd(temporaryDirectory);
       assert.equal(context.targetDirectory, temporaryDirectory);
     });
@@ -472,7 +472,7 @@ describe('RunContext', () => {
         context.cd(path.join(temporaryDirectory, 'NOT_EXIST'));
         assert.fail();
       } catch (error) {
-        assert(error.message.includes(temporaryDirectory));
+        assert.ok(error.message.includes(temporaryDirectory));
       }
     });
   });
@@ -494,7 +494,7 @@ describe('RunContext', () => {
       promisify(done => {
         const callback = mock.fn(function (dir) {
           assert.equal(this, context);
-          assert(dir.includes(tempDirectory));
+          assert.ok(dir.includes(tempDirectory));
         });
 
         context.inTmpDir(callback).on('end', done);
@@ -735,8 +735,8 @@ describe('RunContext', () => {
   describe('#withMockedGenerators()', () => {
     it('creates mocked generator', async () => {
       await context.withMockedGenerators(['foo:bar']).build();
-      assert(await context.env.get('foo:bar'));
-      assert(context.mockedGenerators['foo:bar']);
+      assert.ok(await context.env.get('foo:bar'));
+      assert.ok(context.mockedGenerators['foo:bar']);
     });
   });
 
@@ -745,7 +745,7 @@ describe('RunContext', () => {
       'register paths',
       promisify(done => {
         context.withGenerators([require.resolve('./fixtures/generator-simple/app')]).on('ready', async () => {
-          assert(await context.env.get('simple:app'));
+          assert.ok(await context.env.get('simple:app'));
           done();
         });
       }),
@@ -753,14 +753,14 @@ describe('RunContext', () => {
 
     it('register paths with namespaces', async () => {
       await context.withGenerators([[require.resolve('./fixtures/generator-simple/app'), { namespace: 'foo:bar' }]]).build();
-      assert(await context.env.get('foo:bar'));
+      assert.ok(await context.env.get('foo:bar'));
     });
 
     it(
       'register mocked generator',
       promisify(done => {
         context.withGenerators([[helpers.createDummyGenerator(), { namespace: 'dummy:gen' }]]).on('ready', async () => {
-          assert(await context.env.get('dummy:gen'));
+          assert.ok(await context.env.get('dummy:gen'));
           done();
         });
       }),
@@ -773,8 +773,8 @@ describe('RunContext', () => {
           .withGenerators([require.resolve('./fixtures/generator-simple/app')])
           .withGenerators([[helpers.createDummyGenerator(), { namespace: 'dummy:gen' }]])
           .on('ready', async () => {
-            assert(await context.env.get('dummy:gen'));
-            assert(await context.env.get('simple:app'));
+            assert.ok(await context.env.get('dummy:gen'));
+            assert.ok(await context.env.get('simple:app'));
             done();
           });
       }),
@@ -853,7 +853,7 @@ describe('RunContext', () => {
             return environment;
           })
           .on('ready', async () => {
-            assert(await context.env.get('simple:app'));
+            assert.ok(await context.env.get('simple:app'));
             done();
           });
       }),

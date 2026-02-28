@@ -54,12 +54,12 @@ describe('RunContext running environment', () => {
     });
 
     it('returns instanceof RunContext', () => {
-      assert(context instanceof RunContext);
+      assert.ok(context instanceof RunContext);
     });
 
     it('promises a RunResult', () => {
       return context.run().then(runResult => {
-        assert(runResult instanceof RunResult);
+        assert.ok(runResult instanceof RunResult);
       });
     });
 
@@ -77,7 +77,7 @@ describe('RunContext running environment', () => {
 
     it('passes newErrorHandler to the environment', () => {
       return context.run().then(() => {
-        assert(context.env.options.newErrorHandler);
+        assert.ok(context.env.options.newErrorHandler);
       });
     });
   });
@@ -92,7 +92,7 @@ describe('RunContext running environment', () => {
 
     it('runs the generator', () => {
       return context.run().then(() => {
-        assert(context.env.generatorTestExecuted);
+        assert.ok(context.env.generatorTestExecuted);
       });
     });
   });
@@ -115,7 +115,7 @@ describe('RunContext running environment', () => {
 
     it('runs the generator', () => {
       return context.run().then(() => {
-        assert(context.generator.shouldRun);
+        assert.ok(context.generator.shouldRun);
       });
     });
   });
@@ -136,7 +136,7 @@ describe('RunContext running environment', () => {
 
     it('runs the generator', () => {
       return context.run().then(() => {
-        assert(context.env.generatorTestExecuted);
+        assert.ok(context.env.generatorTestExecuted);
       });
     });
   });
@@ -152,14 +152,14 @@ describe('RunContext running environment', () => {
     });
 
     it('registers every generator', () => {
-      assert(context.env.get('simple:app'));
-      assert(context.env.get('simple:composing'));
-      assert(context.env.get('simple:throwing'));
+      assert.ok(context.env.get('simple:app'));
+      assert.ok(context.env.get('simple:composing'));
+      assert.ok(context.env.get('simple:throwing'));
     });
 
     it('runs the generator', () => {
       return context.run().then(() => {
-        assert(context.env.generatorTestExecuted);
+        assert.ok(context.env.generatorTestExecuted);
       });
     });
   });
@@ -181,14 +181,14 @@ describe('RunContext running environment', () => {
       });
 
       it('registers every generator', () => {
-        assert(context.env.get('simple:app'));
-        assert(context.env.get('simple:composing'));
-        assert(context.env.get('simple:throwing'));
+        assert.ok(context.env.get('simple:app'));
+        assert.ok(context.env.get('simple:composing'));
+        assert.ok(context.env.get('simple:throwing'));
       });
 
       it('runs the generator', () => {
         return context.run().then(() => {
-          assert(context.env.generatorTestExecuted);
+          assert.ok(context.env.generatorTestExecuted);
         });
       });
     });
@@ -205,7 +205,7 @@ describe('RunContext running environment', () => {
         return context.run().then(
           () => assert.fail(),
           error => {
-            assert(/throwing error/.test(error.message));
+            assert.ok(/throwing error/.test(error.message));
           },
         );
       });
@@ -228,7 +228,7 @@ describe('RunContext running environment', () => {
           .withArguments('simple:app')
           .run()
           .then(() => {
-            assert(context.env.generatorTestExecuted);
+            assert.ok(context.env.generatorTestExecuted);
           });
       });
 
@@ -239,7 +239,7 @@ describe('RunContext running environment', () => {
           .then(
             () => assert.fail(),
             error => {
-              assert(/throwing error/.test(error.message));
+              assert.ok(/throwing error/.test(error.message));
             },
           );
       });

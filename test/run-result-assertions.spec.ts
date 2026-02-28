@@ -15,13 +15,13 @@ describe('run-result-assertions', () => {
       description: 'using memory fs',
       options: { memFs },
       verify(runResult) {
-        assert(runResult.fs);
+        assert.ok(runResult.fs);
       },
     },
     {
       description: 'using node fs',
       verify(runResult) {
-        assert(!runResult.fs);
+        assert.ok(!runResult.fs);
       },
     },
   ]) {
