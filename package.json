@@ -7,7 +7,10 @@
     "unit test"
   ],
   "homepage": "http://yeoman.io/authoring/testing.html",
-  "repository": "yeoman/yeoman-test",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yeoman/yeoman-test.git"
+  },
   "license": "MIT",
   "author": "The Yeoman Team",
   "type": "module",
