@@ -2,10 +2,9 @@
 
 ## [11.4.2](https://github.com/yeoman/yeoman-test/compare/v11.4.1...v11.4.2) (2026-04-30)
 
-
 ### Bug Fixes
 
-* always convert file:// url to file path ([#304](https://github.com/yeoman/yeoman-test/issues/304)) ([c405978](https://github.com/yeoman/yeoman-test/commit/c4059783718beb300af0e979a9c0d1baa8ff5d6f))
+- always convert file:// url to file path ([#304](https://github.com/yeoman/yeoman-test/issues/304)) ([c405978](https://github.com/yeoman/yeoman-test/commit/c4059783718beb300af0e979a9c0d1baa8ff5d6f))
 
 ## [11.4.1](https://github.com/yeoman/yeoman-test/compare/v11.4.0...v11.4.1) (2026-04-30)
 
