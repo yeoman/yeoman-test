@@ -10,9 +10,9 @@ import Generator from 'yeoman-generator';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type Environment from 'yeoman-environment';
 import { createEnv as createEnvironment } from '../src/default-environment.js';
-import helpers from '../src/import.js';
 import { TestAdapter } from '../src/adapter.js';
 import RunContext from '../src/run-context.js';
+import helpers, { createHelpers } from '../src/import.js';
 
 const [major, minor] = process.versions.node.split('.').map(Number);
 
@@ -156,6 +156,30 @@ describe('yeoman-test', () => {
           assert.equal(error.message, 'yeoman-test: question notFound was asked but answer was not provided');
         },
       );
+    });
+
+    describe('.runDefault()', () => {
+      it('throws if no default generator is configured', () => {
+        const testHelpers = createHelpers({});
+        assert.throws(() => {
+          testHelpers.runDefault();
+        }, /No default generator defined/);
+      });
+
+      it('runs default generator', () => {
+        const testHelpers = createHelpers({ defaultGenerator: '/tmp/generator.js' });
+        const settings = { namespace: 'dummy' };
+        const environmentOptions = { cwd: '/tmp' };
+        const runResult = {} as RunContext;
+        const mockedRun = mock.method(testHelpers, 'run', () => runResult);
+
+        const result = testHelpers.runDefault(settings, environmentOptions as any);
+
+        assert.strictEqual(result, runResult);
+        assert.strictEqual(mockedRun.mock.callCount(), 1);
+        assert.deepStrictEqual(mockedRun.mock.calls[0].arguments, ['/tmp/generator.js', settings, environmentOptions]);
+        mockedRun.mock.restore();
+      });
     });
 
     it('keep prompt method asynchronous', () => {
