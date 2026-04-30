@@ -1,4 +1,5 @@
 import process from 'node:process';
+import type { BaseGenerator } from '@yeoman/types';
 import { onExit } from 'signal-exit';
 import type RunContext from './run-context.js';
 import type RunResult from './run-result.js';
@@ -52,3 +53,5 @@ const handler2: ProxyHandler<RunResult> = {
  * Provides a proxy for last executed context result.
  */
 export const result: RunResult = new Proxy({} as any, handler2);
+
+export const typedResult = <GeneratorType extends BaseGenerator>(): RunResult<GeneratorType> => result as RunResult<GeneratorType>;
