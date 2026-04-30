@@ -331,12 +331,14 @@ export class YeomanTest {
     const contextSettings = cloneDeep(this.settings ?? {});
     const generatorOptions = cloneDeep(this.generatorOptions ?? {});
     const RunContext = this.getRunContextType();
-    if (typeof GeneratorOrNamespace === 'string' && GeneratorOrNamespace.startsWith('.')) {
-      if (!this.importMeta) {
-        throw new Error('importMeta is required to resolve relative generator paths');
+    if (typeof GeneratorOrNamespace === 'string') {
+      if (GeneratorOrNamespace.startsWith('.')) {
+        if (!this.importMeta) {
+          throw new Error('importMeta is required to resolve relative generator paths');
+        }
+        GeneratorOrNamespace = this.importMeta.resolve(GeneratorOrNamespace);
       }
-      GeneratorOrNamespace = this.importMeta.resolve(GeneratorOrNamespace);
-      if (URL.canParse(GeneratorOrNamespace)) {
+      if (GeneratorOrNamespace.startsWith('file://')) {
         GeneratorOrNamespace = fileURLToPath(GeneratorOrNamespace);
       }
     }
