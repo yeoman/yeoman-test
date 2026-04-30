@@ -362,7 +362,7 @@ const defaultHelpers = new YeomanTest();
 
 export default defaultHelpers;
 
-export const createHelpers = (options: any) => {
+export const createHelpers = (options: Partial<YeomanTest>) => {
   const helpers = new YeomanTest();
   Object.assign(helpers, options);
   return helpers;
