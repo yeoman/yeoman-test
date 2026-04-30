@@ -48,6 +48,7 @@ export class YeomanTest {
   generatorOptions?: BaseGeneratorOptions;
   adapterOptions?: Omit<TestAdapterOptions, 'mockedAnswers'>;
   defaultGenerator?: string;
+  importMeta?: Pick<ImportMeta, 'resolve'>;
 
   /**
    * @deprecated
@@ -318,6 +319,12 @@ export class YeomanTest {
     const contextSettings = cloneDeep(this.settings ?? {});
     const generatorOptions = cloneDeep(this.generatorOptions ?? {});
     const RunContext = this.getRunContextType();
+    if (typeof GeneratorOrNamespace === 'string' && GeneratorOrNamespace.startsWith('.')) {
+      if (!this.importMeta) {
+        throw new Error('importMeta is required to resolve relative generator paths');
+      }
+      GeneratorOrNamespace = this.importMeta.resolve(GeneratorOrNamespace);
+    }
     const runContext = new RunContext<GeneratorType>(
       GeneratorOrNamespace,
       { ...contextSettings, ...settings },
