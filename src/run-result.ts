@@ -2,15 +2,15 @@ import assert from 'node:assert';
 import { existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import { type mock } from 'node:test';
+import type { mock } from 'node:test';
 import type { Store } from 'mem-fs';
 import { type MemFsEditor, type MemFsEditorFile, create as createMemFsEditor } from 'mem-fs-editor';
 import type { BaseEnvironmentOptions, BaseGenerator, GetGeneratorConstructor } from '@yeoman/types';
 import type { DefaultEnvironmentApi } from '../types/type-helpers.js';
-import { type RunContextSettings } from './run-context.js';
-import { type YeomanTest } from './helpers.js';
-import { type AskedQuestions } from './adapter.js';
-import { ValueOf } from 'type-fest';
+import type { RunContextSettings } from './run-context.js';
+import type { YeomanTest } from './helpers.js';
+import type { AskedQuestions } from './adapter.js';
+import type { ValueOf } from 'type-fest';
 
 type MemFsEditorDumpFile = ValueOf<ReturnType<MemFsEditor['dump']>>;
 
