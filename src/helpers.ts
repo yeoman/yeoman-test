@@ -14,11 +14,22 @@ import type {
   InstantiateOptions,
   PromptAnswers,
 } from '@yeoman/types';
+import type { IsAny } from 'type-fest';
 import type { DefaultEnvironmentApi, DefaultGeneratorApi } from '../types/type-helpers.js';
 import { type DummyPromptOptions, TestAdapter, type TestAdapterOptions } from './adapter.js';
 import RunContext, { BasicRunContext, type RunContextSettings } from './run-context.js';
 import testContext from './test-context.js';
 import { createEnv as createEnvironment } from './default-environment.js';
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+type YeomanGeneratorOptions = import('yeoman-generator').BaseOptions;
+type GeneratorOptions = IsAny<YeomanGeneratorOptions> extends true ? BaseGeneratorOptions : YeomanGeneratorOptions;
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+type YeomanEnvironmentOptions = import('yeoman-environment').EnvironmentOptions;
+type EnvironmentOptions = IsAny<YeomanEnvironmentOptions> extends true ? BaseEnvironmentOptions : YeomanEnvironmentOptions;
 
 let dummyParentClass;
 export const setDefaultDummyParentClass = (parentClass: any) => {
@@ -30,7 +41,7 @@ const getDummyParentClass = (): BaseGeneratorConstructor => {
   return dummyParentClass;
 };
 
-export type CreateEnv = (options: BaseEnvironmentOptions) => Promise<BaseEnvironment>;
+export type CreateEnv = (options: EnvironmentOptions) => Promise<BaseEnvironment>;
 
 /**
  * Dependencies can be path (autodiscovery) or an array [<generator>, <name>]
@@ -44,8 +55,8 @@ export type Dependency = string | Parameters<DefaultEnvironmentApi['register']>;
 
 export class YeomanTest {
   settings?: RunContextSettings;
-  environmentOptions?: BaseEnvironmentOptions;
-  generatorOptions?: BaseGeneratorOptions;
+  environmentOptions?: EnvironmentOptions;
+  generatorOptions?: GeneratorOptions;
   adapterOptions?: Omit<TestAdapterOptions, 'mockedAnswers'>;
   defaultGenerator?: string;
   importMeta?: Pick<ImportMeta, 'resolve'>;
@@ -251,7 +262,7 @@ export class YeomanTest {
    * });
    */
 
-  async createEnv(options: BaseEnvironmentOptions): Promise<DefaultEnvironmentApi> {
+  async createEnv(options: EnvironmentOptions): Promise<DefaultEnvironmentApi> {
     return createEnvironment(options);
   }
 
@@ -263,7 +274,7 @@ export class YeomanTest {
    * const env = createTestEnv(require('yeoman-environment').createEnv);
    */
 
-  async createTestEnv(environmentContructor: CreateEnv = this.createEnv, options: BaseEnvironmentOptions = { localConfigOnly: true }) {
+  async createTestEnv(environmentContructor: CreateEnv = this.createEnv, options: EnvironmentOptions = { localConfigOnly: true }) {
     let environmentOptions = cloneDeep(this.environmentOptions ?? {});
     if (typeof options === 'boolean') {
       environmentOptions = {
@@ -314,7 +325,7 @@ export class YeomanTest {
   run<GeneratorType extends BaseGenerator = DefaultGeneratorApi>(
     GeneratorOrNamespace: string | GetGeneratorConstructor<GeneratorType>,
     settings?: RunContextSettings,
-    environmentOptions?: BaseEnvironmentOptions,
+    environmentOptions?: EnvironmentOptions,
   ): RunContext<GeneratorType> {
     const contextSettings = cloneDeep(this.settings ?? {});
     const generatorOptions = cloneDeep(this.generatorOptions ?? {});
@@ -343,7 +354,7 @@ export class YeomanTest {
    */
   runDefault<GeneratorType extends BaseGenerator = BaseGenerator>(
     settings?: RunContextSettings,
-    environmentOptions?: BaseEnvironmentOptions,
+    environmentOptions?: EnvironmentOptions,
   ): RunContext<GeneratorType> {
     if (!this.defaultGenerator) {
       throw new Error('No default generator defined');
@@ -360,7 +371,7 @@ export class YeomanTest {
   create<GeneratorType extends BaseGenerator = DefaultGeneratorApi>(
     GeneratorOrNamespace: string | GetGeneratorConstructor<GeneratorType>,
     settings?: RunContextSettings,
-    environmentOptions?: BaseEnvironmentOptions,
+    environmentOptions?: EnvironmentOptions,
   ) {
     return this.run<GeneratorType>(GeneratorOrNamespace, settings, environmentOptions);
   }
