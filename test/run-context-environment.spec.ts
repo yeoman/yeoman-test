@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { createRequire } from 'node:module';
 import { mock } from 'node:test';
-import { type LookupOptions } from '@yeoman/types';
+import type { LookupOptions } from '@yeoman/types';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, it } from 'vitest';
 import helpers from '../src/import.js';
 import RunContext from '../src/run-context.js';
