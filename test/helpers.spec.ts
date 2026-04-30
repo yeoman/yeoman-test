@@ -255,6 +255,16 @@ describe('yeoman-test', () => {
       });
     });
 
+    describe('with a url', () => {
+      it('converts the url to a file path', () => {
+        const context = helpers.run(pathToFileURL('/resolved/./app/index.js').toString());
+
+        assert.ok(context instanceof RunContext);
+        // @ts-expect-error - Generator is protected
+        assert.strictEqual(context.Generator, fileURLToPath(pathToFileURL('/resolved/./app/index.js').toString()));
+      });
+    });
+
     it('pass settings to RunContext', () => {
       const runContext = helpers.run(helpers.createDummyGenerator(), {
         namespace: 'foo',
