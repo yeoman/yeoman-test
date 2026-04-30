@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import path, { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import process from 'node:process';
 import { createRequire } from 'node:module';
 import { existsSync } from 'node:fs';
@@ -238,6 +238,20 @@ describe('yeoman-test', () => {
         assert.deepStrictEqual(resolveMock.mock.calls[0].arguments, ['./app/index.js']);
         // @ts-expect-error - Generator is protected
         assert.strictEqual(context.Generator, '/resolved/./app/index.js');
+      });
+
+      it('resolves relative generator path with importMeta.resolve and url', () => {
+        const resolveMock = mock.fn((id: string) => pathToFileURL(`/resolved/${id}`).toString());
+        const testHelpers = createHelpers({
+          importMeta: { resolve: resolveMock } as Pick<ImportMeta, 'resolve'>,
+        });
+
+        const context = testHelpers.run('./app/index.js');
+
+        assert.strictEqual(resolveMock.mock.callCount(), 1);
+        assert.deepStrictEqual(resolveMock.mock.calls[0].arguments, ['./app/index.js']);
+        // @ts-expect-error - Generator is protected
+        assert.strictEqual(context.Generator, fileURLToPath(pathToFileURL('/resolved/./app/index.js').toString()));
       });
     });
 

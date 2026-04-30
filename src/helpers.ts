@@ -3,6 +3,7 @@ import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 import process from 'node:process';
 import { mock } from 'node:test';
+import { fileURLToPath } from 'node:url';
 import { cloneDeep } from 'lodash-es';
 import type {
   BaseEnvironment,
@@ -324,6 +325,9 @@ export class YeomanTest {
         throw new Error('importMeta is required to resolve relative generator paths');
       }
       GeneratorOrNamespace = this.importMeta.resolve(GeneratorOrNamespace);
+      if (URL.canParse(GeneratorOrNamespace)) {
+        GeneratorOrNamespace = fileURLToPath(GeneratorOrNamespace);
+      }
     }
     const runContext = new RunContext<GeneratorType>(
       GeneratorOrNamespace,
