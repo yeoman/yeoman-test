@@ -1,5 +1,14 @@
 # Changelog
 
+## [11.4.1](https://github.com/yeoman/yeoman-test/compare/v11.4.0...v11.4.1) (2026-04-30)
+
+
+### Bug Fixes
+
+* convert url to filepath if needed ([#300](https://github.com/yeoman/yeoman-test/issues/300)) ([c14efcb](https://github.com/yeoman/yeoman-test/commit/c14efcbfabab47b36e594d1b05342bc7c9f790b5))
+* enable some tsconfig options ([#302](https://github.com/yeoman/yeoman-test/issues/302)) ([5393d08](https://github.com/yeoman/yeoman-test/commit/5393d0820a85d17897d16e13955486753158fb66))
+* try to use yeoman-environment and yeoman-generator types ([#301](https://github.com/yeoman/yeoman-test/issues/301)) ([27015c2](https://github.com/yeoman/yeoman-test/commit/27015c28396f29b0eb4609252d6c87d65eba686f))
+
 ## [11.4.0](https://github.com/yeoman/yeoman-test/compare/v11.3.1...v11.4.0) (2026-04-30)
 
 ### Features
