@@ -219,6 +219,28 @@ describe('yeoman-test', () => {
       );
     });
 
+    describe('with a relative path', () => {
+      it('throws if generator is relative and importMeta is missing', () => {
+        assert.throws(() => {
+          helpers.run('./app/index.js');
+        }, /importMeta is required to resolve relative generator paths/);
+      });
+
+      it('resolves relative generator path with importMeta.resolve', () => {
+        const resolveMock = mock.fn((id: string) => `/resolved/${id}`);
+        const testHelpers = createHelpers({
+          importMeta: { resolve: resolveMock } as Pick<ImportMeta, 'resolve'>,
+        });
+
+        const context = testHelpers.run('./app/index.js');
+
+        assert.strictEqual(resolveMock.mock.callCount(), 1);
+        assert.deepStrictEqual(resolveMock.mock.calls[0].arguments, ['./app/index.js']);
+        // @ts-expect-error - Generator is protected
+        assert.strictEqual(context.Generator, '/resolved/./app/index.js');
+      });
+    });
+
     it('pass settings to RunContext', () => {
       const runContext = helpers.run(helpers.createDummyGenerator(), {
         namespace: 'foo',
