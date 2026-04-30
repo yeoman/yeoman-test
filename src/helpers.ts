@@ -47,6 +47,7 @@ export class YeomanTest {
   environmentOptions?: BaseEnvironmentOptions;
   generatorOptions?: BaseGeneratorOptions;
   adapterOptions?: Omit<TestAdapterOptions, 'mockedAnswers'>;
+  defaultGenerator?: string;
 
   /**
    * @deprecated
@@ -328,6 +329,19 @@ export class YeomanTest {
     }
 
     return runContext;
+  }
+
+  /**
+   * Run the default generator
+   */
+  runDefault<GeneratorType extends BaseGenerator = BaseGenerator>(
+    settings?: RunContextSettings,
+    environmentOptions?: BaseEnvironmentOptions,
+  ): RunContext<GeneratorType> {
+    if (!this.defaultGenerator) {
+      throw new Error('No default generator defined');
+    }
+    return this.run<GeneratorType>(this.defaultGenerator, settings, environmentOptions);
   }
 
   /**
