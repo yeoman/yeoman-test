@@ -57,7 +57,7 @@ export type Dependency = string | Parameters<DefaultEnvironmentApi['register']>;
 export class YeomanTest {
   settings?: RunContextSettings;
   environmentOptions?: EnvironmentOptions;
-  generatorOptions?: GeneratorOptions;
+  generatorOptions?: Partial<Omit<GeneratorOptions, 'env' | 'resolved' | 'namespace'>>;
   adapterOptions?: Omit<TestAdapterOptions, 'mockedAnswers'>;
   defaultGenerator?: string;
   importMeta?: Pick<ImportMeta, 'resolve'>;
@@ -318,6 +318,15 @@ export class YeomanTest {
     return RunContext;
   }
 
+  createRunContext<GeneratorType extends BaseGenerator = DefaultGeneratorApi>(
+    GeneratorOrNamespace: string | GetGeneratorConstructor<GeneratorType>,
+    settings?: RunContextSettings,
+    environmentOptions?: EnvironmentOptions,
+  ): RunContext<GeneratorType> {
+    const RunContext = this.getRunContextType();
+    return new RunContext<GeneratorType>(GeneratorOrNamespace, settings, environmentOptions, this);
+  }
+
   /**
    * Run the provided Generator
    * @param GeneratorOrNamespace - Generator constructor or namespace
@@ -327,10 +336,9 @@ export class YeomanTest {
     GeneratorOrNamespace: string | GetGeneratorConstructor<GeneratorType>,
     settings?: RunContextSettings,
     environmentOptions?: EnvironmentOptions,
-  ): RunContext<GeneratorType> {
+  ): ReturnType<typeof this.createRunContext<GeneratorType>> {
     const contextSettings = cloneDeep(this.settings ?? {});
     const generatorOptions = cloneDeep(this.generatorOptions ?? {});
-    const RunContext = this.getRunContextType();
     if (typeof GeneratorOrNamespace === 'string') {
       if (GeneratorOrNamespace.startsWith('.')) {
         if (!this.importMeta) {
@@ -342,11 +350,11 @@ export class YeomanTest {
         GeneratorOrNamespace = fileURLToPath(GeneratorOrNamespace);
       }
     }
-    const runContext = new RunContext<GeneratorType>(
+
+    const runContext = this.createRunContext<GeneratorType>(
       GeneratorOrNamespace,
       { ...contextSettings, ...settings },
       environmentOptions,
-      this,
     ).withOptions(generatorOptions as any);
     if (settings?.autoCleanup !== false) {
       testContext.startNewContext(runContext);
@@ -361,7 +369,7 @@ export class YeomanTest {
   runDefault<GeneratorType extends BaseGenerator = BaseGenerator>(
     settings?: RunContextSettings,
     environmentOptions?: EnvironmentOptions,
-  ): RunContext<GeneratorType> {
+  ): ReturnType<typeof this.createRunContext<GeneratorType>> {
     if (!this.defaultGenerator) {
       throw new Error('No default generator defined');
     }
@@ -378,7 +386,7 @@ export class YeomanTest {
     GeneratorOrNamespace: string | GetGeneratorConstructor<GeneratorType>,
     settings?: RunContextSettings,
     environmentOptions?: EnvironmentOptions,
-  ) {
+  ): ReturnType<typeof this.createRunContext<GeneratorType>> {
     return this.run<GeneratorType>(GeneratorOrNamespace, settings, environmentOptions);
   }
 
