@@ -12,7 +12,7 @@ import type Environment from 'yeoman-environment';
 import { createEnv as createEnvironment } from '../src/default-environment.js';
 import { TestAdapter } from '../src/adapter.js';
 import RunContext from '../src/run-context.js';
-import helpers, { createHelpers } from '../src/import.js';
+import helpers, { YeomanTest, createHelpers } from '../src/import.js';
 
 const [major, minor] = process.versions.node.split('.').map(Number);
 
@@ -156,6 +156,14 @@ describe('yeoman-test', () => {
           assert.equal(error.message, 'yeoman-test: question notFound was asked but answer was not provided');
         },
       );
+    });
+
+    describe('createHelpers()', () => {
+      it('supports custom factory', () => {
+        class Foo extends YeomanTest {}
+        const testHelpers = createHelpers({ factory: () => new Foo() });
+        expect(testHelpers instanceof Foo).toBe(true);
+      });
     });
 
     describe('.runDefault()', () => {
