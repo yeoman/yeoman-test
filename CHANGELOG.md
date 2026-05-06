@@ -2,10 +2,9 @@
 
 ## [11.5.1](https://github.com/yeoman/yeoman-test/compare/v11.5.0...v11.5.1) (2026-05-06)
 
-
 ### Bug Fixes
 
-* fix utilities types ([#309](https://github.com/yeoman/yeoman-test/issues/309)) ([298532d](https://github.com/yeoman/yeoman-test/commit/298532dd6c3221216817744ded8923fed4b9cae6))
+- fix utilities types ([#309](https://github.com/yeoman/yeoman-test/issues/309)) ([298532d](https://github.com/yeoman/yeoman-test/commit/298532dd6c3221216817744ded8923fed4b9cae6))
 
 ## [11.5.0](https://github.com/yeoman/yeoman-test/compare/v11.4.2...v11.5.0) (2026-05-06)
 
