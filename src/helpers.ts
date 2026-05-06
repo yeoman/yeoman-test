@@ -400,8 +400,9 @@ const defaultHelpers = new YeomanTest();
 
 export default defaultHelpers;
 
-export const createHelpers = (options: Partial<YeomanTest>) => {
-  const helpers = new YeomanTest();
+export const createHelpers = <T extends YeomanTest = YeomanTest>(options: Partial<T> & { factory?: () => T }): T => {
+  const { factory = () => new YeomanTest() as T } = options;
+  const helpers = factory();
   Object.assign(helpers, options);
   return helpers;
 };
