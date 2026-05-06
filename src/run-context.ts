@@ -83,7 +83,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
   private args: string[] = [];
   private options: Partial<Omit<GetGeneratorOptions<GeneratorType>, 'env' | 'namespace' | 'resolved'>> = {};
   private answers?: any;
-  private readonly adapterOptions?: Omit<TestAdapterOptions, 'mockedAnswers'> = {};
+  private readonly adapterOptions: Omit<TestAdapterOptions, 'mockedAnswers'> = {};
   private keepFsState?: boolean;
 
   private readonly onGeneratorCallbacks: Array<(this: this, generator: GeneratorType) => any> = [];
@@ -99,7 +99,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
 
   private oldCwd?: string;
   private eventListenersSet = false;
-  private envCB: any;
+  private envCB: ((this: this, environment: DefaultEnvironmentApi) => DefaultEnvironmentApi | void) | undefined;
 
   private built = false;
   private ran = false;
@@ -287,7 +287,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * TestAdapter options.
    */
   withAdapterOptions(options: Omit<TestAdapterOptions, 'mockedAnswers'>) {
-    Object.assign(this.adapterOptions as any, options);
+    Object.assign(this.adapterOptions, options);
     return this;
   }
 
@@ -300,7 +300,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * @param {Function} [cb] - callback who'll receive the folder path as argument
    * @return {this} run context instance
    */
-  withEnvironment(callback: any) {
+  withEnvironment(callback: (this: this, environment: DefaultEnvironmentApi) => DefaultEnvironmentApi | void) {
     this.envCB = callback;
     return this;
   }
@@ -325,7 +325,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     return this.onEnvironment(async environment => {
       lookups = Array.isArray(lookups) ? lookups : [lookups];
       for (const lookup of lookups) {
-        await (environment as any).lookup(lookup);
+        await environment.lookup(lookup);
       }
     });
   }

@@ -76,7 +76,7 @@ export type RunResultOptions<GeneratorType extends BaseGenerator> = {
  */
 
 export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerator> {
-  env: any;
+  env: DefaultEnvironmentApi;
   generator: GeneratorType;
   cwd: string;
   oldCwd: string;
