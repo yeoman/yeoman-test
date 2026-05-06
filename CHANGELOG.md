@@ -2,10 +2,9 @@
 
 ## [11.5.0](https://github.com/yeoman/yeoman-test/compare/v11.4.2...v11.5.0) (2026-05-06)
 
-
 ### Features
 
-* add factory to createHelpers ([#306](https://github.com/yeoman/yeoman-test/issues/306)) ([00e721f](https://github.com/yeoman/yeoman-test/commit/00e721f7211ebfa3601acc5a36b8fd83e704efc2))
+- add factory to createHelpers ([#306](https://github.com/yeoman/yeoman-test/issues/306)) ([00e721f](https://github.com/yeoman/yeoman-test/commit/00e721f7211ebfa3601acc5a36b8fd83e704efc2))
 
 ## [11.4.2](https://github.com/yeoman/yeoman-test/compare/v11.4.1...v11.4.2) (2026-04-30)
 
