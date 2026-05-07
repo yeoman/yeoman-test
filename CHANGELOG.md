@@ -1,5 +1,11 @@
 # Changelog
 
+## [11.5.2](https://github.com/yeoman/yeoman-test/compare/v11.5.1...v11.5.2) (2026-05-07)
+
+### Bug Fixes
+
+- improve types ([#308](https://github.com/yeoman/yeoman-test/issues/308)) ([7f54eda](https://github.com/yeoman/yeoman-test/commit/7f54eda1f0b7fce9fda1aa124c7af3e77ca8a570))
+
 ## [11.5.1](https://github.com/yeoman/yeoman-test/compare/v11.5.0...v11.5.1) (2026-05-06)
 
 ### Bug Fixes
