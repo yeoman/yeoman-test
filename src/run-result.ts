@@ -82,7 +82,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
   oldCwd: string;
   memFs: Store<MemFsEditorFile>;
   fs: MemFsEditor;
-  mockedGenerators: any;
+  mockedGenerators: Record<string, BaseGenerator>;
   options: RunResultOptions<GeneratorType>;
   spawnStub?: any;
   readonly askedQuestions: AskedQuestions;
@@ -447,7 +447,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
    * @returns the generator mock
    */
   getGeneratorMock(generator: string): ReturnType<typeof mock.fn>['mock'] {
-    const mockedGenerator: ReturnType<typeof mock.fn> = this.mockedGenerators[generator];
+    const mockedGenerator = this.mockedGenerators[generator] as unknown as ReturnType<typeof mock.fn>;
     if (!mockedGenerator) {
       throw new Error(`Generator ${generator} is not mocked`);
     }

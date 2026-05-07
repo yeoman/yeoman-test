@@ -40,7 +40,7 @@
     "fix": "prettier . --write && eslint . --fix",
     "precommit": "lint-staged",
     "prepare": "npm run build && husky",
-    "pretest": "eslint .",
+    "pretest": "eslint . && tsc -p tsconfig.spec.json",
     "test": "vitest run --coverage"
   },
   "config": {
