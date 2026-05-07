@@ -61,7 +61,7 @@
     "@yeoman/eslint": "^1.0.0",
     "husky": "^9.1.7",
     "jsdoc": "^4.0.5",
-    "lint-staged": "^16.4.0",
+    "lint-staged": "^17.0.2",
     "prettier": "^3.8.3",
     "prettier-plugin-packagejson": "^3.0.2",
     "typescript": "^6.0.3",
