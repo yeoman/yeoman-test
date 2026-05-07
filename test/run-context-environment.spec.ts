@@ -4,12 +4,13 @@ import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { createRequire } from 'node:module';
 import { mock } from 'node:test';
-import type { LookupOptions } from '@yeoman/types';
+import type { GetGeneratorConstructor, LookupOptions } from '@yeoman/types';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, it } from 'vitest';
 import helpers from '../src/import.js';
 import RunContext from '../src/run-context.js';
 import RunResult from '../src/run-result.js';
 import SimpleApp from './fixtures/generator-simple/app/index.js';
+import type { DefaultGeneratorApi } from '../types/type-helpers.js';
 
 const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -18,10 +19,10 @@ describe('RunContext running environment', () => {
   const defaultEnvironmentOptions = { foo: 'bar' };
   const defaultRunContextOptions = {};
 
-  let gen;
+  let gen: string | GetGeneratorConstructor<DefaultGeneratorApi> | undefined;
   const contextOptions = {};
-  let context;
-  const environmentOptions = {};
+  let context: RunContext<any>;
+  const environmentOptions: Record<string, unknown> = {};
   let build = true;
   let lookups: LookupOptions[] = [];
 
@@ -33,7 +34,15 @@ describe('RunContext running environment', () => {
     }
 
     context = helpers
-      .create(gen, { ...defaultRunContextOptions, ...contextOptions }, { ...defaultEnvironmentOptions, envOptions: environmentOptions })
+      .create(
+        gen,
+        { ...defaultRunContextOptions, ...contextOptions },
+        {
+          ...defaultEnvironmentOptions,
+          // @ts-expect-error - deprecated api
+          envOptions: environmentOptions,
+        },
+      )
       .withLookups(lookups);
     if (build) {
       await context.build();
@@ -65,6 +74,7 @@ describe('RunContext running environment', () => {
 
     it('forwards envOptions to the environment', () => {
       return context.run().then(() => {
+        // @ts-expect-error - testing private property
         assert.equal(context.env.options.foo, defaultEnvironmentOptions.foo);
       });
     });
@@ -77,6 +87,7 @@ describe('RunContext running environment', () => {
 
     it('passes newErrorHandler to the environment', () => {
       return context.run().then(() => {
+        // @ts-expect-error - testing private property
         assert.ok(context.env.options.newErrorHandler);
       });
     });
@@ -92,6 +103,7 @@ describe('RunContext running environment', () => {
 
     it('runs the generator', () => {
       return context.run().then(() => {
+        // @ts-expect-error - testing private property
         assert.ok(context.env.generatorTestExecuted);
       });
     });
@@ -105,7 +117,7 @@ describe('RunContext running environment', () => {
     beforeEach(() => {
       context.withEnvironment(environment => {
         const FakeGenerator = helpers.createDummyGenerator();
-        mock.method(environment, 'create', () => Promise.resolve(new FakeGenerator([], { env: environment })));
+        mock.method(environment, 'create', () => Promise.resolve(new FakeGenerator([], { env: environment } as any)));
       });
     });
     afterAll(() => {
@@ -136,6 +148,7 @@ describe('RunContext running environment', () => {
 
     it('runs the generator', () => {
       return context.run().then(() => {
+        // @ts-expect-error - testing custom property
         assert.ok(context.env.generatorTestExecuted);
       });
     });
@@ -159,6 +172,7 @@ describe('RunContext running environment', () => {
 
     it('runs the generator', () => {
       return context.run().then(() => {
+        // @ts-expect-error - testing custom property
         assert.ok(context.env.generatorTestExecuted);
       });
     });
@@ -188,6 +202,7 @@ describe('RunContext running environment', () => {
 
       it('runs the generator', () => {
         return context.run().then(() => {
+          // @ts-expect-error - testing custom property
           assert.ok(context.env.generatorTestExecuted);
         });
       });
@@ -204,7 +219,7 @@ describe('RunContext running environment', () => {
       it('rejects with the error', () => {
         return context.run().then(
           () => assert.fail(),
-          error => {
+          (error: any) => {
             assert.ok(/throwing error/.test(error.message));
           },
         );
@@ -228,6 +243,7 @@ describe('RunContext running environment', () => {
           .withArguments('simple:app')
           .run()
           .then(() => {
+            // @ts-expect-error - testing custom property
             assert.ok(context.env.generatorTestExecuted);
           });
       });
@@ -238,7 +254,7 @@ describe('RunContext running environment', () => {
           .run()
           .then(
             () => assert.fail(),
-            error => {
+            (error: any) => {
               assert.ok(/throwing error/.test(error.message));
             },
           );

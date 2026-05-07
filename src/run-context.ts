@@ -354,9 +354,10 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
 
     // Add options as both kebab and camel case. This is to stay backward compatibles with
     // the switch we made to meow for options parsing.
+    const optionsAny = options as any;
     for (const key of Object.keys(options)) {
-      (options as any)[camelCase(key)] = (options as any)[key];
-      (options as any)[kebabCase(key)] = (options as any)[key];
+      optionsAny[camelCase(key)] = optionsAny[key];
+      optionsAny[kebabCase(key)] = optionsAny[key];
     }
 
     this.options = { ...this.options, ...options };
@@ -385,7 +386,9 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    */
   withAnswers(answers: PromptAnswers, options?: Omit<DummyPromptOptions, 'mockedAnswers'>) {
     this.answers = { ...this.answers, ...answers };
-    Object.assign(this.adapterOptions as any, options);
+    if (options) {
+      this.withAdapterOptions(options);
+    }
     return this;
   }
 

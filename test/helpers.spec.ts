@@ -13,24 +13,24 @@ import { createEnv as createEnvironment } from '../src/default-environment.js';
 import { TestAdapter } from '../src/adapter.js';
 import RunContext from '../src/run-context.js';
 import helpers, { YeomanTest, createHelpers } from '../src/import.js';
+import type { DefaultGeneratorApi } from '../types/type-helpers.js';
 
 const [major, minor] = process.versions.node.split('.').map(Number);
 
 /* Remove argument from promisify return */
-const promisify = function_ => () => promisify_(function_)();
+const promisify = (function_: (done: (error?: unknown) => void) => void) => () => promisify_(function_)();
 const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const { resolve, join } = path;
 
 describe('yeoman-test', () => {
-  let StubGenerator;
+  const StubGenerator = class extends Generator {};
   let environment: ReturnType<typeof createEnvironment>;
 
   beforeEach(async () => {
     process.chdir(join(__dirname, './fixtures'));
 
-    StubGenerator = class extends Generator {};
     environment = await createEnvironment({ adapter: new TestAdapter() });
   });
 
@@ -62,17 +62,21 @@ describe('yeoman-test', () => {
         generatorArgs: ['temp'],
         generatorOptions: {
           ui: 'tdd',
-        },
+        } as any,
       });
 
+      // @ts-expect-error - options are passed to the generator
       assert.equal(generator.options.ui, 'tdd');
     });
   });
 
   describe('.mockPrompt()', () => {
-    let generator;
+    let generator: DefaultGeneratorApi;
     beforeEach(async () => {
-      generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      generator = await environment.instantiate<DefaultGeneratorApi>(helpers.createDummyGenerator(), {
+        generatorArgs: [],
+        generatorOptions: {},
+      });
       helpers.mockPrompt(generator, { answer: 'foo' });
     });
 
@@ -83,7 +87,10 @@ describe('yeoman-test', () => {
     });
 
     it('uses default values when no answer is passed', async () => {
-      const generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      const generator = await environment.instantiate<DefaultGeneratorApi>(helpers.createDummyGenerator(), {
+        generatorArgs: [],
+        generatorOptions: {},
+      });
       helpers.mockPrompt(generator);
       return generator.prompt([{ name: 'respuesta', message: 'foo', type: 'input', default: 'bar' }]).then(answers => {
         assert.equal(answers.respuesta, 'bar');
@@ -91,7 +98,10 @@ describe('yeoman-test', () => {
     });
 
     it('supports `null` answer for `list` type', async () => {
-      const generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      const generator = await environment.instantiate<DefaultGeneratorApi>(helpers.createDummyGenerator(), {
+        generatorArgs: [],
+        generatorOptions: {},
+      });
 
       helpers.mockPrompt(generator, {
         respuesta: null,
@@ -103,7 +113,10 @@ describe('yeoman-test', () => {
     });
 
     it('treats `null` as no answer for `input` type', async () => {
-      const generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      const generator = await environment.instantiate<DefaultGeneratorApi>(helpers.createDummyGenerator(), {
+        generatorArgs: [],
+        generatorOptions: {},
+      });
 
       helpers.mockPrompt(generator, {
         respuesta: null,
@@ -115,7 +128,10 @@ describe('yeoman-test', () => {
     });
 
     it('uses `true` as the default value for `confirm` type', async () => {
-      const generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      const generator = await environment.instantiate<DefaultGeneratorApi>(helpers.createDummyGenerator(), {
+        generatorArgs: [],
+        generatorOptions: {},
+      });
       helpers.mockPrompt(generator, {});
 
       return generator.prompt([{ name: 'respuesta', message: 'foo', type: 'confirm' }]).then(answers => {
@@ -124,7 +140,10 @@ describe('yeoman-test', () => {
     });
 
     it('supports `false` answer for `confirm` type', async () => {
-      const generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      const generator = await environment.instantiate<DefaultGeneratorApi>(helpers.createDummyGenerator(), {
+        generatorArgs: [],
+        generatorOptions: {},
+      });
       helpers.mockPrompt(generator, { respuesta: false });
 
       return generator.prompt([{ name: 'respuesta', message: 'foo', type: 'confirm' }]).then(answers => {
@@ -139,20 +158,26 @@ describe('yeoman-test', () => {
     });
 
     it('can be call multiple time on the same generator', async () => {
-      const generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      const generator = await environment.instantiate<DefaultGeneratorApi>(helpers.createDummyGenerator(), {
+        generatorArgs: [],
+        generatorOptions: {},
+      });
       helpers.mockPrompt(generator, { foo: 1 });
       helpers.mockPrompt(generator, { foo: 2 });
-      return generator.prompt({ message: 'bar', name: 'foo' }).then(answers => {
+      return generator.prompt({ message: 'bar', name: 'foo', type: 'input' }).then(answers => {
         assert.equal(answers.foo, 2);
       });
     });
 
     it('throws if answer is not provided', async () => {
-      const generator = await environment.instantiate(helpers.createDummyGenerator(), { generatorArgs: [], generatorOptions: {} });
+      const generator = await environment.instantiate<DefaultGeneratorApi>(helpers.createDummyGenerator(), {
+        generatorArgs: [],
+        generatorOptions: {},
+      });
       helpers.mockPrompt(generator, { foo: 1 }, { throwOnMissingAnswer: true });
-      return generator.prompt([{ message: 'bar', name: 'notFound' }]).then(
+      return generator.prompt([{ message: 'bar', name: 'notFound', type: 'input' }]).then(
         () => assert.fail(),
-        error => {
+        (error: any) => {
           assert.equal(error.message, 'yeoman-test: question notFound was asked but answer was not provided');
         },
       );
@@ -281,7 +306,7 @@ describe('yeoman-test', () => {
     });
 
     it('pass envOptions to RunContext', () => {
-      const environmentOptions = { foo: 2 };
+      const environmentOptions = { foo: 2 } as any;
       const runContext = helpers.run(helpers.createDummyGenerator(), undefined, environmentOptions);
       assert.equal(runContext.envOptions, environmentOptions);
     });
@@ -342,7 +367,7 @@ describe('yeoman-test', () => {
     it(
       'catch run errors',
       promisify(done => {
-        helpers.run(class extends Generator {}, {}, { catchGeneratorError: true }).on('error', _ => {
+        helpers.run(class extends Generator {}, {}, { catchGeneratorError: true } as any).on('error', _ => {
           done();
         });
       }),

@@ -146,7 +146,7 @@ export class YeomanTest {
    * @param generator or environment
    */
   restorePrompt(environmentOrGenerator: BaseGenerator | DefaultEnvironmentApi) {
-    const environment: DefaultEnvironmentApi = (environmentOrGenerator as BaseGenerator).env ?? environmentOrGenerator;
+    const environment = (environmentOrGenerator as BaseGenerator).env ?? environmentOrGenerator;
     environment.adapter.close();
   }
 
@@ -264,7 +264,7 @@ export class YeomanTest {
    */
 
   async createEnv(options: EnvironmentOptions): Promise<DefaultEnvironmentApi> {
-    return createEnvironment(options);
+    return createEnvironment(options) as any;
   }
 
   /**
@@ -275,7 +275,10 @@ export class YeomanTest {
    * const env = createTestEnv(require('yeoman-environment').createEnv);
    */
 
-  async createTestEnv(environmentContructor: CreateEnv = this.createEnv, options: EnvironmentOptions = { localConfigOnly: true }) {
+  async createTestEnv(
+    environmentContructor: CreateEnv = this.createEnv,
+    options: EnvironmentOptions = { localConfigOnly: true },
+  ): Promise<DefaultEnvironmentApi> {
     let environmentOptions = cloneDeep(this.environmentOptions ?? {});
     if (typeof options === 'boolean') {
       environmentOptions = {
@@ -299,7 +302,7 @@ export class YeomanTest {
       } as any;
     }
 
-    return environmentContructor({ adapter: this.createTestAdapter(), ...environmentOptions });
+    return environmentContructor({ adapter: this.createTestAdapter(), ...environmentOptions }) as Promise<DefaultEnvironmentApi>;
   }
 
   /**

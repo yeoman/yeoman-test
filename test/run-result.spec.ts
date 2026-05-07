@@ -4,7 +4,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { mock } from 'node:test';
 import { create as createMemFs } from 'mem-fs';
-import { create as createMemFsEditor } from 'mem-fs-editor';
+import { type MemFsEditorFile, create as createMemFsEditor } from 'mem-fs-editor';
 import { afterEach, beforeAll, beforeEach, describe, it } from 'vitest';
 import RunContext from '../src/run-context.js';
 import RunResult from '../src/run-result.js';
@@ -27,7 +27,7 @@ describe('run-result', () => {
       const memFs = {};
       const cwd = {};
       const options = { memFs, cwd };
-      let runResult;
+      let runResult: RunResult;
       beforeAll(() => {
         runResult = new RunResult(options as any);
       });
@@ -41,14 +41,14 @@ describe('run-result', () => {
     for (const optionName of ['env', 'generator', 'oldCwd', 'cwd', 'mockedGenerators']) {
       describe(`with ${optionName} option`, () => {
         const optionValue = {};
-        const options = {};
-        let runResult;
+        const options: Record<string, unknown> = {};
+        let runResult: RunResult;
         beforeAll(() => {
           options[optionName] = optionValue;
           runResult = new RunResult(options as any);
         });
         it('loads it', () => {
-          assert.equal(runResult[optionName], optionValue);
+          assert.equal((runResult as any)[optionName], optionValue);
         });
         it('loads options option', () => {
           assert.equal(runResult.options, options);
@@ -57,10 +57,10 @@ describe('run-result', () => {
     }
   });
   describe('#dumpFiles', () => {
-    let runResult;
+    let runResult: RunResult;
     let consoleMock: ReturnType<typeof mock.method>;
     beforeEach(() => {
-      const memFs = createMemFs();
+      const memFs = createMemFs<MemFsEditorFile>();
       const memFsEditor = createMemFsEditor(memFs);
       runResult = new RunResult({
         memFs,
@@ -92,10 +92,10 @@ describe('run-result', () => {
     });
   });
   describe('#dumpFilenames', () => {
-    let runResult;
+    let runResult: RunResult;
     let consoleMock: ReturnType<typeof mock.method>;
     beforeEach(() => {
-      const memFs = createMemFs();
+      const memFs = createMemFs<MemFsEditorFile>();
       const memFsEditor = createMemFsEditor(memFs);
       runResult = new RunResult({
         memFs,
@@ -117,9 +117,9 @@ describe('run-result', () => {
     });
   });
   describe('#getSnapshot', () => {
-    let runResult;
+    let runResult: RunResult;
     beforeEach(() => {
-      const memFs = createMemFs();
+      const memFs = createMemFs<MemFsEditorFile>();
       const memFsEditor = createMemFsEditor(memFs);
       runResult = new RunResult({
         memFs,
@@ -143,9 +143,9 @@ describe('run-result', () => {
     });
   });
   describe('#getSnapshotState', () => {
-    let runResult;
+    let runResult: RunResult;
     beforeEach(() => {
-      const memFs = createMemFs();
+      const memFs = createMemFs<MemFsEditorFile>();
       const memFsEditor = createMemFsEditor(memFs);
       runResult = new RunResult({
         memFs,
@@ -167,8 +167,8 @@ describe('run-result', () => {
     });
   });
   describe('#cleanup', () => {
-    let cwd;
-    let runResult;
+    let cwd: string;
+    let runResult: RunResult;
     beforeEach(() => {
       cwd = path.join(process.cwd(), 'fixtures', 'tmp');
       if (!fs.existsSync(cwd)) {
@@ -188,20 +188,20 @@ describe('run-result', () => {
     });
   });
   describe('#create', () => {
-    const newSettings = { newOnly: 'foo', overrided: 'newOverrided' };
-    const newEnvironmentOptions = { newOnlyEnv: 'bar', overridedEnv: 'newOverridedEnv' };
+    const newSettings = { newOnly: 'foo', overrided: 'newOverrided' } as any;
+    const newEnvironmentOptions = { newOnlyEnv: 'bar', overridedEnv: 'newOverridedEnv' } as any;
     const originalEnvironmentOptions = {
       originalOnlyEnv: 'originalOnlyEnv',
       overridedEnv: 'originalOverridedEnv',
-    };
+    } as any;
     const originalSetting = {
       originalOnly: 'originalOnly',
       overrided: 'originalOverrided',
-    };
-    const memFs = {};
-    let cwd;
-    const oldCwd = {};
-    let runContext;
+    } as any;
+    const memFs = {} as any;
+    let cwd: string;
+    const oldCwd = {} as any;
+    let runContext: RunContext;
     beforeAll(() => {
       cwd = process.cwd();
       runContext = new RunResult({
@@ -217,30 +217,37 @@ describe('run-result', () => {
       assert.ok(runContext instanceof RunContext);
     });
     it('forwards settings options', () => {
+      // @ts-expect-error - testing behavior using unknown options
       assert.equal(runContext.settings.newOnly, 'foo');
     });
     it('forwards envOptions options', () => {
+      // @ts-expect-error - testing behavior using unknown options
       assert.equal(runContext.envOptions.newOnlyEnv, 'bar');
     });
     it('forwards settings from the original RunResult', () => {
+      // @ts-expect-error - testing behavior using unknown options
       assert.equal(runContext.settings.originalOnly, 'originalOnly');
     });
     it('forwards envOptions from the original RunResult', () => {
+      // @ts-expect-error - testing behavior using unknown options
       assert.equal(runContext.envOptions.originalOnlyEnv, 'originalOnlyEnv');
     });
     it('forwards cwd from the original RunResult', () => {
       assert.equal(runContext.targetDirectory, cwd);
     });
     it('forwards oldCwd from the original RunResult', () => {
+      // @ts-expect-error - testing private property
       assert.equal(runContext.oldCwd, oldCwd);
     });
     it('forwards memFs from the original RunResult to new RunContext', () => {
       assert.equal(runContext.memFs, memFs);
     });
     it('prefers settings passed to the method', () => {
+      // @ts-expect-error - testing behavior using unknown options
       assert.equal(runContext.settings.overrided, 'newOverrided');
     });
     it('prefers envOptions passed to the method', () => {
+      // @ts-expect-error - testing behavior using unknown options
       assert.equal(runContext.envOptions.overridedEnv, 'newOverridedEnv');
     });
   });
@@ -248,7 +255,7 @@ describe('run-result', () => {
     describe('should proxy methods', () => {
       let runResult: RunResult;
       beforeEach(() => {
-        const memFs = createMemFs();
+        const memFs = createMemFs<MemFsEditorFile>();
         const memFsEditor = createMemFsEditor(memFs);
         runResult = new RunResult({
           memFs,
