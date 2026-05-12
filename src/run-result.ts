@@ -60,7 +60,7 @@ export type RunResultOptions<GeneratorType extends BaseGenerator> = {
   /**
    * The mocked generators of the context.
    */
-  mockedGenerators: Record<string, BaseGenerator>;
+  mockedGenerators: Record<string, unknown>;
 
   spawnStub?: any;
 
@@ -82,7 +82,7 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
   oldCwd: string;
   memFs: Store<MemFsEditorFile>;
   fs: MemFsEditor;
-  mockedGenerators: Record<string, BaseGenerator>;
+  mockedGenerators: Record<string, unknown>;
   options: RunResultOptions<GeneratorType>;
   spawnStub?: any;
   readonly askedQuestions: AskedQuestions;
@@ -444,14 +444,14 @@ export default class RunResult<GeneratorType extends BaseGenerator = BaseGenerat
   /**
    * Get the generator mock
    * @param generator - the namespace of the mocked generator
-   * @returns the generator mock
+   * @returns the generator mock, by default is the mock property of node:test's mock.
    */
-  getGeneratorMock(generator: string): ReturnType<typeof mock.fn>['mock'] {
-    const mockedGenerator = this.mockedGenerators[generator] as unknown as ReturnType<typeof mock.fn>;
+  getGeneratorMock<MockType = ReturnType<typeof mock.fn>['mock']>(generator: string): MockType {
+    const mockedGenerator = this.mockedGenerators[generator] as ReturnType<typeof mock.fn>;
     if (!mockedGenerator) {
       throw new Error(`Generator ${generator} is not mocked`);
     }
-    return mockedGenerator.mock;
+    return (mockedGenerator.mock ?? mockedGenerator) as MockType;
   }
 
   /**
