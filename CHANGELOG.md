@@ -1,5 +1,12 @@
 # Changelog
 
+## [11.5.3](https://github.com/yeoman/yeoman-test/compare/v11.5.2...v11.5.3) (2026-06-09)
+
+### Bug Fixes
+
+- adjust mockedGenerators types ([#318](https://github.com/yeoman/yeoman-test/issues/318)) ([833f8d2](https://github.com/yeoman/yeoman-test/commit/833f8d2f8f0b9c1e4878ca2701f3db867e47ea57))
+- async callbacks are allowed in withEnvironment ([#319](https://github.com/yeoman/yeoman-test/issues/319)) ([0481576](https://github.com/yeoman/yeoman-test/commit/0481576af72ac4602c972e1e0e17a9e6b8d52c92))
+
 ## [11.5.2](https://github.com/yeoman/yeoman-test/compare/v11.5.1...v11.5.2) (2026-05-07)
 
 ### Bug Fixes
