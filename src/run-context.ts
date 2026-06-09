@@ -99,13 +99,15 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
 
   private oldCwd?: string;
   private eventListenersSet = false;
-  private envCB: ((this: this, environment: DefaultEnvironmentApi) => DefaultEnvironmentApi | void) | undefined;
+  private envCB:
+    | ((this: this, environment: DefaultEnvironmentApi) => DefaultEnvironmentApi | void | Promise<DefaultEnvironmentApi | void>)
+    | undefined;
 
   private built = false;
   private ran = false;
   private errored = false;
   private readonly beforePrepareCallbacks: Array<(this: this) => void | Promise<void>> = [];
-  private environmentRun?: (this: this, env: DefaultEnvironmentApi, gen: GeneratorType) => void;
+  private environmentRun?: (this: this, env: DefaultEnvironmentApi, gen: GeneratorType) => void | Promise<void>;
 
   /**
    * This class provide a run context object to façade the complexity involved in setting
@@ -300,7 +302,9 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * @param {Function} [cb] - callback who'll receive the folder path as argument
    * @return {this} run context instance
    */
-  withEnvironment(callback: (this: this, environment: DefaultEnvironmentApi) => DefaultEnvironmentApi | void) {
+  withEnvironment(
+    callback: (this: this, environment: DefaultEnvironmentApi) => DefaultEnvironmentApi | void | Promise<DefaultEnvironmentApi | void>,
+  ): this {
     this.envCB = callback;
     return this;
   }
@@ -311,7 +315,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * @param callback
    * @return {this} run context instance
    */
-  withEnvironmentRun(callback: (this: this, env: DefaultEnvironmentApi, gen: GeneratorType) => void) {
+  withEnvironmentRun(callback: (this: this, env: DefaultEnvironmentApi, gen: GeneratorType) => void | Promise<void>): this {
     this.environmentRun = callback;
     return this;
   }
