@@ -65,7 +65,7 @@ type MockedGeneratorFactory<GenParameter extends BaseGenerator = DefaultGenerato
 type EnvironmentOptions = BaseEnvironmentOptions & { createEnv?: CreateEnvironment };
 
 export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGeneratorApi> extends EventEmitter {
-  readonly mockedGenerators: Record<string, BaseGenerator> = {};
+  readonly mockedGenerators: Record<string, unknown> = {};
   env!: DefaultEnvironmentApi;
   generator!: GeneratorType;
   readonly settings: RunContextSettings;
