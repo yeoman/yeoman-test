@@ -2,10 +2,9 @@
 
 ## [11.6.0](https://github.com/yeoman/yeoman-test/compare/v11.5.3...v11.6.0) (2026-06-12)
 
-
 ### Features
 
-* improve result generics ([#321](https://github.com/yeoman/yeoman-test/issues/321)) ([f61e817](https://github.com/yeoman/yeoman-test/commit/f61e8175f3b11292db8bf2fa6de6bdd3dfd59f12))
+- improve result generics ([#321](https://github.com/yeoman/yeoman-test/issues/321)) ([f61e817](https://github.com/yeoman/yeoman-test/commit/f61e8175f3b11292db8bf2fa6de6bdd3dfd59f12))
 
 ## [11.5.3](https://github.com/yeoman/yeoman-test/compare/v11.5.2...v11.5.3) (2026-06-09)
 
