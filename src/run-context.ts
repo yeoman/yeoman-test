@@ -58,13 +58,16 @@ export type RunContextSettings = {
   namespace?: string;
 };
 
-type PromiseRunResult<GeneratorType extends BaseGenerator> = Promise<RunResult<GeneratorType>>;
+type PromiseRunResult<GeneratorType extends BaseGenerator, ResultType = RunResult<GeneratorType>> = Promise<ResultType>;
 type MockedGeneratorFactory<GenParameter extends BaseGenerator = DefaultGeneratorApi> = (
   GeneratorClass?: GetGeneratorConstructor<GenParameter>,
 ) => GetGeneratorConstructor<GenParameter>;
 type EnvironmentOptions = BaseEnvironmentOptions & { createEnv?: CreateEnvironment };
 
-export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGeneratorApi> extends EventEmitter {
+export class RunContextBase<
+  GeneratorType extends BaseGenerator = DefaultGeneratorApi,
+  ResultType = RunResult<GeneratorType>,
+> extends EventEmitter {
   readonly mockedGenerators: Record<string, unknown> = {};
   env!: DefaultEnvironmentApi;
   generator!: GeneratorType;
@@ -144,11 +147,15 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
     this.mockedGeneratorFactory = this.helpers.createMockedGenerator as any;
   }
 
+  createRunResult(): ResultType {
+    return new RunResult(this._createRunResultOptions()) as ResultType;
+  }
+
   /**
    * Run the generator on the environment and promises a RunResult instance.
    * @return {PromiseRunResult} Promise a RunResult instance.
    */
-  async run(): PromiseRunResult<GeneratorType> {
+  async run(): PromiseRunResult<GeneratorType, ResultType> {
     this.ran = true;
 
     if (!this.built) {
@@ -163,8 +170,8 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
       this.completed = true;
     }
 
-    const runResult = new RunResult(this._createRunResultOptions());
-    testContext.runResult = runResult;
+    const runResult = this.createRunResult();
+    testContext.runResult = runResult as RunResult;
     return runResult;
   }
 
@@ -741,8 +748,8 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * Return a promise representing the generator run process
    * @return Promise resolved on end or rejected on error
    */
-  protected async toPromise(): PromiseRunResult<GeneratorType> {
-    return this.environmentPromise ?? this.run();
+  protected async toPromise(): PromiseRunResult<GeneratorType, ResultType> {
+    return (this.environmentPromise ?? this.run()) as PromiseRunResult<GeneratorType, ResultType>;
   }
 
   protected _createRunResultOptions(): RunResultOptions<GeneratorType> {
@@ -767,7 +774,7 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
    * Keeps compatibility with events
    */
 
-  private setupEventListeners(): Promise<void | RunResult<GeneratorType>> | undefined {
+  private setupEventListeners(): Promise<void | ResultType> | undefined {
     if (this.eventListenersSet) {
       return undefined;
     }
@@ -820,24 +827,24 @@ export class RunContextBase<GeneratorType extends BaseGenerator = DefaultGenerat
   }
 }
 
-export default class RunContext<GeneratorType extends BaseGenerator = BaseGenerator>
-  extends RunContextBase<GeneratorType>
-  implements Promise<RunResult<GeneratorType>>
+export default class RunContext<GeneratorType extends BaseGenerator = BaseGenerator, ResultType = RunResult<GeneratorType>>
+  extends RunContextBase<GeneratorType, ResultType>
+  implements Promise<ResultType>
 {
-  async then<TResult1 = RunResult<GeneratorType>, TResult2 = never>(
-    onfulfilled?: ((value: RunResult<GeneratorType>) => TResult1 | PromiseLike<TResult1>) | undefined,
-    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined,
+  async then<TResult1 = ResultType, TResult2 = never>(
+    onfulfilled?: ((value: ResultType) => TResult1 | PromiseLike<TResult1>) | null | undefined,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined,
   ): Promise<TResult1 | TResult2> {
-    return this.toPromise().then(onfulfilled, onrejected);
+    return this.toPromise().then<TResult1, TResult2>(onfulfilled, onrejected);
   }
 
   async catch<TResult = never>(
-    onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined,
-  ): Promise<RunResult<GeneratorType> | TResult> {
+    onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null | undefined,
+  ): Promise<ResultType | TResult> {
     return this.toPromise().catch(onrejected);
   }
 
-  async finally(onfinally?: (() => void) | undefined): Promise<RunResult<GeneratorType>> {
+  async finally(onfinally?: (() => void) | null | undefined): Promise<ResultType> {
     return this.toPromise().finally(onfinally);
   }
 
