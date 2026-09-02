@@ -1,5 +1,12 @@
 # Changelog
 
+## [11.7.0](https://github.com/yeoman/yeoman-test/compare/v11.6.0...v11.7.0) (2026-09-02)
+
+
+### Features
+
+* accept @yeoman/adapter v5 and mem-fs v6 ([#329](https://github.com/yeoman/yeoman-test/issues/329)) ([a42c4c3](https://github.com/yeoman/yeoman-test/commit/a42c4c30d2610479375afa5c07fcac9dc957ec11))
+
 ## [11.6.0](https://github.com/yeoman/yeoman-test/compare/v11.5.3...v11.6.0) (2026-06-12)
 
 ### Features
