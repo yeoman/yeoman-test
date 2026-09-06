@@ -1,5 +1,11 @@
 # Changelog
 
+## [11.8.0](https://github.com/yeoman/yeoman-test/compare/v11.7.0...v11.8.0) (2026-09-06)
+
+### Features
+
+- alllow yeoman-environment v7 ([#331](https://github.com/yeoman/yeoman-test/issues/331)) ([58ab453](https://github.com/yeoman/yeoman-test/commit/58ab453e6345e9a1a0b49d53d19aa3979363a8be))
+
 ## [11.7.0](https://github.com/yeoman/yeoman-test/compare/v11.6.0...v11.7.0) (2026-09-02)
 
 ### Features
