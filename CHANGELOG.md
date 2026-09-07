@@ -2,10 +2,9 @@
 
 ## [11.8.2](https://github.com/yeoman/yeoman-test/compare/v11.8.1...v11.8.2) (2026-09-07)
 
-
 ### Bug Fixes
 
-* cleanup node:test mocks ([#335](https://github.com/yeoman/yeoman-test/issues/335)) ([feb3ac7](https://github.com/yeoman/yeoman-test/commit/feb3ac72927d589bdde93997ea5e7f63c4b6d8cc))
+- cleanup node:test mocks ([#335](https://github.com/yeoman/yeoman-test/issues/335)) ([feb3ac7](https://github.com/yeoman/yeoman-test/commit/feb3ac72927d589bdde93997ea5e7f63c4b6d8cc))
 
 ## [11.8.1](https://github.com/yeoman/yeoman-test/compare/v11.8.0...v11.8.1) (2026-09-06)
 
